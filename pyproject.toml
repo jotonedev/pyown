@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pyown"
+version = "0.1.0"
+description = "Python wrapper for OpenWebNet protocol"
+authors = ["John Toniutti <john.toniutti@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.1"
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
