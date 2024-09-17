@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import StreamReader, StreamWriter
 
 from typing import Final, Literal
 
@@ -17,7 +18,7 @@ EVENT_SESSION: Final = "1"
 
 
 class OWNClient:
-    def __init__(self, host: str, port: str, password: str):
+    def __init__(self, host: str, port: str | int, password: str | int):
         """
         Initialize the OpenWebNet client.
         :param host: the IP address of the openwebnet gateway.
@@ -25,8 +26,11 @@ class OWNClient:
         :param password: the password used to connect to the openwebnet gateway.
         """
         self.host = host
-        self.port = port
-        self.password = password
+        self.port = port if isinstance(port, int) else int(port)
+        self.password = password if isinstance(password, int) else int(password)
+
+        self.reader: None | StreamReader = None
+        self.writer: None | StreamWriter = None
 
     async def connect(self, session_type: Literal["9", "1"] = COMMAND_SESSION):
         self.reader, self.writer = await asyncio.open_connection(
@@ -40,10 +44,6 @@ class OWNClient:
             raise ConnectionError(f"Unexpected response: {msg}")
         # Send the session type
         await self.send(RawMessage(tags=["99", session_type]))
-
-        # Authenticate
-
-
         
     async def _open_auth(self, msg: OWNMessage):
         """

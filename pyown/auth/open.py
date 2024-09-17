@@ -1,20 +1,27 @@
-def ownCalcPass(password: str | int, nonce: str, test: bool = False) -> str:
-    start = True    
+def ownCalcPass(password: str | int, nonce: str) -> str:
+    """
+    Encode the password using the OPEN algorithm.
+    Source: https://rosettacode.org/wiki/OpenWebNet_password#Python
+
+    Parameters:
+        password (str | int): The password to encode, must be composed of only digits.
+        nonce (str): The nonce received from the gateway.
+
+    Returns:
+        str: The encoded password.
+    """
+    start = True
     num1 = 0
     num2 = 0
 
     if isinstance(password, str):
         password = int(password)
-        
-    if test:
-        print("password: %08x" % (password))
-    for c in nonce :
+
+    for c in nonce:
         if c != "0":
             if start:
                 num2 = password
             start = False
-        if test:
-            print("c: %s num1: %08x num2: %08x" % (c, num1, num2))
         if c == '1':
             num1 = (num2 & 0xFFFFFF80) >> 7
             num2 = num2 << 25
@@ -34,22 +41,20 @@ def ownCalcPass(password: str | int, nonce: str, test: bool = False) -> str:
             num1 = num2 << 12
             num2 = num2 >> 20
         elif c == '7':
-            num1 = num2 & 0x0000FF00 | (( num2 & 0x000000FF ) << 24 ) | (( num2 & 0x00FF0000 ) >> 16 )
-            num2 = ( num2 & 0xFF000000 ) >> 8
+            num1 = num2 & 0x0000FF00 | ((num2 & 0x000000FF) << 24) | ((num2 & 0x00FF0000) >> 16)
+            num2 = (num2 & 0xFF000000) >> 8
         elif c == '8':
-            num1 = (num2 & 0x0000FFFF) << 16 | ( num2 >> 24 )
+            num1 = (num2 & 0x0000FFFF) << 16 | (num2 >> 24)
             num2 = (num2 & 0x00FF0000) >> 8
         elif c == '9':
             num1 = ~num2
-        else :
+        else:
             num1 = num2
 
         num1 &= 0xFFFFFFFF
         num2 &= 0xFFFFFFFF
-        if (c not in "09"):
+        if c not in "09":
             num1 |= num2
-        if test:
-            print("     num1: %08x num2: %08x" % (num1, num2))
         num2 = num1
 
     return str(num1)

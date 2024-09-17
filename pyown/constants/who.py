@@ -1,83 +1,57 @@
-from typing import Final, Union
+from enum import StrEnum
 
 __all__ = [
-    "SCENE",
-    "LIGHTING",
-    "AUTOMATION",
-    "LOAD_CONTROL",
-    "THERMOREGULATION",
-    "BURGLAR_ALARM",
-    "VIDEO_DOOR_ENTRY",
-    "GATEWAY",
-    "CEN_1",
-    "SOUND_DIFFUSION_1",
-    "MH200N_SCENE",
-    "ENERGY_MANAGEMENT",
-    "SOUND_DIFFUSION_2",
-    "CEN_2",
-    "AUTOMATION_DIAGNOSTICS",
-    "THERMOREGULATION_DIAGNOSTICS",
-    "DEVICE_DIAGNOSTICS",
     "WHO",
     "WHO_MAP",
 ]
 
-SCENE: Final = "0"
-LIGHTING: Final = "1"
-AUTOMATION: Final = "2"
-LOAD_CONTROL: Final = "3"
-THERMOREGULATION: Final = "4"
-BURGLAR_ALARM: Final = "5"
-VIDEO_DOOR_ENTRY: Final = "6"
-GATEWAY: Final = "13"
-CEN_1: Final = "15"
-SOUND_DIFFUSION_1: Final = "16"
-MH200N_SCENE: Final = "17"
-ENERGY_MANAGEMENT: Final = "18"
-SOUND_DIFFUSION_2: Final = "22"
-CEN_2: Final = "25"
-AUTOMATION_DIAGNOSTICS: Final = "1001"
-THERMOREGULATION_DIAGNOSTICS: Final = "1004"
-DEVICE_DIAGNOSTICS: Final = "1013"
-ENERGY_DIAGNOSTICS: Final = "1018"
 
-WHO = Union[
-    SCENE, 
-    LIGHTING, 
-    AUTOMATION, 
-    LOAD_CONTROL, 
-    THERMOREGULATION, 
-    BURGLAR_ALARM, 
-    VIDEO_DOOR_ENTRY, 
-    GATEWAY, 
-    CEN_1, 
-    SOUND_DIFFUSION_1, 
-    MH200N_SCENE,
-    ENERGY_MANAGEMENT,
-    SOUND_DIFFUSION_2,
-    CEN_2,
-    AUTOMATION_DIAGNOSTICS,
-    THERMOREGULATION_DIAGNOSTICS,
-    DEVICE_DIAGNOSTICS,
-]
+class WHO(StrEnum):
+    SCENE: str = "0"
+    LIGHTING: str = "1"
+    AUTOMATION: str = "2"
+    LOAD_CONTROL: str = "3"
+    THERMOREGULATION: str = "4"
+    BURGLAR_ALARM: str = "5"
+    VIDEO_DOOR_ENTRY: str = "6"
+    GATEWAY: str = "13"
+    CEN_1: str = "15"
+    SOUND_DIFFUSION_1: str = "16"
+    MH200N_SCENE: str = "17"
+    ENERGY_MANAGEMENT: str = "18"
+    SOUND_DIFFUSION_2: str = "22"
+    CEN_2: str = "25"
+    AUTOMATION_DIAGNOSTICS: str = "1001"
+    THERMOREGULATION_DIAGNOSTICS: str = "1004"
+    DEVICE_DIAGNOSTICS: str = "1013"
+    ENERGY_DIAGNOSTICS: str = "1018"
+
+    @property
+    def name(self) -> str:
+        return WHO_MAP[self]
+
+    @property
+    def number(self) -> int:
+        return int(self)
+
 
 WHO_MAP = {
-    SCENE: "Scene",
-    LIGHTING: "Lighting",
-    AUTOMATION: "Automation",
-    LOAD_CONTROL: "Load control",
-    THERMOREGULATION: "Thermoregulation",
-    BURGLAR_ALARM: "Burglar alarm",
-    VIDEO_DOOR_ENTRY: "Video door entry",
-    GATEWAY: "Gateway management",
-    CEN_1: "CEN",
-    SOUND_DIFFUSION_1: "Sound diffusion 1",
-    MH200N_SCENE: "MH200N Scene",
-    ENERGY_MANAGEMENT: "Energy management",
-    SOUND_DIFFUSION_2: "Sound diffusion 2",
-    CEN_2: "CEN plus / scenarios plus / dry contacts",
-    AUTOMATION_DIAGNOSTICS: "Automation diagnostics",
-    THERMOREGULATION_DIAGNOSTICS: "Thermoregulation diagnostics",
-    DEVICE_DIAGNOSTICS: "Device diagnostics",
+    WHO.SCENE: "Scene",
+    WHO.LIGHTING: "Lighting",
+    WHO.AUTOMATION: "Automation",
+    WHO.LOAD_CONTROL: "Load control",
+    WHO.THERMOREGULATION: "Thermoregulation",
+    WHO.BURGLAR_ALARM: "Burglar alarm",
+    WHO.VIDEO_DOOR_ENTRY: "Video door entry",
+    WHO.GATEWAY: "Gateway management",
+    WHO.CEN_1: "CEN",
+    WHO.SOUND_DIFFUSION_1: "Sound diffusion 1",
+    WHO.MH200N_SCENE: "MH200N Scene",
+    WHO.ENERGY_MANAGEMENT: "Energy management",
+    WHO.SOUND_DIFFUSION_2: "Sound diffusion 2",
+    WHO.CEN_2: "CEN plus / scenarios plus / dry contacts",
+    WHO.AUTOMATION_DIAGNOSTICS: "Automation diagnostics",
+    WHO.THERMOREGULATION_DIAGNOSTICS: "Thermoregulation diagnostics",
+    WHO.DEVICE_DIAGNOSTICS: "Device diagnostics",
 }
 
