@@ -13,7 +13,6 @@ __all__ = [
     "parse_message",
 ]
 
-
 Self = TypeVar("Self", bound="BaseMessage")
 
 
@@ -26,9 +25,6 @@ class MessageType(StrEnum):
     DIMENSION_REQUEST = "DIMENSION REQUEST"
     DIMENSION_RESPONSE = "DIMENSION RESPONSE"
     GENERIC = "GENERIC"
-
-
-
 
 
 class BaseMessage(abc.ABC):
@@ -132,7 +128,11 @@ def parse_message(message: str) -> Type[BaseMessage]:
     if message.count(BaseMessage.suffix) != 1:
         raise InvalidMessage(message=message)
 
-    tags = message.strip().removeprefix(BaseMessage.prefix).removesuffix(BaseMessage.suffix).split(BaseMessage.separator)
+    tags = (message.strip()
+            .removeprefix(BaseMessage.prefix)
+            .removesuffix(BaseMessage.suffix)
+            .split(BaseMessage.separator)
+            )
 
     for subclass in BaseMessage.__subclasses__():
         # noinspection PyUnresolvedReferences
@@ -141,4 +141,3 @@ def parse_message(message: str) -> Type[BaseMessage]:
             return subclass.parse(tags)
     else:
         raise ParseError(message=message, tags=tags)
-
