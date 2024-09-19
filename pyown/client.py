@@ -3,7 +3,7 @@ from asyncio import StreamReader, StreamWriter
 
 from typing import Final, Literal
 
-from .message import *
+from pyown.message import *
 from .auth.open import ownCalcPass
 
 
