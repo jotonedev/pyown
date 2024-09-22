@@ -5,6 +5,18 @@ description = "Python wrapper for OpenWebNet protocol"
 authors = ["John Toniutti <john.toniutti@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
+repository = "https://github.com/jotonedev/pyown"
+keywords = ["openwebnet", "myhome", "bticino", "wrapper"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
