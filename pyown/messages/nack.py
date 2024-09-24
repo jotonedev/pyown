@@ -1,10 +1,8 @@
 import re
-
-from typing import Self, Pattern, AnyStr
+from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
 from ..exceptions import ParseError
-
 
 __all__ = [
     "NACK",
@@ -14,7 +12,7 @@ __all__ = [
 class NACK(BaseMessage):
     """Represent an NACK message"""
     _type = MessageType.NACK
-    _tags: list[str] = ["#", "0"]
+    _tags: Final[tuple[str]] = ("#", "0")
 
     _regex: Pattern[AnyStr] = re.compile(r"^\*#\*0##$")
 

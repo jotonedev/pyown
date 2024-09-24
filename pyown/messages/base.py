@@ -1,9 +1,8 @@
 import abc
-import re
 import copy
-
+import re
 from enum import StrEnum
-from typing import Final, TypeVar, Type, Pattern, AnyStr
+from typing import Final, TypeVar, Type, Pattern, AnyStr, Iterable
 
 from ..exceptions import ParseError, InvalidMessage
 
@@ -29,7 +28,7 @@ class MessageType(StrEnum):
 
 class BaseMessage(abc.ABC):
     _type: MessageType = MessageType.GENERIC  # Type of the message
-    _tags: list[StrEnum, str]  # Contains the tags of the message
+    _tags: Iterable[str]  # Contains the tags of the message
 
     prefix: Final[str] = "*"  # Prefix of the message
     suffix: Final[str] = "##"  # Suffix of the message
@@ -55,7 +54,7 @@ class BaseMessage(abc.ABC):
         Returns:
             str: The representation
         """
-        return f"<{self.__class__.__name__}: {','.join(self.tags)}>"
+        return f"<{self.__class__.__name__}: {','.join(self._tags)}>"
 
     def __hash__(self) -> int:
         return hash((self._type, self._tags))
@@ -78,7 +77,7 @@ class BaseMessage(abc.ABC):
         return cls._regex
 
     @property
-    def tags(self) -> list[StrEnum, str]:
+    def tags(self) -> Iterable[str]:
         """
         Return the tags of the message.
         The tags are the elements that compose the message, like the WHO, WHAT, WHERE, etc.
@@ -128,11 +127,9 @@ def parse_message(message: str) -> Type[BaseMessage]:
     if message.count(BaseMessage.suffix) != 1:
         raise InvalidMessage(message=message)
 
-    tags = (message.strip()
-            .removeprefix(BaseMessage.prefix)
-            .removesuffix(BaseMessage.suffix)
-            .split(BaseMessage.separator)
-            )
+    message = message.strip()
+
+    tags = message.removeprefix(BaseMessage.prefix).removesuffix(BaseMessage.suffix).split(BaseMessage.separator)
 
     for subclass in BaseMessage.__subclasses__():
         # noinspection PyUnresolvedReferences

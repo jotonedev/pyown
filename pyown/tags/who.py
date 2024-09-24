@@ -1,12 +1,14 @@
-from enum import StrEnum
+import enum
+from typing import Final
+
+from .base import Tag
 
 __all__ = [
-    "WHO",
-    "WHO_MAP",
+    "Who",
 ]
 
 
-class WHO(StrEnum):
+class Who(Tag, enum.Enum):
     SCENE: str = "0"
     LIGHTING: str = "1"
     AUTOMATION: str = "2"
@@ -28,30 +30,25 @@ class WHO(StrEnum):
 
     @property
     def name(self) -> str:
-        return WHO_MAP[self]
-
-    @property
-    def number(self) -> int:
-        return int(self)
+        return who_map[self]
 
 
-WHO_MAP = {
-    WHO.SCENE: "Scene",
-    WHO.LIGHTING: "Lighting",
-    WHO.AUTOMATION: "Automation",
-    WHO.LOAD_CONTROL: "Load control",
-    WHO.THERMOREGULATION: "Thermoregulation",
-    WHO.BURGLAR_ALARM: "Burglar alarm",
-    WHO.VIDEO_DOOR_ENTRY: "Video door entry",
-    WHO.GATEWAY: "Gateway management",
-    WHO.CEN_1: "CEN",
-    WHO.SOUND_DIFFUSION_1: "Sound diffusion 1",
-    WHO.MH200N_SCENE: "MH200N Scene",
-    WHO.ENERGY_MANAGEMENT: "Energy management",
-    WHO.SOUND_DIFFUSION_2: "Sound diffusion 2",
-    WHO.CEN_2: "CEN plus / scenarios plus / dry contacts",
-    WHO.AUTOMATION_DIAGNOSTICS: "Automation diagnostics",
-    WHO.THERMOREGULATION_DIAGNOSTICS: "Thermoregulation diagnostics",
-    WHO.DEVICE_DIAGNOSTICS: "Device diagnostics",
+who_map: Final[dict[Who, str]] = {
+    Who.SCENE: "Scene",
+    Who.LIGHTING: "Lighting",
+    Who.AUTOMATION: "Automation",
+    Who.LOAD_CONTROL: "Load control",
+    Who.THERMOREGULATION: "Thermoregulation",
+    Who.BURGLAR_ALARM: "Burglar alarm",
+    Who.VIDEO_DOOR_ENTRY: "Video door entry",
+    Who.GATEWAY: "Gateway management",
+    Who.CEN_1: "CEN",
+    Who.SOUND_DIFFUSION_1: "Sound diffusion 1",
+    Who.MH200N_SCENE: "MH200N Scene",
+    Who.ENERGY_MANAGEMENT: "Energy management",
+    Who.SOUND_DIFFUSION_2: "Sound diffusion 2",
+    Who.CEN_2: "CEN plus / scenarios plus / dry contacts",
+    Who.AUTOMATION_DIAGNOSTICS: "Automation diagnostics",
+    Who.THERMOREGULATION_DIAGNOSTICS: "Thermoregulation diagnostics",
+    Who.DEVICE_DIAGNOSTICS: "Device diagnostics",
 }
-

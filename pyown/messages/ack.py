@@ -1,10 +1,8 @@
 import re
-
-from typing import Self, Pattern, AnyStr
+from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
 from ..exceptions import ParseError
-
 
 __all__ = [
     "ACK",
@@ -14,7 +12,7 @@ __all__ = [
 class ACK(BaseMessage):
     """Represent an ACK message"""
     _type = MessageType.ACK
-    _tags: list[str] = ["#", "1"]
+    _tags: Final[tuple[str]] = ("#", "1")
 
     _regex: Pattern[AnyStr] = re.compile(r"^\*#\*1##$")
 

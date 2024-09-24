@@ -1,14 +1,12 @@
 import asyncio
 from asyncio import StreamReader, StreamWriter
-
 from typing import Final, Literal
 
 from pyown.message import *
+
 from .auth.open import ownCalcPass
 
-
 __all__ = ["OWNClient"]
-
 
 # Use for sending commands and getting responses from the gateway
 COMMAND_SESSION: Final = "9"
@@ -44,7 +42,7 @@ class OWNClient:
             raise ConnectionError(f"Unexpected response: {msg}")
         # Send the session type
         await self.send(RawMessage(tags=["99", session_type]))
-        
+
     async def _open_auth(self, msg: OWNMessage):
         """
         Implement the OPEN algorithm for authentication.
@@ -81,7 +79,7 @@ class OWNClient:
         """
         if isinstance(msg, str):
             msg = msg.encode()
-        
+
         self.writer.write(msg)
         await self.writer.drain()
 
@@ -99,7 +97,7 @@ class OWNClient:
                 msg = await self.reader.readuntil(b"##")
             else:
                 msg = await self.reader.readuntil(b"##", 1024)
-            
+
         return msg.decode(errors="ignore", encoding="ascii")  # omw uses only ascii characters
 
     async def send(self, msg: OWNMessage):

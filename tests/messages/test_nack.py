@@ -7,6 +7,6 @@ def test_nack():
     nack = parse_message(message)
 
     assert str(nack) == message
-    assert nack.tags == ["#", "0"]
+    assert nack.tags == ("#", "0")
     assert nack.type == MessageType.NACK
     assert NACK() == nack

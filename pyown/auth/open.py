@@ -1,4 +1,4 @@
-def ownCalcPass(password: str | int, nonce: str) -> str:
+def ownCalcPass(password: str | int, nonce: str | int) -> str:
     """
     Encode the password using the OPEN algorithm.
     Source: https://rosettacode.org/wiki/OpenWebNet_password#Python
@@ -16,6 +16,9 @@ def ownCalcPass(password: str | int, nonce: str) -> str:
 
     if isinstance(password, str):
         password = int(password)
+
+    if isinstance(nonce, int):
+        nonce = str(nonce)
 
     for c in nonce:
         if c != "0":
