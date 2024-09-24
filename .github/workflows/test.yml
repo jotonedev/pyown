@@ -20,18 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Setup and Cache Python Poetry
+        uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: true
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --sync --no-interaction
+          poetry-version: "1.8.3"
+          install-args: --all-extras
 
       - name: Lint with flake8
         if: matrix.python-version == '3.12'
