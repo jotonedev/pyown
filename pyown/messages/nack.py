@@ -10,8 +10,12 @@ __all__ = [
 
 
 class NACK(BaseMessage):
-    """Represent an NACK message"""
-    _type = MessageType.NACK
+    """
+    Represent an NACK message
+
+    Syntax: *#*0##
+    """
+    _type: Final[MessageType] = MessageType.NACK
     _tags: Final[tuple[str]] = ("#", "0")
 
     _regex: Pattern[AnyStr] = re.compile(r"^\*#\*0##$")

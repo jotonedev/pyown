@@ -1,5 +1,5 @@
 import re
-from typing import Self, Pattern, AnyStr
+from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
 from ..tags import Who, What, Where
@@ -10,9 +10,14 @@ __all__ = [
 
 
 class NormalMessage(BaseMessage):
-    """Represent an NACK message"""
-    _type = MessageType.NORMAL
-    _tags: tuple[Who, What, Where]
+    """
+    Represent a Normal message
+
+    Syntax: *who*what*where##
+
+    """
+    _type: Final[MessageType] = MessageType.NORMAL
+    _tags: Final[tuple[Who, What, Where]]
 
     _regex: Pattern[AnyStr] = re.compile(r"^\*[0-9#]+\*[0-9#]*\*[0-9#]*##$")
 

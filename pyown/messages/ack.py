@@ -10,8 +10,12 @@ __all__ = [
 
 
 class ACK(BaseMessage):
-    """Represent an ACK message"""
-    _type = MessageType.ACK
+    """
+    Represent an ACK message
+
+    Syntax: *#*1##
+    """
+    _type: Final[MessageType] = MessageType.ACK
     _tags: Final[tuple[str]] = ("#", "1")
 
     _regex: Pattern[AnyStr] = re.compile(r"^\*#\*1##$")

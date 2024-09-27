@@ -28,6 +28,9 @@ class Who(Tag, enum.Enum):
     DEVICE_DIAGNOSTICS: str = "1013"
     ENERGY_DIAGNOSTICS: str = "1018"
 
+    def __str__(self) -> str:
+        return self.value
+
     @property
     def name(self) -> str:
         return who_map[self]

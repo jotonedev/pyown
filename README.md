@@ -10,7 +10,7 @@ OpenWebNet is a home automation protocol developed by Bticino (now part of Legra
 lights, shutters, heating, etc.
 It was developed around 2000, and it's still used today in many installations.
 It does not implement any encryption, so it's not secure to use it over the internet.
-Also many devices implement only the old password algorithm, which is easily bruteforceable.
+Also, many devices implement only the old password algorithm, which is easily bruteforceable.
 So, when using OpenWebNet, be sure to use it only in a trusted network and taking security measures, like vlan
 separation.
 
