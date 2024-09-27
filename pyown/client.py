@@ -4,7 +4,7 @@ from typing import Final, Literal
 
 from pyown.message import *
 
-from .auth.open import ownCalcPass
+from .auth.open import own_calc_pass
 
 __all__ = ["OWNClient"]
 
@@ -52,7 +52,7 @@ class OWNClient:
         msg = await self.recv()
         nonce = msg.tags[0].removeprefix("#")
         # Calculate the password
-        password = ownCalcPass(self.password, nonce)
+        password = own_calc_pass(self.password, nonce)
         # Send the password
         await self.send(RawMessage(tags=["#" + password]))
         # Receive the response

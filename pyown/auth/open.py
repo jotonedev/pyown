@@ -1,4 +1,7 @@
-def ownCalcPass(password: str | int, nonce: str | int) -> str:
+__all__ = ["own_calc_pass"]
+
+
+def own_calc_pass(password: str | int, nonce: str | int) -> str:
     """
     Encode the password using the OPEN algorithm.
     Source: https://rosettacode.org/wiki/OpenWebNet_password#Python
