@@ -27,5 +27,3 @@ def test_normal_with_params():
     assert normal.where.tag == 41
     assert normal.where.parameters == ["4", "2"]
     assert normal.type == MessageType.NORMAL
-
-

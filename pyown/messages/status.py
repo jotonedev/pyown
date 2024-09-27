@@ -2,7 +2,7 @@ import re
 from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
-from ..tags import Who, What, Where
+from ..tags import Who, Where
 
 __all__ = [
     "StatusRequest"
@@ -45,4 +45,3 @@ class StatusRequest(BaseMessage):
                 Where(tags[1])
             )
         )
-

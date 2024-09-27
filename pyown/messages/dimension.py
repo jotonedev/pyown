@@ -2,7 +2,7 @@ import re
 from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
-from ..tags import Who, What, Where, Dimension, Value
+from ..tags import Who, Where, Dimension, Value
 
 __all__ = [
     "DimensionRequest",
