@@ -1,10 +1,9 @@
 from enum import IntEnum
-
+from hashlib import sha1, sha256
+from hmac import HMAC, compare_digest
 from secrets import token_bytes
 
-from hmac import HMAC, compare_digest
-from hashlib import sha1, sha256
-
+from ..messages.base import GenericMessage
 
 __all__ = [
     "AuthAlgorithm",
@@ -19,6 +18,9 @@ __all__ = [
 class AuthAlgorithm(IntEnum):
     SHA1 = 1
     SHA256 = 2
+
+    def to_message(self) -> GenericMessage:
+        return GenericMessage(["98", str(self.value)])
 
 
 def client_hmac(
@@ -98,6 +100,7 @@ def server_hmac(
 
     return hmac.digest()
 
+
 def compare_hmac(
         hmac1: bytes,
         hmac2: bytes,
@@ -113,6 +116,7 @@ def compare_hmac(
         bool: True if the hmacs are equal, False otherwise
     """
     return compare_digest(hmac1, hmac2)
+
 
 def create_key(
         hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
@@ -134,6 +138,7 @@ def create_key(
         raise ValueError("Invalid hash algorithm")
 
     return hash_function(token_bytes(32)).hexdigest()
+
 
 def hex_to_digits(
         hex_string: str,

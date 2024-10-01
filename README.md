@@ -22,5 +22,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * [openwebnet documentation](https://developer.legrand.com/Documentation/)
 * [old password algorithm](https://rosettacode.org/wiki/OpenWebNet_password#Python)
-* [java implementation](https://github.com/mvalla/openwebnet4j/) used in OpenHab developed by [mvalla](https://github.com/mvalla)
-* [another python implementation](https://github.com/karel1980/ReOpenWebNet) developed by [karel1980](https://github.com/karel1980)
+* [java implementation](https://github.com/mvalla/openwebnet4j/) used in OpenHab developed
+  by [mvalla](https://github.com/mvalla)
+* [another python implementation](https://github.com/karel1980/ReOpenWebNet) developed
+  by [karel1980](https://github.com/karel1980)

@@ -9,6 +9,7 @@ from ..exceptions import ParseError, InvalidMessage
 __all__ = [
     "MessageType",
     "BaseMessage",
+    "GenericMessage",
     "parse_message",
 ]
 
@@ -114,6 +115,19 @@ class BaseMessage(abc.ABC):
         raise NotImplementedError
 
 
+class GenericMessage(BaseMessage):
+    def __init__(self, tags: list[str]):
+        self._tags = tags
+
+    @property
+    def message(self) -> str:
+        return f"*{'*'.join(self._tags)}##"
+
+    @classmethod
+    def parse(cls, tags: list[str]) -> Self:
+        return cls(tags=tags)
+
+
 def parse_message(message: str) -> Type[BaseMessage]:
     """
     Parse a message from the OpenWebNet bus.
@@ -122,7 +136,7 @@ def parse_message(message: str) -> Type[BaseMessage]:
         message (str): The message to parse
 
     Returns:
-        Type[BaseMessage]: The appropriate message class instance
+        Type[BaseMessage]: The appropriate message class instance, GenericMessage if the message has an unknown WHO tag or its structure is unknown
     """
     if message.count(BaseMessage.suffix) != 1:
         raise InvalidMessage(message=message)
@@ -131,10 +145,18 @@ def parse_message(message: str) -> Type[BaseMessage]:
 
     tags = message.removeprefix(BaseMessage.prefix).removesuffix(BaseMessage.suffix).split(BaseMessage.separator)
 
+    # First of all, check if the message is valid
+    if GenericMessage.pattern().match(message) is None:
+        raise ParseError(tags=tags, message="Invalid message")
+
     for subclass in BaseMessage.__subclasses__():
+        if subclass is GenericMessage:
+            continue
+
         # noinspection PyUnresolvedReferences
         match = subclass.pattern().match(message)
         if match is not None:
             return subclass.parse(tags)
-    else:
-        raise ParseError(message=message, tags=tags)
+
+    # Default case
+    return GenericMessage.parse(tags)
