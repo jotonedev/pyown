@@ -1,26 +1,16 @@
-from enum import IntEnum
 from hashlib import sha1, sha256
 from hmac import HMAC, compare_digest
 from secrets import token_bytes
 
-from ..messages.base import GenericMessage
+from .enum import AuthAlgorithm
 
 __all__ = [
-    "AuthAlgorithm",
     "client_hmac",
     "server_hmac",
     "compare_hmac",
     "create_key",
     "hex_to_digits",
 ]
-
-
-class AuthAlgorithm(IntEnum):
-    SHA1 = 1
-    SHA256 = 2
-
-    def to_message(self) -> GenericMessage:
-        return GenericMessage(["98", str(self.value)])
 
 
 def client_hmac(
