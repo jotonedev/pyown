@@ -123,6 +123,10 @@ class GenericMessage(BaseMessage):
     def message(self) -> str:
         return f"*{'*'.join(self._tags)}##"
 
+    @property
+    def bytes(self) -> bytes:
+        return self.message.encode("ascii")
+
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
         return cls(tags=tags)
