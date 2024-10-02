@@ -34,7 +34,8 @@ class OWNProtocol(Protocol):
             loop (AbstractEventLoop): The event loop
             on_session_start (Future, optional): The future to set when the session starts. Defaults to None.
             on_session_end (Future, optional): The future to set when the session ends. Defaults to None.
-            on_message_received (Callable[[Type[BaseMessage]], Awaitable[None], optional): The async callback to call when a message is received. Defaults to None.
+            on_message_received (Callable[[Type[BaseMessage]], Awaitable[None], optional):
+            The async callback to call when a message is received. Defaults to None.
 
         Returns:
             None
@@ -104,5 +105,7 @@ class OWNProtocol(Protocol):
         Called when the connection is lost or closed.
         """
         log.info(
-            f"Connection lost {f'with exception: {exc}' if exc is not None else ''} to {self._transport.get_extra_info('peername')}")
+            f"Connection lost {f'with exception: {exc}' if exc is not None else ''} "
+            f"to {self._transport.get_extra_info('peername')}"
+        )
         self._on_connection_end.set_result(True)

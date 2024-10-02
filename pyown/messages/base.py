@@ -140,7 +140,8 @@ def parse_message(message: str) -> Type[BaseMessage]:
         message (str): The message to parse
 
     Returns:
-        Type[BaseMessage]: The appropriate message class instance, GenericMessage if the message has an unknown WHO tag or its structure is unknown
+        Type[BaseMessage]: The appropriate message class instance,
+        GenericMessage if the message has an unknown WHO tag or its structure is unknown
     """
     if message.count(BaseMessage.suffix) != 1:
         raise InvalidMessage(message=message)
