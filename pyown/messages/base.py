@@ -2,7 +2,7 @@ import abc
 import copy
 import re
 from enum import StrEnum
-from typing import Final, TypeVar, Type, Pattern, AnyStr, Iterable
+from typing import Final, TypeVar, Pattern, AnyStr
 
 from ..exceptions import ParseError, InvalidMessage
 
@@ -29,13 +29,13 @@ class MessageType(StrEnum):
 
 class BaseMessage(abc.ABC):
     _type: MessageType = MessageType.GENERIC  # Type of the message
-    _tags: Iterable[str]  # Contains the tags of the message
+    _tags: tuple[str] | list[str]  # Contains the tags of the message
 
     prefix: Final[str] = "*"  # Prefix of the message
     suffix: Final[str] = "##"  # Suffix of the message
     separator: Final[str] = "*"  # Separator of the tags
 
-    _regex: Pattern[AnyStr] = re.compile(r"^\*(?:([0-9#]*)\*)+([0-9#]*)##$")  # Regex pattern used to match the message
+    _regex: Pattern[AnyStr] = re.compile(r"^\*(?:([0-9#]*)\*?)+##$")  # Regex pattern used to match the message
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs) -> None:
@@ -78,7 +78,7 @@ class BaseMessage(abc.ABC):
         return cls._regex
 
     @property
-    def tags(self) -> Iterable[str]:
+    def tags(self) -> tuple[str] | list[str]:
         """
         Return the tags of the message.
         The tags are the elements that compose the message, like the WHO, WHAT, WHERE, etc.
@@ -108,9 +108,13 @@ class BaseMessage(abc.ABC):
         """
         raise NotImplementedError
 
+    @property
+    def bytes(self) -> bytes:
+        return self.message.encode("ascii")
+
     @classmethod
     @abc.abstractmethod
-    def parse(cls, tags: list[str]) -> Type[Self]:
+    def parse(cls, tags: list[str]) -> Self:
         """Parse the tags of a message from the OpenWebNet bus."""
         raise NotImplementedError
 
@@ -123,16 +127,12 @@ class GenericMessage(BaseMessage):
     def message(self) -> str:
         return f"*{'*'.join(self._tags)}##"
 
-    @property
-    def bytes(self) -> bytes:
-        return self.message.encode("ascii")
-
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
         return cls(tags=tags)
 
 
-def parse_message(message: str) -> Type[BaseMessage]:
+def parse_message(message: str) -> BaseMessage:
     """
     Parse a message from the OpenWebNet bus.
 
@@ -140,7 +140,7 @@ def parse_message(message: str) -> Type[BaseMessage]:
         message (str): The message to parse
 
     Returns:
-        Type[BaseMessage]: The appropriate message class instance,
+        BaseMessage: The appropriate message class instance,
         GenericMessage if the message has an unknown WHO tag or its structure is unknown
     """
     if message.count(BaseMessage.suffix) != 1:

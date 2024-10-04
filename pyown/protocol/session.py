@@ -24,3 +24,4 @@ class SessionType(StrEnum):
 class AuthType(Enum):
     Open = auto()
     Hmac = auto()
+    NoAuth = auto()

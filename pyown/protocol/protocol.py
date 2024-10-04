@@ -1,14 +1,9 @@
 import asyncio
 import logging
-from asyncio import Protocol, Transport
-from typing import TYPE_CHECKING, Callable, Awaitable, Type
+from asyncio import Protocol, Transport, Future, Queue
 
 from ..exceptions import ParseError
 from ..messages import BaseMessage, parse_message
-
-if TYPE_CHECKING:
-    from asyncio import AbstractEventLoop
-    from asyncio.futures import Future
 
 __all__ = [
     "OWNProtocol",
@@ -22,29 +17,24 @@ class OWNProtocol(Protocol):
 
     def __init__(
             self,
-            loop: AbstractEventLoop,
-            on_session_start: Future | None = None,
-            on_session_end: Future | None = None,
-            on_message_received: Callable[[Type[BaseMessage]], Awaitable[None]] | None = None,
+            on_connection_start: Future[Transport],
+            on_connection_end: Future[Exception | None],
     ):
         """
         Initialize the protocol.
 
         Args:
-            loop (AbstractEventLoop): The event loop
-            on_session_start (Future, optional): The future to set when the session starts. Defaults to None.
-            on_session_end (Future, optional): The future to set when the session ends. Defaults to None.
-            on_message_received (Callable[[Type[BaseMessage]], Awaitable[None], optional):
-            The async callback to call when a message is received. Defaults to None.
-
-        Returns:
-            None
+            on_connection_start (Future): The future to set when the connection starts.
+            on_connection_end (Future): The future to set when the connection ends.
         """
-        self._loop = loop
+        self._on_connection_start: Future[Transport] = on_connection_start
+        self._on_connection_end: Future[Exception | None] = on_connection_end
 
-        self._on_connection_start: Future | None = on_session_start
-        self._on_connection_end: Future | None = on_session_end
-        self._on_message_received: Callable[[Type[BaseMessage]], Awaitable[None]] | None = on_message_received
+        # The queue was chosen because it supports both synchronous and asynchronous functions
+        # It contains list of messages to ensure that when multiple messages are sent in a packet, they are all consumed
+        # This happens when the server sends, for example, a dimension response followed by an ACK even if the response
+        # is itself a confirmation that the request was successful.
+        self._messages_queue: Queue[list[BaseMessage]] = asyncio.Queue()
 
     def connection_made(self, transport: Transport):
         """
@@ -52,7 +42,20 @@ class OWNProtocol(Protocol):
         """
         log.info(f"Connection made with {transport.get_extra_info('peername')}")
         self._transport = transport
-        self._on_connection_start.set_result(True)
+        self._on_connection_start.set_result(transport)
+
+    def connection_lost(self, exc: Exception | None):
+        """
+        Called when the connection is lost or closed.
+        """
+        log.info(
+            f"Connection lost {f' with exception: {exc}' if exc is not None else ''}"
+            f"to {self._transport.get_extra_info('peername')}"
+        )
+        if exc is None:
+            self._on_connection_end.set_result(None)
+        else:
+            self._on_connection_end.set_exception(exc)
 
     def data_received(self, data: bytes):
         """
@@ -78,8 +81,8 @@ class OWNProtocol(Protocol):
         # Sometimes multiple messages can be sent in the same packet
         try:
             messages = [parse_message(msg + "##") for msg in data.split("##") if msg]
-        except ParseError:
-            log.warning(f"Received invalid message: {data}")
+        except ParseError as e:
+            log.warning(f"Received invalid message: {e.tags}")
             self._transport.close()
             return
 
@@ -87,25 +90,28 @@ class OWNProtocol(Protocol):
         if not messages:
             return
 
-        # If the on_message_received is not set, return
-        if self._on_message_received is None:
-            return
+        log.debug(f"Received messages: {messages}")
 
-        # Call the on_message_received for each message
-        for msg in messages:
-            log.debug(f"Received message: {msg}")
+        # Call the on_message_received future
+        self._messages_queue.put_nowait(messages)
 
-            asyncio.ensure_future(
-                self._on_message_received(msg),
-                loop=self._loop,
-            )
-
-    def connection_lost(self, exc: Exception | None):
+    def send_message(self, msg: BaseMessage):
         """
-        Called when the connection is lost or closed.
+        Send a message to the server.
+
+        Args:
+            msg (BaseMessage): The message to send
         """
-        log.info(
-            f"Connection lost {f'with exception: {exc}' if exc is not None else ''} "
-            f"to {self._transport.get_extra_info('peername')}"
-        )
-        self._on_connection_end.set_result(True)
+        data = msg.bytes
+        self._transport.write(data)
+        log.debug(f"Sent message: {data}")
+
+    async def receive_message(self) -> list[BaseMessage]:
+        """
+        Receive a message from the server.
+
+        Returns:
+            list[BaseMessage]: The received messages
+        """
+        messages = await self._messages_queue.get()
+        return messages

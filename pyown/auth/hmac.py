@@ -10,6 +10,7 @@ __all__ = [
     "compare_hmac",
     "create_key",
     "hex_to_digits",
+    "digits_to_hex",
 ]
 
 
@@ -146,4 +147,23 @@ def hex_to_digits(
     for c in hex_string:
         value = int(c, 16)
         out += str(value // 10) + str(value % 10)
+    return out
+
+
+def digits_to_hex(
+        digits_string: str,
+) -> str:
+    """
+    Convert a digits string to hex.
+
+    Args:
+        digits_string: The digits string
+
+    Returns:
+        str: the hex string
+    """
+    out = ""
+    for i in range(0, len(digits_string), 2):
+        value = int(digits_string[i]) * 10 + int(digits_string[i + 1])
+        out += hex(value)[2:]
     return out

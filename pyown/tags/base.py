@@ -14,7 +14,7 @@ VALID_TAG_CHARS: Final[str] = "0123456789#"
 class Tag(str):
     """Tag class."""
 
-    def __init__(self, string: str):
+    def __init__(self, string: str = ""):
         # Check if the string contains only valid characters
         if not all(c in VALID_TAG_CHARS for c in string):
             raise InvalidTag(string)
