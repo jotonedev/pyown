@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [published]
+    types: [ published ]
   workflow_dispatch:
     inputs:
       upload:
@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 jobs:
-  pypi-publish:
-    name: Upload release to PyPI
+  release-build:
+    name: Build the release
     runs-on: ubuntu-latest
 
     permissions:
@@ -42,14 +42,30 @@ jobs:
         with:
           subject-path: "dist/*"
 
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-        if: ${{ (github.event.inputs.upload || github.event.action == 'published') && github.event.release.draft == false }}
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: "dist/*"
+          name: release-dists
+          path: "dist/"
+
+  pypi-publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: release-build
+    if: ${{ (github.event.inputs.upload || github.event.action == 'published') && github.event.release.draft == false }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: release-dists
+          path: dist/
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true

@@ -75,7 +75,7 @@ class BaseClient:
         # The second packet is from the client and set the session type
         # Wait for the first packet
         async with asyncio.timeout(5):
-            messages = await self._protocol.receive_message()
+            messages = await self._protocol.receive_messages()
 
         if messages[0].type != MessageType.ACK:
             raise InvalidSession("Expected ACK message")
@@ -214,7 +214,7 @@ class BaseClient:
 
         # Wait for the response
         async with asyncio.timeout(timeout):
-            messages = await self._protocol.receive_message()
+            messages = await self._protocol.receive_messages()
 
         return messages
 

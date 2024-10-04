@@ -40,7 +40,7 @@ class OWNProtocol(Protocol):
         """
         Called when the socket is connected.
         """
-        log.info(f"Connection made with {transport.get_extra_info('peername')}")
+        log.info(f"Connection made")
         self._transport = transport
         self._on_connection_start.set_result(transport)
 
@@ -48,10 +48,7 @@ class OWNProtocol(Protocol):
         """
         Called when the connection is lost or closed.
         """
-        log.info(
-            f"Connection lost {f' with exception: {exc}' if exc is not None else ''}"
-            f"to {self._transport.get_extra_info('peername')}"
-        )
+        log.info(f"Connection lost {f' with exception: {exc}' if exc is not None else ''}")
         if exc is None:
             self._on_connection_end.set_result(None)
         else:
@@ -73,18 +70,16 @@ class OWNProtocol(Protocol):
         # In OpenWebNet, the message is always written with ascii characters
         try:
             data = data.decode("ascii").strip()
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
             log.warning(f"Received data is not ascii: {data.hex()}")
-            self._transport.close()
-            return
+            raise e
 
         # Sometimes multiple messages can be sent in the same packet
         try:
             messages = [parse_message(msg + "##") for msg in data.split("##") if msg]
         except ParseError as e:
             log.warning(f"Received invalid message: {e.tags}")
-            self._transport.close()
-            return
+            raise e
 
         # If there are no messages, return
         if not messages:
@@ -106,12 +101,12 @@ class OWNProtocol(Protocol):
         self._transport.write(data)
         log.debug(f"Sent message: {data}")
 
-    async def receive_message(self) -> list[BaseMessage]:
+    async def receive_messages(self) -> list[BaseMessage]:
         """
-        Receive a message from the server.
+        Receive a list of messages from the server.
 
         Returns:
-            list[BaseMessage]: The received messages
+            list[BaseMessage]: a list of messages that were sent in the same packet.
         """
         messages = await self._messages_queue.get()
         return messages
