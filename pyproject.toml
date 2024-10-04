@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyown"
-version = "0.1.0"
+version = "0.1.0a0"
 description = "Python wrapper for OpenWebNet protocol"
 authors = ["John Toniutti <john.toniutti@gmail.com>"]
 license = "GPL-3.0"
