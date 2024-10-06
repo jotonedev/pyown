@@ -35,6 +35,7 @@ class BaseClient:
             port (int): The port to connect to
             password (str): The password to authenticate with
             session_type (SessionType): The session type to use
+            loop (Optional[AbstractEventLoop]): The event loop to use
         """
         self._host = host
         self._port = port

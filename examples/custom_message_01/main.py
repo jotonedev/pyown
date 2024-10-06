@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from pyown.client.base import BaseClient
+from pyown.client import BaseClient
 from pyown.messages import MessageType, DimensionRequest
 from pyown.tags import Who, Where, Dimension
 
@@ -25,11 +25,15 @@ async def run(host: str, port: int, password: str):
             )
         )
     )
+
+    # Parse response
     for msg in resp:
+        # The gateway will respond with NACK when the message contains an error, or it's not supported
         if msg.type == MessageType.NACK:
             print("The server did not accept the request")
             return
         else:
+            # Sometimes the gateway will send with the response an ACK to confirm the request was successful
             if msg.type == MessageType.ACK:
                 print(f"The server accepted the request")
             else:
