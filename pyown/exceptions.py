@@ -1,4 +1,9 @@
-class ParseError(Exception):
+class OWNException(Exception):
+    def __init__(self, message: str = "") -> None:
+        super().__init__(message)
+
+
+class ParseError(OWNException):
     tags: list[str]
     message: str
 
@@ -8,7 +13,7 @@ class ParseError(Exception):
         super().__init__(f"Error parsing message: {message}")
 
 
-class InvalidData(Exception):
+class InvalidData(OWNException):
     data: bytes
 
     def __init__(self, data: bytes):
@@ -17,7 +22,7 @@ class InvalidData(Exception):
         super().__init__(f"Error parsing data: {data.hex()}")
 
 
-class InvalidMessage(Exception):
+class InvalidMessage(OWNException):
     message: str
 
     def __init__(self, message: str) -> None:
@@ -25,7 +30,7 @@ class InvalidMessage(Exception):
         super().__init__(f"Invalid message: {message}")
 
 
-class InvalidTag(Exception):
+class InvalidTag(OWNException):
     tag: str
 
     def __init__(self, tag: str) -> None:
@@ -33,7 +38,7 @@ class InvalidTag(Exception):
         super().__init__(f"Invalid tag: {tag}")
 
 
-class InvalidSession(Exception):
+class InvalidSession(OWNException):
     def __init__(self, message: str) -> None:
         super().__init__(message)
 
@@ -43,6 +48,6 @@ class InvalidAuthentication(InvalidSession):
         super().__init__(message)
 
 
-class RequestError(Exception):
+class RequestError(OWNException):
     def __init__(self, message: str = "") -> None:
         super().__init__(message)
