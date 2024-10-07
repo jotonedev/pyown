@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from pyown.client import Client
-from pyown.messages import MessageType, DimensionRequest, ACK, NACK
+from pyown.messages import DimensionRequest, ACK, NACK
 from pyown.tags import Who, Where, Dimension
 
 

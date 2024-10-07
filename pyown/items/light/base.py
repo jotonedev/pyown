@@ -101,6 +101,3 @@ class BaseLight(BaseItem):
     async def turn_on_0_5_sec(self):
         """Turn the light on for 0.5 seconds."""
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
-
-
-

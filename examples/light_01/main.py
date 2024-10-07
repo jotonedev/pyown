@@ -1,14 +1,12 @@
 import asyncio
 import logging
 
-from pyown.client import BaseClient
-from pyown.messages import MessageType, DimensionRequest, ACK, NACK
-from pyown.tags import Who, Where, Dimension
+from pyown.client import Client
 from pyown.items.light import Light
 
 
 async def run(host: str, port: int, password: str):
-    client = BaseClient(
+    client = Client(
         host=host,
         port=port,
         password=password

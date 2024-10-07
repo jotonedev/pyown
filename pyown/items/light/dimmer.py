@@ -1,6 +1,5 @@
 from .base import BaseLight, WhatLight
 
-
 __all__ = [
     "Dimmer",
 ]
