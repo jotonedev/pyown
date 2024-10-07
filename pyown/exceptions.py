@@ -41,3 +41,8 @@ class InvalidSession(Exception):
 class InvalidAuthentication(InvalidSession):
     def __init__(self, message: str) -> None:
         super().__init__(message)
+
+
+class RequestError(Exception):
+    def __init__(self, message: str = "") -> None:
+        super().__init__(message)

@@ -31,10 +31,7 @@ class OWNProtocol(Protocol):
         self._on_connection_end: Future[Exception | None] = on_connection_end
 
         # The queue was chosen because it supports both synchronous and asynchronous functions
-        # It contains list of messages to ensure that when multiple messages are sent in a packet, they are all consumed
-        # This happens when the server sends, for example, a dimension response followed by an ACK even if the response
-        # is itself a confirmation that the request was successful.
-        self._messages_queue: Queue[list[BaseMessage]] = asyncio.Queue()
+        self._messages_queue: Queue[BaseMessage] = asyncio.Queue()
 
     def connection_made(self, transport: Transport):
         """
@@ -88,7 +85,8 @@ class OWNProtocol(Protocol):
         log.debug(f"Received messages: {messages}")
 
         # Call the on_message_received future
-        self._messages_queue.put_nowait(messages)
+        for msg in messages:
+            self._messages_queue.put_nowait(msg)
 
     def send_message(self, msg: BaseMessage):
         """
@@ -101,7 +99,7 @@ class OWNProtocol(Protocol):
         self._transport.write(data)
         log.debug(f"Sent message: {data}")
 
-    async def receive_messages(self) -> list[BaseMessage]:
+    async def receive_messages(self) -> BaseMessage:
         """
         Receive a list of messages from the server.
 

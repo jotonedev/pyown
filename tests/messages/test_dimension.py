@@ -23,7 +23,7 @@ def test_dimension_request_with_params():
     assert str(dimension_request) == msg
     assert dimension_request.who == "13"
     assert dimension_request.where == "7#3"
-    assert dimension_request.where.tag == 7
+    assert dimension_request.where.tag == "7"
     assert dimension_request.where.parameters == ["3"]
     assert dimension_request.dimension == "1"
     assert dimension_request.type == MessageType.DIMENSION_REQUEST
@@ -53,7 +53,7 @@ def test_dimension_writing_with_params():
     assert str(dimension_writing) == msg
     assert dimension_writing.who == "13"
     assert dimension_writing.where == "7#3"
-    assert dimension_writing.where.tag == 7
+    assert dimension_writing.where.tag == "7"
     assert dimension_writing.where.parameters == ["3"]
     assert dimension_writing.dimension == "0"
     assert dimension_writing.values == ("21", "10", "00", "01")
@@ -84,7 +84,7 @@ def test_dimension_response_with_params():
     assert str(dimension_response) == msg
     assert dimension_response.who == "13"
     assert dimension_response.where == "7#3"
-    assert dimension_response.where.tag == 7
+    assert dimension_response.where.tag == "7"
     assert dimension_response.where.parameters == ["3"]
     assert dimension_response.dimension == "1"
     assert dimension_response.values == ("1", "1", "1", "2012")

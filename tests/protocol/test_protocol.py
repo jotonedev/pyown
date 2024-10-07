@@ -36,10 +36,9 @@ class OWNProtocolTests(unittest.IsolatedAsyncioTestCase):
         data = b"*#*1##"  # ACK message
 
         self.protocol.data_received(data)
-        messages = await self.protocol._messages_queue.get()
-        self.assertEqual(len(messages), 1)
-        self.assertIsInstance(messages[0], ACK)
-        self.assertEqual(messages[0].bytes, data)
+        message = await self.protocol._messages_queue.get()
+        self.assertIsInstance(message, ACK)
+        self.assertEqual(message.bytes, data)
 
     async def test_data_received_invalid(self):
         data = b"deadbeef"

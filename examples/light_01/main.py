@@ -1,13 +1,14 @@
 import asyncio
 import logging
 
-from pyown.client import Client
+from pyown.client import BaseClient
 from pyown.messages import MessageType, DimensionRequest, ACK, NACK
 from pyown.tags import Who, Where, Dimension
+from pyown.items.light import Light
 
 
 async def run(host: str, port: int, password: str):
-    client = Client(
+    client = BaseClient(
         host=host,
         port=port,
         password=password
@@ -15,38 +16,12 @@ async def run(host: str, port: int, password: str):
 
     await client.start()
 
-    # Get the ip address of the server
-    await client.send_message(
-        DimensionRequest(
-            (
-                Who.GATEWAY,
-                Where(),
-                Dimension("10")
-            )
-        )
+    light = Light(
+        client,
+        "32"
     )
 
-    # Parse response
-    resp = None
-    status = None
-    try:
-        resp = await client.read_message()
-        if resp == NACK():
-            logging.error("The server did not acknowledge the message")
-            return await client.close()
-
-        status = await client.read_message()
-    except asyncio.TimeoutError:
-        logging.error("Timeout while waiting for response")
-
-    if status == ACK():
-        logging.info("The server acknowledged the message")
-        ip = resp.tags[-4:]
-        print(f"The ip address of the server is {ip}")
-    else:
-        logging.error("The server did not acknowledge the message")
-
-    await client.close()
+    await light.turn_on_1_min()
 
 
 def main(host: str, port: int, password: str):

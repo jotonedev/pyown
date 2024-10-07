@@ -1,4 +1,4 @@
-import enum
+from enum import StrEnum
 from typing import Final
 
 from .base import Tag
@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 
-class Who(Tag, enum.Enum):
+class Who(Tag, StrEnum):
     SCENE: str = "0"
     LIGHTING: str = "1"
     AUTOMATION: str = "2"
@@ -29,7 +29,7 @@ class Who(Tag, enum.Enum):
     ENERGY_DIAGNOSTICS: str = "1018"
 
     def __str__(self) -> str:
-        return self.value
+        return self.string
 
     @property
     def name(self) -> str:

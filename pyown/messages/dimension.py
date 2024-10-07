@@ -90,7 +90,7 @@ class DimensionWriting(BaseMessage):
 
     @property
     def message(self) -> str:
-        return f"*#{self.who}*{self.where}*#{self.dimension}*{'*'.join(self.values)}##"
+        return f"*#{self.who}*{self.where}*#{self.dimension}*{'*'.join([str(value) for value in self.values])}##"
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
@@ -103,7 +103,7 @@ class DimensionWriting(BaseMessage):
             tags=(
                 Who(tags[0].removeprefix("#")),
                 Where(tags[1]),
-                Dimension(tags[2]).removeprefix("#"),
+                Dimension(tags[2].removeprefix("#")),
                 *values
             )
         )
@@ -122,4 +122,4 @@ class DimensionResponse(DimensionWriting, BaseMessage):
 
     @property
     def message(self) -> str:
-        return f"*#{self.who}*{self.where}*{self.dimension}*{'*'.join(self.values)}##"
+        return f"*#{self.who}*{self.where}*{self.dimension}*{'*'.join([str(value) for value in self.values])}##"

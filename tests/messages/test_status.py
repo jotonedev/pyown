@@ -22,6 +22,6 @@ def test_status_request_with_params():
     assert str(status_request) == message
     assert status_request.who == "1"
     assert status_request.where == "41#4#2"
-    assert status_request.where.tag == 41
+    assert status_request.where.tag == "41"
     assert status_request.where.parameters == ["4", "2"]
     assert status_request.type == MessageType.STATUS_REQUEST

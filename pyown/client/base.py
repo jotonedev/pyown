@@ -76,29 +76,30 @@ class BaseClient:
         # The second packet is from the client and set the session type
         # Wait for the first packet
         async with asyncio.timeout(5):
-            messages = await self._protocol.receive_messages()
+            message = await self._protocol.receive_messages()
 
-        if messages[0].type != MessageType.ACK:
+        if message.type != MessageType.ACK:
             raise InvalidSession("Expected ACK message")
 
         log.debug("Starting handshake")
 
         # Send the session type
-        resp = await self.send_message_with_response(self._session_type.to_message())
+        await self.send_message(self._session_type.to_message())
+        resp = await self.read_message()
 
         # Authentication
         # if the next message is an ACK, the server does not require authentication
         # if it's a message with only a number, the server requires the open authentication algorithm
         # if it's a ∗98∗## open command, the server requires the hmac authentication algorithm
-        if resp[0].type == MessageType.ACK:
+        if resp.type == MessageType.ACK:
             log.info("No authentication required")
             pass
-        elif len(resp[0].tags) == 1:
+        elif len(resp.tags) == 1:
             log.info("Using open authentication")
-            await self._authenticate_open(nonce=resp[0].tags[0])
-        elif resp[0].tags[0] == "98":
+            await self._authenticate_open(nonce=resp.tags[0])
+        elif resp.tags[0] == "98":
             log.info("Using hmac authentication")
-            tag = resp[0].tags[1]
+            tag = resp.tags[1]
             await self._authenticate_hmac(
                 hash_algorithm=tag,
             )
@@ -117,9 +118,10 @@ class BaseClient:
         """
         enc = own_calc_pass(self._password, nonce)
 
-        resp = await self.send_message_with_response(GenericMessage(["#" + enc]))
+        await self.send_message(GenericMessage(["#" + enc]))
+        resp = await self.read_message()
 
-        if resp[0].type != MessageType.ACK:
+        if resp.type != MessageType.ACK:
             raise InvalidAuthentication("Invalid password")
 
     async def _authenticate_hmac(self, hash_algorithm: AuthAlgorithm | str) -> None:
@@ -139,8 +141,9 @@ class BaseClient:
                 raise InvalidAuthentication("Invalid hash algorithm")
 
         # Send an ACK to accept the algorithm and wait for the server key
-        resp = await self.send_message_with_response(ACK())
-        server_key = resp[0].tags[0]
+        await self.send_message(ACK())
+        resp = await self.read_message()
+        server_key = resp.tags[0]
 
         # Generate the client key
         client_key = create_key(hash_algorithm)
@@ -160,11 +163,10 @@ class BaseClient:
         )
 
         # Send the client authentication string
-        resp = await self.send_message_with_response(
+        await self.send_message(
             GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())])
         )
-
-        resp = resp[0]
+        resp = await self.read_message()
 
         if resp.type == MessageType.NACK:
             raise InvalidAuthentication("Invalid password")
@@ -187,37 +189,20 @@ class BaseClient:
         """
         self._protocol.send_message(message)
 
-    async def send_message_with_response(
-            self,
-            message: BaseMessage,
-            timeout: int = 5
-    ) -> list[BaseMessage]:
+    async def read_message(self, timeout: int | None = 5) -> BaseMessage:
         """
-        Send a message and return the response.
-        Valid only when the client is in a command session, otherwise raise an exception
-
-        Args:
-            message (BaseMessage): send to the server a subclass of BaseMessage
-            timeout (int): the number of seconds to wait before raising TimeoutError
+        Read a message from the server
 
         Returns:
-            BaseMessage: the response from the server
+            BaseMessage: the message from the server
 
         Raises:
-            InvalidSession: if the client is not in a command session
-            TimeoutError: if the server does not return the excepted number of messages in the defined period in seconds
+            TimeoutError: if the server does not respond
         """
-        if self._session_type == SessionType.EventSession:
-            raise InvalidSession
-
-        # Send message
-        self._protocol.send_message(message)
-
-        # Wait for the response
         async with asyncio.timeout(timeout):
-            messages = await self._protocol.receive_messages()
+            message = await self._protocol.receive_messages()
 
-        return messages
+        return message
 
     async def close(self) -> None:
         """
