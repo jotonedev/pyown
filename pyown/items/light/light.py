@@ -53,3 +53,14 @@ class Light(BaseLight):
     async def blink_5_0_sec(self):
         """Blink the light every 5.0 seconds."""
         await self.send_normal_message(WhatLight.BLINKING_5_0_SEC)
+
+    async def get_status(self) -> bool:
+        """
+        Get the status of the light.
+
+        Returns:
+            True if the light is on, False if the light is off.
+        """
+        resp = await self.send_status_request()
+
+        return resp.what == WhatLight.ON

@@ -1,3 +1,4 @@
+from abc import ABC
 from ..client import BaseClient
 from ..exceptions import RequestError
 from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType
@@ -8,7 +9,7 @@ __all__ = [
 ]
 
 
-class BaseItem:
+class BaseItem(ABC):
     _who = Who.LIGHTING
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
@@ -153,3 +154,29 @@ class BaseItem:
 
         if resp.type != MessageType.ACK:
             raise RequestError(f"Error sending message: {resp}")
+
+    async def send_status_request(self) -> NormalMessage:
+        """
+        Send a status request to the server and check the response.
+
+        Raises:
+            RequestError: If the server does not acknowledge the message.
+        """
+        msg = self.create_status_message()
+        await self._client.send_message(msg)
+
+        resp = await self._client.read_message()
+
+        if resp.type != MessageType.ACK:
+            raise RequestError(f"Error sending message: {msg}, response: {resp}")
+
+        ack = await self._client.read_message()
+
+        if ack.type != MessageType.ACK:
+            raise RequestError(f"Error sending message: {msg}, response: {ack}")
+
+        if not isinstance(resp, NormalMessage):
+            raise RequestError(f"Error sending message: {msg}, response: {ack}")
+
+        return resp
+

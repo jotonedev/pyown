@@ -1,19 +1,14 @@
+from abc import ABC, abstractmethod
 from enum import Enum, auto, StrEnum
+from typing import Final
 
 from ..base import BaseItem
 from ...tags import Who, What
 
 __all__ = [
-    "LightState",
     "BaseLight",
     "WhatLight",
 ]
-
-
-class LightState(Enum):
-    """The state of a light item."""
-    OFF = auto()
-    ON = auto()
 
 
 class WhatLight(What, StrEnum):
@@ -58,9 +53,9 @@ class WhatLight(What, StrEnum):
     COMMAND_TRANSLATION = "1000"
 
 
-class BaseLight(BaseItem):
+class BaseLight(BaseItem, ABC):
     """Base class for all light items."""
-    _who = Who.LIGHTING
+    _who: Final[Who] = Who.LIGHTING
 
     async def turn_on(self):
         """Turn the light on."""
@@ -101,3 +96,8 @@ class BaseLight(BaseItem):
     async def turn_on_0_5_sec(self):
         """Turn the light on for 0.5 seconds."""
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
+
+    @abstractmethod
+    async def get_status(self) -> bool | int:
+        """Get the status of the light"""
+        raise NotImplementedError

@@ -110,3 +110,14 @@ class Dimmer(BaseLight):
             what = what.with_parameters(speed)
 
         await self.send_normal_message(what)
+
+    async def get_status(self) -> int:
+        """
+        Get the status of the light.
+
+        Returns:
+            True if the light is on, False if the light is off.
+        """
+        resp = await self.send_status_request()
+
+        return int(resp.what.tag)
