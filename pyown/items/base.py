@@ -1,4 +1,5 @@
 from abc import ABC
+
 from ..client import BaseClient
 from ..exceptions import RequestError
 from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType
@@ -179,4 +180,3 @@ class BaseItem(ABC):
             raise RequestError(f"Error sending message: {msg}, response: {ack}")
 
         return resp
-

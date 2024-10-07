@@ -45,7 +45,10 @@ class OWNProtocol(Protocol):
         """
         Called when the connection is lost or closed.
         """
-        log.info(f"Connection lost {f' with exception: {exc}' if exc is not None else ''}")
+        if exc is not None:
+            log.info(f"Connection lost with exception: {exc}")
+        else:
+            log.info(f"Connection lost")
         if exc is None:
             self._on_connection_end.set_result(None)
         else:

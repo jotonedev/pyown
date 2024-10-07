@@ -4,9 +4,9 @@ from asyncio import AbstractEventLoop, Transport, Future
 from typing import Optional
 
 from ..auth import AuthAlgorithm
-from ..auth.hmac import *
-from ..auth.open import *
-from ..exceptions import *
+from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
+from ..auth.open import own_calc_pass
+from ..exceptions import InvalidAuthentication, InvalidSession
 from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
 from ..protocol import OWNProtocol, SessionType
 

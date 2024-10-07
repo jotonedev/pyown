@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import Enum, auto, StrEnum
+from enum import StrEnum
 from typing import Final
 
 from ..base import BaseItem

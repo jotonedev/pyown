@@ -7,7 +7,7 @@ def own_calc_pass(password: str | int, nonce: str | int) -> str:  # noqa: C901
     Source: https://rosettacode.org/wiki/OpenWebNet_password#Python
 
     Parameters:
-        password (str | int): The password to encode, must be composed of only digits.
+        password (str | int): The password to encode must be composed of only digits.
         nonce (str): The nonce received from the gateway.
 
     Returns:
