@@ -1,11 +1,11 @@
-from .base import Tag
+from .base import TagWithParameters
 
 __all__ = [
     "Dimension",
 ]
 
 
-class Dimension(Tag):
+class Dimension(TagWithParameters):
     """
     Represent the DIMENSION tag.
 

@@ -118,7 +118,7 @@ class DimensionResponse(DimensionWriting, BaseMessage):
     This is sent by the server to the client
     """
     _type: Final[MessageType] = MessageType.DIMENSION_RESPONSE
-    _regex: Pattern[AnyStr] = re.compile(r"^\*#[0-9#]+\*[0-9#]*\*[0-9]*(?:\*[0-9#]*)*##$")
+    _regex: Pattern[AnyStr] = re.compile(r"^\*#[0-9#]+\*[0-9#]*\*[0-9#]*(?:\*[0-9#]*)*##$")
 
     @property
     def message(self) -> str:

@@ -55,7 +55,7 @@ class BaseMessage(abc.ABC):
         Returns:
             str: The representation
         """
-        return f"<{self.__class__.__name__}: {','.join(self._tags)}>"
+        return f"<{self.__class__.__name__}: {','.join([str(tag) for tag in self._tags])}>"
 
     def __hash__(self) -> int:
         return hash((self._type, self._tags))
