@@ -21,6 +21,7 @@ This project is licensed under the GNU GPL v3 license - see the [LICENSE](LICENS
 ## Acknowledgments
 
 * [openwebnet documentation](https://developer.legrand.com/Documentation/)
+* [another openwebnet documentation page](https://developer.legrand.com/local-interoperability/#PDF%20documentation)
 * [old password algorithm](https://rosettacode.org/wiki/OpenWebNet_password#Python)
 * [java implementation](https://github.com/mvalla/openwebnet4j/) used in OpenHab developed
   by [mvalla](https://github.com/mvalla)
