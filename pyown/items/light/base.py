@@ -1,14 +1,22 @@
 from abc import ABC, abstractmethod
-from enum import StrEnum
+from enum import StrEnum, Enum, auto
 from typing import Final
 
-from ..base import BaseItem
+from ..base import BaseItem, BaseEvents
 from ...tags import Who, What, Value
 
 __all__ = [
     "BaseLight",
     "WhatLight",
 ]
+
+
+class LightEvents(BaseEvents, Enum):
+    STATUS_CHANGE = auto()
+    LUMINOSITY_CHANGE = auto()
+    LIGHT_TEMPORIZATION = auto()
+    HSV_CHANGE = auto()
+    WHITE_TEMP_CHANGE = auto()
 
 
 class WhatLight(What, StrEnum):

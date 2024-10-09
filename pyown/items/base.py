@@ -6,8 +6,13 @@ from ..messages import NormalMessage, StatusRequest, DimensionWriting, Dimension
 from ..tags import Where, Who, What, Dimension, Value
 
 __all__ = [
-    "BaseItem"
+    "BaseEvents",
+    "BaseItem",
 ]
+
+
+class BaseEvents:
+    pass
 
 
 class BaseItem(ABC):
