@@ -177,3 +177,39 @@ class Dimmer(BaseLight):
         temperature = Value(str(temperature))
 
         await self.send_dimension_writing("13", temperature)
+
+    async def request_current_brightness_speed(self):
+        """
+        Request the gateway the last set brightness and speed command that was sent.
+
+        The response will be sent to the event session.
+        """
+        msg = self.create_dimension_request_message(Dimension("2"))
+        await self._send_message(msg)
+
+        resp = await self._read_message()
+        self._check_ack(resp)
+
+    async def request_current_hsv(self):
+        """
+        Request the gateway the last set HSV command that was sent.
+
+        The response will be sent to the event session.
+        """
+        msg = self.create_dimension_request_message(Dimension("12"))
+        await self._send_message(msg)
+
+        resp = await self._read_message()
+        self._check_ack(resp)
+
+    async def request_current_white_temperature(self):
+        """
+        Request the gateway the last set white temperature command that was sent.
+
+        The response will be sent to the event session.
+        """
+        msg = self.create_dimension_request_message(Dimension("14"))
+        await self._send_message(msg)
+
+        resp = await self._read_message()
+        self._check_ack(resp)

@@ -1,9 +1,12 @@
+import asyncio
 from abc import ABC, abstractmethod
 from enum import StrEnum, Enum, auto
 from typing import Final
 
 from ..base import BaseItem, BaseEvents
-from ...tags import Who, What, Value
+from ...exceptions import RequestError
+from ...messages import DimensionResponse
+from ...tags import Who, What, Value, Dimension
 
 __all__ = [
     "BaseLight",
@@ -130,8 +133,37 @@ class BaseLight(BaseItem, ABC):
 
         await self.send_dimension_writing("2", hour, minutes, second)
 
-    async def max_working_time(self, time: int):
-        """It's not clear what this command does."""
-        time = Value(str(time))
+    async def request_current_temporization(self):
+        """
+        Request the gateway the last temporization command sent.
 
-        await self.send_dimension_writing("9", time)
+        The response will be sent to the event session.
+        """
+        msg = self.create_dimension_request_message(Dimension("1"))
+        await self._send_message(msg)
+
+        resp = await self._read_message()
+        self._check_ack(resp)
+
+    async def request_working_time_lamp(self) -> int:
+        """
+        Request the gateway for how long the light has been on.
+
+        Returns:
+            The time in seconds the light has been on.
+        """
+
+        msg = self.create_dimension_request_message(Dimension("8"))
+        await asyncio.sleep(1)
+        await self._send_message(msg)
+
+        resp = await self._read_message()
+        self._check_nack(resp)
+
+        ack = await self._read_message()
+        self._check_ack(ack)
+
+        if not isinstance(resp, DimensionResponse):
+            raise RequestError(f"Error sending message: {msg}, response: {resp}")
+
+        return int(resp.values[0].tag)

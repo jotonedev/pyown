@@ -91,14 +91,18 @@ class OWNProtocol(Protocol):
         for msg in messages:
             self._messages_queue.put_nowait(msg)
 
-    def send_message(self, msg: BaseMessage):
+    async def send_message(self, msg: BaseMessage, delay: float = 0.1):
         """
         Send a message to the server.
 
         Args:
             msg (BaseMessage): The message to send
+            delay (float): The delay to wait before sending the message.
+            If the messages are sent too fast, certain servers will respond with invalid messages.
         """
         data = msg.bytes
+
+        await asyncio.sleep(delay)
         self._transport.write(data)
         log.debug(f"Sent message: {data}")
 

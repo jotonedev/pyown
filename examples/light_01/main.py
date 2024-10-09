@@ -21,6 +21,11 @@ async def run(host: str, port: int, password: str):
 
     await light.turn_on_1_min()
 
+    time = await light.request_working_time_lamp()
+    print(f"Working time: {time}")
+
+    await client.close()
+
 
 def main(host: str, port: int, password: str):
     # Set the logging level to DEBUG

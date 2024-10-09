@@ -187,7 +187,7 @@ class BaseClient:
         Args:
             message (BaseMessage): send to the server a subclass of BaseMessage
         """
-        self._protocol.send_message(message)
+        await self._protocol.send_message(message)
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
         """
