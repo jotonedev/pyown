@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import Final
 
 from ..base import BaseItem
-from ...tags import Who, What
+from ...tags import Who, What, Value
 
 __all__ = [
     "BaseLight",
@@ -101,3 +101,29 @@ class BaseLight(BaseItem, ABC):
     async def get_status(self) -> bool | int:
         """Get the status of the light"""
         raise NotImplementedError
+
+    async def temporization_command(self, hour: int, minute: int, second: int):
+        """
+        Send a temporization command
+
+        It will turn the light immediately on and then off after the specified time passed.
+
+        Args:
+            hour: The number of hours to wait before turning off the light.
+            minute: The number of minutes to wait before turning off the light.
+            second: The number of seconds to wait before turning off the light.
+        """
+        if hour >= 24 or minute >= 60 or second >= 60:
+            raise ValueError("Invalid time")
+
+        hour = Value(str(hour))
+        minutes = Value(str(minute))
+        second = Value(str(second))
+
+        await self.send_dimension_writing("2", hour, minutes, second)
+
+    async def max_working_time(self, time: int):
+        """It's not clear what this command does."""
+        time = Value(str(time))
+
+        await self.send_dimension_writing("9", time)

@@ -1,4 +1,5 @@
 from .base import BaseLight, WhatLight
+from ...tags import Value, Dimension
 
 __all__ = [
     "Dimmer",
@@ -121,3 +122,58 @@ class Dimmer(BaseLight):
         resp = await self.send_status_request()
 
         return int(resp.what.tag)
+
+    async def set_brightness_with_speed(self, brightness: int | str, speed: int | str):
+        """
+        Set the brightness of the light with a specific speed.
+
+        Args:
+            brightness: the brightness to set
+            speed: the speed to set the brightness
+
+        Raises:
+            RequestError: If the server does not acknowledge the message.
+        """
+        if isinstance(brightness, int):
+            brightness = str(brightness)
+
+        if isinstance(speed, int):
+            speed = str(speed)
+
+        await self.send_dimension_writing(Dimension("1"), Value(brightness), Value(speed))
+
+    async def set_hsv(self, hue: int, saturation: int, value: int):
+        """
+        Set the color of the light in HSV format.
+
+        Args:
+            hue: the hue value
+            saturation: the saturation value
+            value:  the value to set
+        """
+        if hue < 0 or hue > 360:
+            raise ValueError("Invalid hue value")
+
+        if saturation < 0 or saturation > 100:
+            raise ValueError("Invalid saturation value")
+
+        if value < 0 or value > 100:
+            raise ValueError("Invalid value")
+
+        hue = Value(str(hue))
+        saturation = Value(str(saturation))
+        value = Value(str(value))
+
+        await self.send_dimension_writing("12", hue, saturation, value)
+
+    async def set_white_temperature(self, temperature: int):
+        """
+        Set the white temperature of the light.
+
+        Args:
+            temperature: the temperature to set
+        """
+        # It's not clear what is the range of the temperature parameter
+        temperature = Value(str(temperature))
+
+        await self.send_dimension_writing("13", temperature)
