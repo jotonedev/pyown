@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from asyncio import Protocol, Transport, Future, Queue
+from threading import Lock
 
 from ..exceptions import ParseError
 from ..messages import BaseMessage, parse_message
@@ -14,6 +15,7 @@ log = logging.getLogger("pyown.protocol")
 
 class OWNProtocol(Protocol):
     _transport: Transport
+    _lock: Lock
 
     def __init__(
             self,
@@ -32,6 +34,8 @@ class OWNProtocol(Protocol):
 
         # The queue was chosen because it supports both synchronous and asynchronous functions
         self._messages_queue: Queue[BaseMessage] = asyncio.Queue()
+
+        self._lock = Lock()
 
     def connection_made(self, transport: Transport):
         """
@@ -91,6 +95,20 @@ class OWNProtocol(Protocol):
         for msg in messages:
             self._messages_queue.put_nowait(msg)
 
+    def pause_writing(self):
+        """
+        Called when the transport's buffer goes over the high-water mark.
+        """
+        self._lock.acquire()
+        log.debug("Paused writing")
+
+    def resume_writing(self):
+        """
+        Called when the transport buffer drains below the low-water mark.
+        """
+        self._lock.release()
+        log.debug("Resumed writing")
+
     async def send_message(self, msg: BaseMessage, delay: float = 0.1):
         """
         Send a message to the server.
@@ -102,7 +120,10 @@ class OWNProtocol(Protocol):
         """
         data = msg.bytes
 
-        await asyncio.sleep(delay)
+        # block multiple messages from being sent at the same time
+        while self._lock.locked():
+            await asyncio.sleep(delay)
+
         self._transport.write(data)
         log.debug(f"Sent message: {data}")
 
