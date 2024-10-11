@@ -1,7 +1,8 @@
 import asyncio
 import logging
+from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Transport, Future
-from typing import Optional
+from typing import Optional, Callable, Awaitable, Any
 
 from ..auth import AuthAlgorithm
 from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
@@ -9,6 +10,7 @@ from ..auth.open import own_calc_pass
 from ..exceptions import InvalidAuthentication, InvalidSession
 from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
 from ..protocol import OWNProtocol, SessionType
+from ..tags import Who, Where
 
 __all__ = [
     "BaseClient",
@@ -17,7 +19,7 @@ __all__ = [
 log = logging.getLogger("pyown.client")
 
 
-class BaseClient:
+class BaseClient(ABC):
     def __init__(
             self,
             host: str,
@@ -50,6 +52,15 @@ class BaseClient:
         self._on_connection_start: Future[Transport] = self._loop.create_future()
         self._on_connection_end: Future[Exception | None] = self._loop.create_future()
 
+    async def is_cmd_session(self) -> bool:
+        """
+        Check if the session is a command session
+
+        Returns:
+            bool: True if the session is a command session
+        """
+        return self._session_type == SessionType.CommandSession or self._session_type == SessionType.OldCommandSession
+
     async def start(self) -> None:
         """
         Start the client
@@ -76,7 +87,7 @@ class BaseClient:
         # The second packet is from the client and set the session type
         # Wait for the first packet
         async with asyncio.timeout(5):
-            message = await self._protocol.receive_messages()
+            message = await self.read_message()
 
         if message.type != MessageType.ACK:
             raise InvalidSession("Expected ACK message")
@@ -84,7 +95,7 @@ class BaseClient:
         log.debug("Starting handshake")
 
         # Send the session type
-        await self.send_message(self._session_type.to_message())
+        await self._protocol.send_message(self._session_type.to_message())
         resp = await self.read_message()
 
         # Authentication
@@ -118,7 +129,7 @@ class BaseClient:
         """
         enc = own_calc_pass(self._password, nonce)
 
-        await self.send_message(GenericMessage(["#" + enc]))
+        await self._protocol.send_message(GenericMessage(["#" + enc]))
         resp = await self.read_message()
 
         if resp.type != MessageType.ACK:
@@ -137,11 +148,11 @@ class BaseClient:
                 hash_algorithm = AuthAlgorithm.from_string(hash_algorithm)
             except ValueError:
                 # Close the connection
-                await self.send_message(NACK())
+                await self._protocol.send_message(NACK())
                 raise InvalidAuthentication("Invalid hash algorithm")
 
         # Send an ACK to accept the algorithm and wait for the server key
-        await self.send_message(ACK())
+        await self._protocol.send_message(ACK())
         resp = await self.read_message()
         server_key = resp.tags[0]
 
@@ -163,7 +174,7 @@ class BaseClient:
         )
 
         # Send the client authentication string
-        await self.send_message(
+        await self._protocol.send_message(
             GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())])
         )
         resp = await self.read_message()
@@ -178,7 +189,7 @@ class BaseClient:
         ):
             raise InvalidAuthentication("Invalid password")
         else:
-            await self.send_message(ACK())
+            await self._protocol.send_message(ACK())
 
     async def send_message(self, message: BaseMessage) -> None:
         """
@@ -186,7 +197,12 @@ class BaseClient:
 
         Args:
             message (BaseMessage): send to the server a subclass of BaseMessage
+
+        Raises:
+            InvalidSession: if the client is set as an event session
         """
+        if not self.is_cmd_session():
+            raise InvalidSession("Cannot send messages in an event session")
         await self._protocol.send_message(message)
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
@@ -209,3 +225,82 @@ class BaseClient:
         Close the client
         """
         self._transport.close()
+
+    @abstractmethod
+    def add_callback(self, callback: Callable[[Any, Any], Awaitable[None]]):
+        """
+        Add a callback to the client.
+        It will be called every time a message is received.
+        Must be used only when the client is set as an event client.
+
+        Args:
+            callback: the function to call when a message is received, it must accept two arguments: the item and the event
+
+        Returns:
+            None
+
+        Raises:
+            InvalidSession: if called when the client is set as a command client
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_who_callback(self, callback: Callable[[Any, Any], Awaitable[None]], who: Who):
+        """
+        Add a callback to the client.
+        It will be called every time a message with the specified who is received.
+        Must be used only when the client is set as an event client.
+
+        Args:
+            callback: the function to call when a message is received, it must accept two arguments: the item and the event
+            who: the who tag to listen to
+
+        Returns:
+            None
+
+        Raises:
+            InvalidSession: if called when the client is set as a command client
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_where_callback(self, callback: Callable[[Any, Any], Awaitable[None]], who: Who, where: Where):
+        """
+        Add a callback to the client.
+        It will be called every time a message with the specified who and where is received.
+        Must be used only when the client is set as an event client.
+
+        Args:
+            callback: the function to call when a message is received, it must accept two arguments: the item and the event
+            who: the who tag to listen to
+            where: the where tag to listen to
+
+        Returns:
+            None
+
+        Raises:
+            InvalidSession: if called when the client is set as a command client
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_callback(self, callback: Callable[[Any, Any], Awaitable[None]]):
+        """
+        Remove a callback from the client.
+
+        Args:
+            callback: the function to remove
+
+        Returns:
+            None
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def loop(self):
+        """
+        Run the event loop until the client is closed
+        This is not associated with the asyncio event loop.
+        This will loop until the client is closed, and it will call the callbacks when a message is received.
+        """
+        raise NotImplementedError

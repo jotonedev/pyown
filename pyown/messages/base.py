@@ -13,6 +13,8 @@ __all__ = [
     "parse_message",
 ]
 
+from ..tags import Who, Where
+
 Self = TypeVar("Self", bound="BaseMessage")
 
 
@@ -117,6 +119,16 @@ class BaseMessage(abc.ABC):
     def parse(cls, tags: list[str]) -> Self:
         """Parse the tags of a message from the OpenWebNet bus."""
         raise NotImplementedError
+
+    @property
+    def who(self) -> Who | None:
+        """Return the WHO tag of the message."""
+        return None
+
+    @property
+    def where(self) -> Where | None:
+        """Return the WHAT tag of the message."""
+        return None
 
 
 class GenericMessage(BaseMessage):
