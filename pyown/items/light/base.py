@@ -127,9 +127,9 @@ class BaseLight(BaseItem, ABC):
         if hour >= 24 or minute >= 60 or second >= 60:
             raise ValueError("Invalid time")
 
-        hour = Value(str(hour))
-        minutes = Value(str(minute))
-        second = Value(str(second))
+        hour = Value(hour)
+        minutes = Value(minute)
+        second = Value(second)
 
         await self.send_dimension_writing("2", hour, minutes, second)
 

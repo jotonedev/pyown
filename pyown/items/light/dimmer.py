@@ -134,12 +134,6 @@ class Dimmer(BaseLight):
         Raises:
             RequestError: If the server does not acknowledge the message.
         """
-        if isinstance(brightness, int):
-            brightness = str(brightness)
-
-        if isinstance(speed, int):
-            speed = str(speed)
-
         await self.send_dimension_writing(Dimension("1"), Value(brightness), Value(speed))
 
     async def set_hsv(self, hue: int, saturation: int, value: int):
@@ -160,9 +154,9 @@ class Dimmer(BaseLight):
         if value < 0 or value > 100:
             raise ValueError("Invalid value")
 
-        hue = Value(str(hue))
-        saturation = Value(str(saturation))
-        value = Value(str(value))
+        hue = Value(hue)
+        saturation = Value(saturation)
+        value = Value(value)
 
         await self.send_dimension_writing("12", hue, saturation, value)
 
@@ -174,7 +168,7 @@ class Dimmer(BaseLight):
             temperature: the temperature to set
         """
         # It's not clear what is the range of the temperature parameter
-        temperature = Value(str(temperature))
+        temperature = Value(temperature)
 
         await self.send_dimension_writing("13", temperature)
 
