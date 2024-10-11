@@ -14,6 +14,21 @@ Also, many devices implement only the old password algorithm, which is easily br
 So, when using OpenWebNet, be sure to use it only in a trusted network and taking security measures, like vlan
 separation.
 
+## Project structure
+
+- [pyown](pyown) contains the library code
+- [examples](examples) contains some examples on how to use the library
+- [tests](tests) contains the tests for the library
+
+### Library structure
+
+- [items](pyown/items) contains the code for the various types of devices that can be controlled
+- [client](pyown/client) used to connect to the gateway, manages the various types of sessions
+- [auth](pyown/auth) implementation of the authentication algorithms
+- [protocol](pyown/protocol) manages the send and receive of the messages and the initial parsing
+- [messages](pyown/messages) defines the various types of messages allowed by the protocol
+- [tags](pyown/tags) defines the tags that compose a message
+
 ## License
 
 This project is licensed under the GNU GPL v3 license - see the [LICENSE](LICENSE) file for details.
