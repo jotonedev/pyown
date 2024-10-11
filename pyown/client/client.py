@@ -11,6 +11,8 @@ __all__ = [
     "Client"
 ]
 
+log = logging.getLogger("pyown.client")
+
 
 class Client(BaseClient):
     _where_callback: dict[tuple[Who, Where], list[Callable[[BaseItem, BaseEvents], Awaitable[None]]]] = {}
@@ -157,13 +159,13 @@ class Client(BaseClient):
             if message.type == MessageType.ACK or message.type == MessageType.NACK:
                 continue
             elif message.type == MessageType.GENERIC:
-                logging.warning("Received an unknown message: %s", message)
+                log.warning("Received an unknown message: %s", message)
                 continue
 
             who, where = message.who, message.where
 
             if who is None or where is None:
-                logging.warning("Received a message without who or where: %s", message)
+                log.warning("Received a message without who or where: %s", message)
                 continue
 
             if (who, where) in self._items:

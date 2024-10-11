@@ -5,6 +5,7 @@ from enum import StrEnum
 from typing import Final, TypeVar, Pattern, AnyStr
 
 from ..exceptions import ParseError, InvalidMessage
+from ..tags import Who, Where
 
 __all__ = [
     "MessageType",
@@ -12,8 +13,6 @@ __all__ = [
     "GenericMessage",
     "parse_message",
 ]
-
-from ..tags import Who, Where
 
 Self = TypeVar("Self", bound="BaseMessage")
 

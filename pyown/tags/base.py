@@ -6,6 +6,7 @@ __all__ = [
     "Tag",
     "TagWithParameters",
     "Value",
+    "VALID_TAG_CHARS",
 ]
 
 VALID_TAG_CHARS: Final[str] = "0123456789#"
