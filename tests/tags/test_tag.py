@@ -64,7 +64,10 @@ def test_tag() -> None:
 def test_conversion_to_params_tag() -> None:
     tag = Tag("123")
 
-    assert tag.with_parameters("1", "2", "3") == TagWithParameters("123#1#2#3")
+    assert tag.with_parameter("1") == TagWithParameters("123#1")
 
-    tag = TagWithParameters("123#1#2#3")
-    assert tag.with_parameters("1", "2", "3") == TagWithParameters("123#1#2#3#1#2#3")
+    tag = TagWithParameters("123#1")
+    assert tag.with_parameter("1") == TagWithParameters("123#1#1")
+
+    tag = tag.with_parameter("1")
+    assert tag == TagWithParameters("123#1#1")
