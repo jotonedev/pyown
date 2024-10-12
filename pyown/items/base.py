@@ -188,7 +188,7 @@ class BaseItem(ABC):
                 self._who,
                 self._where,
                 dimension,
-                *args
+                *args  # type: ignore[arg-type]
             )
         )
 

@@ -95,7 +95,7 @@ class BaseClient(ABC):
         log.debug("Starting handshake")
 
         # Send the session type
-        await self._protocol.send_message(self._session_type.to_message())
+        await self.send_message(self._session_type.to_message(), force=True)
         resp = await self.read_message()
 
         # Authentication
@@ -114,7 +114,6 @@ class BaseClient(ABC):
             await self._authenticate_hmac(
                 hash_algorithm=tag,
             )
-
         else:
             raise InvalidSession("Invalid authentication response")
 
@@ -129,7 +128,7 @@ class BaseClient(ABC):
         """
         enc = own_calc_pass(self._password, nonce)
 
-        await self._protocol.send_message(GenericMessage(["#" + enc]))
+        await self.send_message(GenericMessage(["#" + enc]), force=True)
         resp = await self.read_message()
 
         if resp.type != MessageType.ACK:
@@ -148,11 +147,11 @@ class BaseClient(ABC):
                 hash_algorithm = AuthAlgorithm.from_string(hash_algorithm)
             except ValueError:
                 # Close the connection
-                await self._protocol.send_message(NACK())
+                await self.send_message(NACK(), force=True)
                 raise InvalidAuthentication("Invalid hash algorithm")
 
         # Send an ACK to accept the algorithm and wait for the server key
-        await self._protocol.send_message(ACK())
+        await self.send_message(ACK(), force=True)
         resp = await self.read_message()
         server_key = resp.tags[0]
 
@@ -174,8 +173,9 @@ class BaseClient(ABC):
         )
 
         # Send the client authentication string
-        await self._protocol.send_message(
-            GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())])
+        await self.send_message(
+            GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())]),
+            force=True
         )
         resp = await self.read_message()
 
@@ -189,20 +189,24 @@ class BaseClient(ABC):
         ):
             raise InvalidAuthentication("Invalid password")
         else:
-            await self._protocol.send_message(ACK())
+            await self.send_message(ACK(), force=True)
 
-    async def send_message(self, message: BaseMessage) -> None:
+    async def send_message(self, message: BaseMessage, *, force: bool = False) -> None:
         """
         Send a message to the server
 
         Args:
             message (BaseMessage): send to the server a subclass of BaseMessage
+            force (bool): if True, the message will be sent even if the client is set as an event session
 
         Raises:
-            InvalidSession: if the client is set as an event session
+            InvalidSession: if the client is set as an event session or if the client is not started
         """
-        if not self.is_cmd_session():
+        if not self.is_cmd_session() and not force:
             raise InvalidSession("Cannot send messages in an event session")
+        if self._protocol is None:
+            raise InvalidSession("Client not started")
+
         await self._protocol.send_message(message)
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
@@ -214,7 +218,11 @@ class BaseClient(ABC):
 
         Raises:
             TimeoutError: if the server does not respond
+            InvalidSession: if the client is not started
         """
+        if self._protocol is None:
+            raise InvalidSession("Client not started")
+
         async with asyncio.timeout(timeout):
             message = await self._protocol.receive_messages()
 
@@ -224,7 +232,8 @@ class BaseClient(ABC):
         """
         Close the client
         """
-        self._transport.close()
+        if self._transport is not None:
+            self._transport.close()
 
     @abstractmethod
     def add_callback(self, callback: Callable[[Any, Any], Awaitable[None]]):

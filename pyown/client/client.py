@@ -19,7 +19,7 @@ class Client(BaseClient):
     _who_callback: dict[Who, list[Callable[[BaseItem, BaseEvents], Awaitable[None]]]] = {}
     _default_callback: list[Callable[[BaseItem, BaseEvents], Awaitable[None]]] = []
 
-    _items: dict[(Who, Where), BaseItem] = {}
+    _items: dict[tuple[Who, Where], BaseItem] = {}
 
     def add_callback(self, callback: Callable[[BaseItem, BaseEvents], Awaitable[None]]):
         """

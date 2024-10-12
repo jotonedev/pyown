@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import abc
 import copy
 import re
 from enum import StrEnum
-from typing import Final, TypeVar, Pattern, AnyStr
+from typing import Final, TypeVar, Pattern, AnyStr, Self, Any
 
 from ..exceptions import ParseError, InvalidMessage
 from ..tags import Who, Where
@@ -13,8 +15,6 @@ __all__ = [
     "GenericMessage",
     "parse_message",
 ]
-
-Self = TypeVar("Self", bound="BaseMessage")
 
 
 class MessageType(StrEnum):
@@ -30,13 +30,13 @@ class MessageType(StrEnum):
 
 class BaseMessage(abc.ABC):
     _type: MessageType = MessageType.GENERIC  # Type of the message
-    _tags: tuple[str] | list[str]  # Contains the tags of the message
+    _tags: Any  # Contains the tags of the message
 
     prefix: Final[str] = "*"  # Prefix of the message
     suffix: Final[str] = "##"  # Suffix of the message
     separator: Final[str] = "*"  # Separator of the tags
 
-    _regex: Pattern[AnyStr] = re.compile(r"^\*(?:([0-9#]*)\*?)+##$")  # Regex pattern used to match the message
+    _regex: Pattern[str] = re.compile(r"^\*(?:([0-9#]*)\*?)+##$")  # Regex pattern used to match the message
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs) -> None:
@@ -70,11 +70,11 @@ class BaseMessage(abc.ABC):
         return not self.__eq__(other)
 
     @classmethod
-    def pattern(cls) -> Pattern[AnyStr]:
+    def pattern(cls) -> Pattern[str]:
         """
         Return the regex pattern used to match the message represented by the class.
         Returns:
-            Pattern[AnyStr]: The regex pattern
+            Pattern[str]: The regex pattern
         """
         return cls._regex
 
@@ -115,7 +115,7 @@ class BaseMessage(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def parse(cls, tags: list[str]) -> Self:
+    def parse(cls, tags: list[str]) -> BaseMessage:
         """Parse the tags of a message from the OpenWebNet bus."""
         raise NotImplementedError
 

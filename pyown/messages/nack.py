@@ -11,14 +11,14 @@ __all__ = [
 
 class NACK(BaseMessage):
     """
-    Represent an NACK message
+    Represent a NACK message
 
     Syntax: *#*0##
     """
-    _type: Final[MessageType] = MessageType.NACK
-    _tags: Final[tuple[str]] = ("#", "0")
+    _type: MessageType = MessageType.NACK
+    _tags: tuple[str, str] = ("#", "0")
 
-    _regex: Pattern[AnyStr] = re.compile(r"^\*#\*0##$")
+    _regex: Pattern[str] = re.compile(r"^\*#\*0##$")
 
     def __init__(self):
         pass

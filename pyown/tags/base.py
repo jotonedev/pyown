@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, Self
 
 from ..exceptions import InvalidTag
 
@@ -16,14 +16,14 @@ class Tag:
     """Tag class."""
 
     def __init__(self, string: str | int = "", *args, **kwargs):
-        # Check if the string contains only valid characters
-        if not all(c in VALID_TAG_CHARS for c in string):
-            raise InvalidTag(string)
-
         if isinstance(string, int):
             self._string = str(string)
         else:
             self._string = string
+
+        # Check if the string contains only valid characters
+        if not all(c in VALID_TAG_CHARS for c in self.string):
+            raise InvalidTag(self.string)
 
     @property
     def string(self) -> str:
@@ -41,9 +41,9 @@ class Tag:
         """Return the parameters of the tag"""
         return None
 
-    def with_parameters(self, *parameters: str | int) -> "TagWithParameters":
+    def with_parameter(self, parameter: str | int) -> "TagWithParameters":
         """Return the tag with parameters"""
-        return TagWithParameters(f"{self}#{'#'.join(parameters)}")
+        return TagWithParameters(f"{self}#{parameter}")
 
     def __str__(self) -> str:
         return self.string
@@ -74,6 +74,10 @@ class TagWithParameters(Tag):
     def parameters(self) -> list[str]:
         """Return the parameters of the tag"""
         return self.string.split("#")[1:]
+
+    def with_parameter(self, parameter: str | int) -> Self:
+        """Return the tag with parameters"""
+        return self.__class__(f"{self}#{parameter}")
 
 
 class Value(Tag):

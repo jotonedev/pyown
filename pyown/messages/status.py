@@ -15,10 +15,10 @@ class StatusRequest(BaseMessage):
 
     Syntax: *#who*where##
     """
-    _type: Final[MessageType] = MessageType.STATUS_REQUEST
-    _tags: Final[tuple[Who, Where]]
+    _type: MessageType = MessageType.STATUS_REQUEST
+    _tags: tuple[Who, Where]
 
-    _regex: Pattern[AnyStr] = re.compile(r"^\*#[0-9#]+\*[0-9#]*##$")
+    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9#]*##$")
 
     def __init__(self, tags: tuple[Who, Where]):
         self._tags = tags

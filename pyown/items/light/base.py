@@ -66,7 +66,7 @@ class WhatLight(What, StrEnum):
 
 class BaseLight(BaseItem, ABC):
     """Base class for all light items."""
-    _who: Final[Who] = Who.LIGHTING
+    _who: Who = Who.LIGHTING
 
     async def turn_on(self):
         """Turn the light on."""
@@ -127,11 +127,7 @@ class BaseLight(BaseItem, ABC):
         if hour >= 24 or minute >= 60 or second >= 60:
             raise ValueError("Invalid time")
 
-        hour = Value(hour)
-        minutes = Value(minute)
-        second = Value(second)
-
-        await self.send_dimension_writing("2", hour, minutes, second)
+        await self.send_dimension_writing("2", Value(hour), Value(minute), Value(second))
 
     async def request_current_temporization(self):
         """
@@ -151,6 +147,9 @@ class BaseLight(BaseItem, ABC):
 
         Returns:
             The time in seconds the light has been on.
+
+        Raises:
+            RequestError: If the response is not what was expected.
         """
 
         msg = self.create_dimension_request_message(Dimension("8"))
@@ -166,4 +165,7 @@ class BaseLight(BaseItem, ABC):
         if not isinstance(resp, DimensionResponse):
             raise RequestError(f"Error sending message: {msg}, response: {resp}")
 
-        return int(resp.values[0].tag)
+        if resp.values[0].tag is not None:
+            return int(resp.values[0].tag)
+        else:
+            raise RequestError(f"Invalid response: {resp}")

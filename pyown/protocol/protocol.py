@@ -37,7 +37,7 @@ class OWNProtocol(Protocol):
 
         self._lock = Lock()
 
-    def connection_made(self, transport: Transport):
+    def connection_made(self, transport: Transport):  # type: ignore[override]
         """
         Called when the socket is connected.
         """
@@ -58,7 +58,7 @@ class OWNProtocol(Protocol):
         else:
             self._on_connection_end.set_exception(exc)
 
-    def data_received(self, data: bytes):
+    def data_received(self, raw: bytes):
         """
         Called when some data is received.
 
@@ -66,16 +66,16 @@ class OWNProtocol(Protocol):
         It tries to parse the data and call the on_message_received for each message received.
 
         Args:
-            data (bytes): The incoming data
+            raw (bytes): The incoming data
 
         Returns:
             None
         """
         # In OpenWebNet, the message is always written with ascii characters
         try:
-            data = data.decode("ascii").strip()
+            data = raw.decode("ascii").strip()
         except UnicodeDecodeError as e:
-            log.warning(f"Received data is not ascii: {data.hex()}")
+            log.warning(f"Received data not ascii: {raw.hex()}")
             raise e
 
         # Sometimes multiple messages can be sent in the same packet
@@ -125,7 +125,7 @@ class OWNProtocol(Protocol):
             await asyncio.sleep(delay)
 
         self._transport.write(data)
-        log.debug(f"Sent message: {data}")
+        log.debug(f"Sent message: {msg}")
 
     async def receive_messages(self) -> BaseMessage:
         """

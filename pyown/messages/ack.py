@@ -15,10 +15,10 @@ class ACK(BaseMessage):
 
     Syntax: *#*1##
     """
-    _type: Final[MessageType] = MessageType.ACK
-    _tags: Final[tuple[str]] = ("#", "1")
+    _type: MessageType = MessageType.ACK
+    _tags: tuple[str, str] = ("#", "1")
 
-    _regex: Pattern[AnyStr] = re.compile(r"^\*#\*1##$")
+    _regex: Pattern[str] = re.compile(r"^\*#\*1##$")
 
     def __init__(self):
         pass

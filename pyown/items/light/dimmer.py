@@ -18,7 +18,7 @@ class Dimmer(BaseLight):
         # I do not own a dimmer, so I cannot test this.
         # Also, the documentation is not clear on what is the range of the speed parameter
         if speed is not None:
-            what = what.with_parameters(speed)
+            what = what.with_parameter(speed)
         await self.send_normal_message(what)
 
     async def turn_off(self, speed: int | None = None):
@@ -31,7 +31,7 @@ class Dimmer(BaseLight):
         what = WhatLight.OFF
 
         if speed is not None:
-            what = what.with_parameters(speed)
+            what = what.with_parameter(speed)
         await self.send_normal_message(what)
 
     async def set_20_percent(self):
@@ -85,9 +85,9 @@ class Dimmer(BaseLight):
         what = WhatLight.UP_1_PERCENT
 
         if value is not None:
-            what = what.with_parameters(value)
+            what = what.with_parameter(value)
         if speed is not None:
-            what = what.with_parameters(speed)
+            what = what.with_parameter(speed)
 
         await self.send_normal_message(what)
 
@@ -106,9 +106,9 @@ class Dimmer(BaseLight):
         what = WhatLight.DOWN_1_PERCENT
 
         if value is not None:
-            what = what.with_parameters(value)
+            what = what.with_parameter(value)
         if speed is not None:
-            what = what.with_parameters(speed)
+            what = what.with_parameter(speed)
 
         await self.send_normal_message(what)
 
@@ -154,11 +154,7 @@ class Dimmer(BaseLight):
         if value < 0 or value > 100:
             raise ValueError("Invalid value")
 
-        hue = Value(hue)
-        saturation = Value(saturation)
-        value = Value(value)
-
-        await self.send_dimension_writing("12", hue, saturation, value)
+        await self.send_dimension_writing("12", Value(hue), Value(saturation), Value(value))
 
     async def set_white_temperature(self, temperature: int):
         """
@@ -168,9 +164,7 @@ class Dimmer(BaseLight):
             temperature: the temperature to set
         """
         # It's not clear what is the range of the temperature parameter
-        temperature = Value(temperature)
-
-        await self.send_dimension_writing("13", temperature)
+        await self.send_dimension_writing("13", Value(temperature))
 
     async def request_current_brightness_speed(self):
         """
