@@ -22,7 +22,7 @@ class DimensionRequest(BaseMessage):
     _type: MessageType = MessageType.DIMENSION_REQUEST
     _tags: tuple[Who, Where, Dimension]
 
-    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9#]*\*[0-9]*##$")
+    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*##$")
 
     def __init__(self, tags: tuple[Who, Where, Dimension]):
         self._tags = tags
@@ -67,7 +67,7 @@ class DimensionWriting(BaseMessage):
     _type: MessageType = MessageType.DIMENSION_WRITING
     _tags: tuple[Who, Where, Dimension, Value, ...]  # type: ignore[misc]
 
-    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9#]*\*#[0-9]*(?:\*[0-9#]*)*##$")
+    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*#[0-9]*(?:\*[0-9]*(?:#[0-9]*)*)*##$")
 
     def __init__(self, tags: tuple[Who, Where, Dimension, Value, ...]):  # type: ignore[misc]
         self._tags = tags
@@ -118,7 +118,7 @@ class DimensionResponse(DimensionWriting, BaseMessage):
     This is sent by the server to the client
     """
     _type: MessageType = MessageType.DIMENSION_RESPONSE
-    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9#]*\*[0-9#]*(?:\*[0-9#]*)*##$")
+    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*(?:\*[0-9]*(?:#[0-9]*)*)*##$")
 
     @property
     def message(self) -> str:

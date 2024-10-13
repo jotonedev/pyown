@@ -19,7 +19,7 @@ class NormalMessage(BaseMessage):
     _type: MessageType = MessageType.NORMAL
     _tags: tuple[Who, What, Where]
 
-    _regex: Pattern[str] = re.compile(r"^\*[0-9#]+\*[0-9#]*\*[0-9#]*##$")
+    _regex: Pattern[str] = re.compile(r"^\*[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*##$")
 
     def __init__(self, tags: tuple[Who, What, Where]):
         self._tags = tags

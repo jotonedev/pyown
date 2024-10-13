@@ -36,7 +36,7 @@ class BaseMessage(abc.ABC):
     suffix: Final[str] = "##"  # Suffix of the message
     separator: Final[str] = "*"  # Separator of the tags
 
-    _regex: Pattern[str] = re.compile(r"^\*(?:([0-9#]*)\*?)+##$")  # Regex pattern used to match the message
+    _regex: Pattern[str] = re.compile(r"^\*(?:([0-9]*)(?:#[0-9]*)*\*?)+##$")  # Regex pattern used to match the message
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs) -> None:

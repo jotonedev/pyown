@@ -18,7 +18,7 @@ class StatusRequest(BaseMessage):
     _type: MessageType = MessageType.STATUS_REQUEST
     _tags: tuple[Who, Where]
 
-    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9#]*##$")
+    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*##$")
 
     def __init__(self, tags: tuple[Who, Where]):
         self._tags = tags
