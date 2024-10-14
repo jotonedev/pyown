@@ -8,20 +8,24 @@ from ..messages import MessageType, BaseMessage
 from ..tags import Who, Where
 
 __all__ = [
-    "Client"
+    "Client",
+    "ClientCallback"
 ]
 
 log = logging.getLogger("pyown.client")
 
+# Type alias for callbacks
+ClientCallback = Callable[[BaseClient, BaseMessage], Awaitable[None]]
+
 
 class Client(BaseClient):
-    _where_callback: dict[tuple[Who, Where], list[Callable[[BaseItem, BaseEvents], Awaitable[None]]]] = {}
-    _who_callback: dict[Who, list[Callable[[BaseItem, BaseEvents], Awaitable[None]]]] = {}
-    _default_callback: list[Callable[[BaseItem, BaseEvents], Awaitable[None]]] = []
+    _where_callback: dict[tuple[Who, Where], list[ClientCallback]] = {}
+    _who_callback: dict[Who, list[ClientCallback]] = {}
+    _default_callback: list[ClientCallback] = []
 
     _items: dict[tuple[Who, Where], BaseItem] = {}
 
-    def add_callback(self, callback: Callable[[BaseItem, BaseEvents], Awaitable[None]]):
+    def add_callback(self, callback: ClientCallback):
         """
         Add a callback to the client.
         It will be called every time a message is received.
@@ -41,7 +45,7 @@ class Client(BaseClient):
         else:
             raise InvalidSession("Cannot add callback to a command session")
 
-    def add_who_callback(self, callback: Callable[[BaseItem, BaseEvents], Awaitable[None]], who: Who):
+    def add_who_callback(self, callback: ClientCallback, who: Who):
         """
         Add a callback to the client.
         It will be called every time a message with the specified who is received.
@@ -64,7 +68,7 @@ class Client(BaseClient):
         else:
             raise InvalidSession("Cannot add callback to a command session")
 
-    def add_where_callback(self, callback: Callable[[BaseItem, BaseEvents], Awaitable[None]], who: Who, where: Where):
+    def add_where_callback(self, callback: ClientCallback, who: Who, where: Where):
         """
         Add a callback to the client.
         It will be called every time a message with the specified who and where is received.
@@ -88,7 +92,7 @@ class Client(BaseClient):
         else:
             raise InvalidSession("Cannot add callback to a command session")
 
-    def remove_callback(self, callback: Callable[[BaseItem, BaseEvents], Awaitable[None]]):
+    def remove_callback(self, callback: ClientCallback):
         """
         Remove a callback from the client.
 
@@ -99,11 +103,11 @@ class Client(BaseClient):
             None
         """
         # check if the callback is in every list and remove it
-        for who, callbacks in self._who_callback.items():
+        for callbacks in self._who_callback.values():
             if callback in callbacks:
                 callbacks.remove(callback)
 
-        for (who, where), callbacks in self._where_callback.items():
+        for callbacks in self._where_callback.values():
             if callback in callbacks:
                 callbacks.remove(callback)
 

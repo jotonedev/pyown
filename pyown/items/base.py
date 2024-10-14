@@ -1,4 +1,5 @@
 from abc import ABC
+from enum import EnumMeta
 from typing import Callable, Awaitable, Self
 
 from ..client import BaseClient
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 
-class BaseEvents:
+class BaseEvents(ABC, EnumMeta):
     pass
 
 
@@ -51,45 +52,6 @@ class BaseItem(ABC):
     @property
     def who(self):
         return self._who
-
-    def add_callback(self, callback: Callable[[Self, BaseEvents], Awaitable[None]]):
-        """
-        Register a callback to be called when a message for this item is received.
-        Args:
-            callback: The callback to call.
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: If the client is not an event client.
-        """
-        return self._client.add_where_callback(callback, self._who, self._where)
-
-    def add_who_callback(self, callback: Callable[[Self, BaseEvents], Awaitable[None]]):
-        """
-        Register a callback to be called when a message for this type of item is received.
-        Args:
-            callback: The callback to call.
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: If the client is not an event client.
-        """
-        return self._client.add_who_callback(callback, self._who)
-
-    def remove_callback(self, callback: Callable[[Self, BaseEvents], Awaitable[None]]):
-        """
-        Remove a callback from the client.
-        Args:
-            callback: The callback to remove.
-
-        Returns:
-            None
-        """
-        return self._client.remove_callback(callback)
 
     async def _send_message(self, message: BaseMessage) -> None:
         """
