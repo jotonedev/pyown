@@ -1,136 +1,75 @@
 import logging
-from typing import Callable, Awaitable
+from asyncio import AbstractEventLoop
+from typing import Optional
 
 from .base import BaseClient
-from ..exceptions import InvalidSession
-from ..items.base import BaseItem, BaseEvents
-from ..messages import MessageType, BaseMessage
+from ..exceptions import InvalidSession, ParseError, InvalidMessage, InvalidTag, RequestError
+from ..items.base import BaseItem
+from ..items.utils import ITEM_TYPES
+from ..messages import MessageType
+from ..protocol import SessionType
 from ..tags import Who, Where
 
 __all__ = [
     "Client",
-    "ClientCallback"
 ]
 
 log = logging.getLogger("pyown.client")
 
-# Type alias for callbacks
-ClientCallback = Callable[[BaseClient, BaseMessage], Awaitable[None]]
-
 
 class Client(BaseClient):
-    _where_callback: dict[tuple[Who, Where], list[ClientCallback]] = {}
-    _who_callback: dict[Who, list[ClientCallback]] = {}
-    _default_callback: list[ClientCallback] = []
+    _items: dict[tuple[Who, Where], BaseItem]
 
-    _items: dict[tuple[Who, Where], BaseItem] = {}
-
-    def add_callback(self, callback: ClientCallback):
+    def __init__(
+            self,
+            host: str,
+            port: int,
+            password: str,
+            session_type: SessionType = SessionType.CommandSession,
+            *,
+            loop: Optional[AbstractEventLoop] = None
+    ):
         """
-        Add a callback to the client.
-        It will be called every time a message is received.
-        Must be used only when the client is set as an event client.
+        Create a new client.
 
         Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
+            host (str): The host to connect to (ip address)
+            port (int): The port to connect to
+            password (str): The password to authenticate with
+            session_type (SessionType): The session type to use.
+            Default is CommandSession
+            loop (Optional[AbstractEventLoop]): The event loop to use
+        """
+        super().__init__(host, port, password, session_type, loop=loop)
+
+        self._items = {}
+
+    def get_item(self, who: Who, where: Where, *, client: BaseClient) -> BaseItem:
+        """
+        Get an item from the client.
+
+        Args:
+            who: The type of the item.
+            where: The location of the item.
+            client: The client to use to declare the items if they are already declared.
 
         Returns:
-            None
+            The item.
 
         Raises:
-            InvalidSession: if called when the client is set as a command client
+            KeyError: if the item is not found.
         """
-        if not self.is_cmd_session():
-            self._default_callback.append(callback)
+        if (who, where) in self._items:
+            return self._items[(who, where)]
         else:
-            raise InvalidSession("Cannot add callback to a command session")
+            factory = ITEM_TYPES.get(who)
+            if factory is not None:
+                item = self._items[(who, where)] = factory(self, where)
+                return item
+            else:
+                raise KeyError(f"Item not found: {who}, {where}")
 
-    def add_who_callback(self, callback: ClientCallback, who: Who):
-        """
-        Add a callback to the client.
-        It will be called every time a message with the specified who is received.
-        Must be used only when the client is set as an event client.
-
-        Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
-            who: the who tag to listen to
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: if called when the client is set as a command client
-        """
-        if not self.is_cmd_session():
-            if who not in self._who_callback:
-                self._who_callback[who] = []
-            self._who_callback[who].append(callback)
-        else:
-            raise InvalidSession("Cannot add callback to a command session")
-
-    def add_where_callback(self, callback: ClientCallback, who: Who, where: Where):
-        """
-        Add a callback to the client.
-        It will be called every time a message with the specified who and where is received.
-        Must be used only when the client is set as an event client.
-
-        Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
-            who: the who tag to listen to
-            where: the where tag to listen to
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: if called when the client is set as a command client
-        """
-        if not self.is_cmd_session():
-            if (who, where) not in self._where_callback:
-                self._where_callback[(who, where)] = []
-            self._where_callback[(who, where)].append(callback)
-        else:
-            raise InvalidSession("Cannot add callback to a command session")
-
-    def remove_callback(self, callback: ClientCallback):
-        """
-        Remove a callback from the client.
-
-        Args:
-            callback: the function to remove
-
-        Returns:
-            None
-        """
-        # check if the callback is in every list and remove it
-        for callbacks in self._who_callback.values():
-            if callback in callbacks:
-                callbacks.remove(callback)
-
-        for callbacks in self._where_callback.values():
-            if callback in callbacks:
-                callbacks.remove(callback)
-
-        if callback in self._default_callback:
-            self._default_callback.remove(callback)
-
-    async def _call_callbacks(self, item: BaseItem, event: BaseMessage):
-        """Call the callbacks for the specified item and event"""
-        raise NotImplementedError
-
-    async def _call_who_callbacks(self, item: BaseItem, event: BaseMessage):
-        """Call the callbacks for the specified item and event"""
-        raise NotImplementedError
-
-    async def _call_where_callbacks(self, item: BaseItem, message: BaseMessage):
-        """Call the callbacks for the specified item and event"""
-        raise NotImplementedError
-
-    def _item_factory(self, who: Who, where: Where) -> BaseItem:
-        """Create a new item"""
-        raise NotImplementedError
-
-    async def loop(self):
+    async def loop(self, *, client: BaseClient | None = None):
         """
         Run the event loop until the client is closed
         This is not associated with the asyncio event loop.
@@ -148,6 +87,10 @@ class Client(BaseClient):
         await client.close()
         ```
 
+        Args:
+            client: The client to use to declare the items for the callbacks.
+            Default is self.
+
         Returns:
             None
 
@@ -157,8 +100,18 @@ class Client(BaseClient):
         if self.is_cmd_session():
             raise InvalidSession("Cannot run loop on a command session")
 
+        if self._transport is None:
+            raise InvalidSession("Client is not connected")
+
+        if client is None:
+            client = self
+
         while not self._transport.is_closing():
-            message = await self.read_message(timeout=None)
+            try:
+                message = await self.read_message(timeout=None)
+            except (ParseError, InvalidMessage, InvalidTag, RequestError) as e:
+                log.warning("Error reading message: %s", e)
+                continue
 
             if message.type == MessageType.ACK or message.type == MessageType.NACK:
                 continue
@@ -172,11 +125,19 @@ class Client(BaseClient):
                 log.warning("Received a message without who or where: %s", message)
                 continue
 
-            if (who, where) in self._items:
-                item = self._items[(who, where)]
-            else:
-                item = self._items[(who, where)] = self._item_factory(who, where)
+            try:
+                item = self.get_item(who, where, client=client)
+            except KeyError:
+                log.info(f"Item type not supported, WHO={who}, WHERE={where}")
+                continue
 
-            await self._call_callbacks(item, message)
-            await self._call_who_callbacks(item, message)
-            await self._call_where_callbacks(item, message)
+            for item_obj in BaseItem.__subclasses__():
+                if message.who == item_obj.who:
+                    try:
+                        item_obj.call_callbacks(item, message, loop=self._loop)
+                    except ValueError:
+                        log.warning(f"Message not supported {message}")
+                    else:
+                        break
+            else:
+                log.warning(f"Item not found for message {message}")

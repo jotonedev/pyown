@@ -1,20 +1,22 @@
 import asyncio
 from abc import ABC, abstractmethod
+from asyncio import AbstractEventLoop
 from enum import StrEnum, Enum, auto
-from typing import Final
+from typing import Callable, Self, Coroutine
 
-from ..base import BaseItem, BaseEvents
+from ..base import BaseItem
 from ...exceptions import RequestError
-from ...messages import DimensionResponse
+from ...messages import DimensionResponse, BaseMessage, NormalMessage
 from ...tags import Who, What, Value, Dimension
 
 __all__ = [
     "BaseLight",
     "WhatLight",
+    "LightEvents",
 ]
 
 
-class LightEvents(BaseEvents, Enum):
+class LightEvents(Enum):
     STATUS_CHANGE = auto()
     LUMINOSITY_CHANGE = auto()
     LIGHT_TEMPORIZATION = auto()
@@ -64,9 +66,14 @@ class WhatLight(What, StrEnum):
     COMMAND_TRANSLATION = "1000"
 
 
+CoroutineCallback = Callable[..., Coroutine[None, None, None]]
+
+
 class BaseLight(BaseItem, ABC):
     """Base class for all light items."""
     _who: Who = Who.LIGHTING
+
+    _event_callbacks: dict[LightEvents, list[CoroutineCallback]] = {}
 
     async def turn_on(self):
         """Turn the light on."""
@@ -169,3 +176,86 @@ class BaseLight(BaseItem, ABC):
             return int(resp.values[0].tag)
         else:
             raise RequestError(f"Invalid response: {resp}")
+
+    @classmethod
+    def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
+        """
+        Register a callback function to be called when the light status changes.
+
+        Args:
+            callback: The callback function to call.
+            It will receive as arguments the item and the status.
+        """
+        cls._event_callbacks.setdefault(LightEvents.STATUS_CHANGE, []).append(callback)
+
+    @classmethod
+    def on_temporization_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
+        """
+        Register a callback function to be called when the temporization changes.
+
+        Args:
+            callback: The callback function to call.
+            It will receive as arguments the item, the hour, the minute, and the second.
+        """
+        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
+
+    @classmethod
+    def call_callbacks(cls, item: BaseItem, message: BaseMessage, *, loop: AbstractEventLoop | None = None) -> None:
+        """
+        Call the registered callbacks for the event.
+
+        Args:
+            item: The item that triggered the event.
+            message: The message that triggered the event.
+            loop: The event loop to use, default is asyncio.get_event_loop()
+        """
+        loop = loop or asyncio.get_event_loop()
+
+        if isinstance(message, DimensionResponse):
+            if message.dimension.tag == "1":
+                for callback in cls._event_callbacks.get(LightEvents.LIGHT_TEMPORIZATION, []):
+                    loop.create_task(
+                        callback(
+                            item,
+                            int(message.values[0].tag),  # type: ignore[arg-type]
+                            int(message.values[1].tag),  # type: ignore[arg-type]
+                            int(message.values[2].tag)  # type: ignore[arg-type]
+                        )
+                    )
+            elif message.dimension.tag == "8":
+                for callback in cls._event_callbacks.get(LightEvents.LUMINOSITY_CHANGE, []):
+                    loop.create_task(
+                        callback(
+                            item,
+                            int(message.values[0].tag),  # type: ignore[arg-type]
+                            int(message.values[1].tag)  # type: ignore[arg-type]
+                        )
+                    )
+            elif message.dimension.tag == "12":
+                for callback in cls._event_callbacks.get(LightEvents.HSV_CHANGE, []):
+                    loop.create_task(
+                        callback(
+                            item,
+                            int(message.values[0].tag),  # type: ignore[arg-type]
+                            int(message.values[1].tag),  # type: ignore[arg-type]
+                            int(message.values[2].tag)  # type: ignore[arg-type]
+                        )
+                    )
+            elif message.dimension.tag == "13":
+                for callback in cls._event_callbacks.get(LightEvents.WHITE_TEMP_CHANGE, []):
+                    loop.create_task(
+                        callback(
+                            item,
+                            int(message.values[0].tag)  # type: ignore[arg-type]
+                        )
+                    )
+        elif isinstance(message, NormalMessage):
+            for callback in cls._event_callbacks.get(LightEvents.STATUS_CHANGE, []):
+                loop.create_task(
+                    callback(
+                        item,
+                        message.what == WhatLight.ON
+                    )
+                )
+        else:
+            raise ValueError(f"Invalid message: {message}")

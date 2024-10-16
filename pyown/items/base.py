@@ -1,6 +1,6 @@
-from abc import ABC
-from enum import EnumMeta
-from typing import Callable, Awaitable, Self
+from abc import ABC, abstractmethod
+from asyncio import AbstractEventLoop
+from typing import Self
 
 from ..client import BaseClient
 from ..exceptions import RequestError
@@ -8,23 +8,12 @@ from ..messages import NormalMessage, StatusRequest, DimensionWriting, Dimension
 from ..tags import Where, Who, What, Dimension, Value
 
 __all__ = [
-    "BaseEvents",
     "BaseItem",
-    "EventCallback"
 ]
-
-
-# Uses forward reference here to avoid it later in the code
-EventCallback = Callable[["BaseItem", "BaseEvents"], Awaitable[None]]
-
-
-class BaseEvents(EnumMeta):
-    pass
 
 
 class BaseItem(ABC):
     _who = Who.LIGHTING
-    _event_callbacks: dict[Who, list[EventCallback]] = {}
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """
@@ -55,45 +44,23 @@ class BaseItem(ABC):
     def where(self) -> Where:
         return self._where
 
+    @classmethod  # type: ignore[misc]
     @property
-    def who(self) -> Who:
-        return self._who
+    def who(cls) -> Who:
+        return cls._who
+
+    @property
+    def client(self) -> BaseClient:
+        return self._client
+
+    @client.setter
+    def client(self, client: BaseClient):
+        self._client = client
 
     @classmethod
-    async def add_callback_event(cls, callback: EventCallback, *, who: Who | None = None):
-        """
-        Add a callback for this type of item.
-        It will be called every time an event for this type of item is received.
-
-        Args:
-            callback: the function to call when an event is received, it must accept two arguments: the item and the event
-            who: the who tag to listen to, if None, it will listen to the tag of the class
-
-        Returns:
-            None
-        """
-        if who is None:
-            cls._event_callbacks[cls._who].append(callback)
-        else:
-            cls._event_callbacks[who].append(callback)
-
-    @classmethod
-    async def remove_callback_event(cls, callback: EventCallback, *, who: Who | None = None):
-        """
-        Remove a callback previously added.
-        It will no longer be called when an event for this type of item is received.
-
-        Args:
-            callback: the function to remove
-            who: thw who tag to remove the callback from, if None, it will remove it from the tag of the class
-
-        Returns:
-            None
-        """
-        if who is None:
-            cls._event_callbacks[cls._who].append(callback)
-        else:
-            cls._event_callbacks[who].remove(callback)
+    @abstractmethod
+    def call_callbacks(cls, item: Self, message: BaseMessage, *, loop: AbstractEventLoop | None = None) -> None:
+        raise NotImplementedError
 
     async def _send_message(self, message: BaseMessage) -> None:
         """

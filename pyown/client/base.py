@@ -2,7 +2,7 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Transport, Future
-from typing import Optional, Callable, Awaitable, Any
+from typing import Optional
 
 from ..auth import AuthAlgorithm
 from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
@@ -10,7 +10,6 @@ from ..auth.open import own_calc_pass
 from ..exceptions import InvalidAuthentication, InvalidSession
 from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
 from ..protocol import OWNProtocol, SessionType
-from ..tags import Who, Where
 
 __all__ = [
     "BaseClient",
@@ -52,7 +51,7 @@ class BaseClient(ABC):
         self._on_connection_start: Future[Transport] = self._loop.create_future()
         self._on_connection_end: Future[Exception | None] = self._loop.create_future()
 
-    async def is_cmd_session(self) -> bool:
+    def is_cmd_session(self) -> bool:
         """
         Check if the session is a command session
 
@@ -234,76 +233,6 @@ class BaseClient(ABC):
         """
         if self._transport is not None:
             self._transport.close()
-
-    @abstractmethod
-    def add_callback(self, callback: Callable[[Any, Any], Awaitable[None]]):
-        """
-        Add a callback to the client.
-        It will be called every time a message is received.
-        Must be used only when the client is set as an event client.
-
-        Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: if called when the client is set as a command client
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_who_callback(self, callback: Callable[[Any, Any], Awaitable[None]], who: Who):
-        """
-        Add a callback to the client.
-        It will be called every time a message with the specified who is received.
-        Must be used only when the client is set as an event client.
-
-        Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
-            who: the who tag to listen to
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: if called when the client is set as a command client
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def add_where_callback(self, callback: Callable[[Any, Any], Awaitable[None]], who: Who, where: Where):
-        """
-        Add a callback to the client.
-        It will be called every time a message with the specified who and where is received.
-        Must be used only when the client is set as an event client.
-
-        Args:
-            callback: the function to call when a message is received, it must accept two arguments: the item and the event
-            who: the who tag to listen to
-            where: the where tag to listen to
-
-        Returns:
-            None
-
-        Raises:
-            InvalidSession: if called when the client is set as a command client
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def remove_callback(self, callback: Callable[[Any, Any], Awaitable[None]]):
-        """
-        Remove a callback from the client.
-
-        Args:
-            callback: the function to remove
-
-        Returns:
-            None
-        """
-        raise NotImplementedError
 
     @abstractmethod
     async def loop(self):

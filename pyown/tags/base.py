@@ -56,6 +56,8 @@ class Tag:
             return self.string == other.string
         elif isinstance(other, str):
             return self.string == other
+        elif isinstance(other, int):
+            return self.string == str(other)
         else:
             return NotImplemented
 
