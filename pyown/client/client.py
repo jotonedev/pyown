@@ -1,5 +1,6 @@
+import asyncio
 import logging
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, Task
 from typing import Optional
 
 from .base import BaseClient
@@ -95,7 +96,8 @@ class Client(BaseClient):
             None
 
         Raises:
-            InvalidSession: if called when the client is set as a command client and not as an event client
+            InvalidSession: if called when the client is set as a command client and not as an event client or
+            if the client is not connected
         """
         if self.is_cmd_session():
             raise InvalidSession("Cannot run loop on a command session")
@@ -106,13 +108,16 @@ class Client(BaseClient):
         if client is None:
             client = self
 
+        # loop until the connection is dropped or closed
         while not self._transport.is_closing():
             try:
+                # by putting timeout as None, it will wait indefinitely for a message
                 message = await self.read_message(timeout=None)
             except (ParseError, InvalidMessage, InvalidTag, RequestError) as e:
                 log.warning("Error reading message: %s", e)
                 continue
 
+            # ignore status messages
             if message.type == MessageType.ACK or message.type == MessageType.NACK:
                 continue
             elif message.type == MessageType.GENERIC:
@@ -126,18 +131,29 @@ class Client(BaseClient):
                 continue
 
             try:
+                # get item if already declared, otherwise instantiate it
                 item = self.get_item(who, where, client=client)
             except KeyError:
                 log.info(f"Item type not supported, WHO={who}, WHERE={where}")
                 continue
 
+            # because callbacks are defined inside items, we need to loop through all items to find the correct one
             for item_obj in BaseItem.__subclasses__():
                 if message.who == item_obj.who:
                     try:
-                        item_obj.call_callbacks(item, message, loop=self._loop)
+                        tasks = item_obj.call_callbacks(item, message)
                     except ValueError:
                         log.warning(f"Message not supported {message}")
                     else:
+                        self._loop.create_task(self._check_task_result(tasks))
                         break
             else:
                 log.warning(f"Item not found for message {message}")
+
+    @staticmethod
+    async def _check_task_result(tasks: list[Task]):
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for i, r in enumerate(results):
+            if isinstance(r, Exception):
+                log.error(f"Error in callback {r}")
+                tasks[i].print_stack()

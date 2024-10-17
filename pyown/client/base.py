@@ -2,7 +2,7 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Transport, Future
-from typing import Optional
+from typing import Optional, Any
 
 from ..auth import AuthAlgorithm
 from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
@@ -47,6 +47,7 @@ class BaseClient(ABC):
         self._protocol: Optional[OWNProtocol] = None
 
         self._loop = loop or asyncio.get_event_loop()
+        self._loop.set_exception_handler(self._exception_handler)
 
         self._on_connection_start: Future[Transport] = self._loop.create_future()
         self._on_connection_end: Future[Exception | None] = self._loop.create_future()
@@ -242,3 +243,20 @@ class BaseClient(ABC):
         This will loop until the client is closed, and it will call the callbacks when a message is received.
         """
         raise NotImplementedError
+
+    @staticmethod
+    def _exception_handler(_: AbstractEventLoop, context: dict[str, Any]):
+        exception = context.get("exception")
+        message = context.get("message")
+
+        if exception is not None:
+            log.error(f"Exception occurred: {message} ({exception})")
+        else:
+            return
+
+        if (task := context.get("task")) is not None:
+            task.print_stack()
+        elif (protocol := context.get("protocol")) is not None:
+            log.error(f"Protocol error: {protocol}")
+        elif (transport := context.get("transport")) is not None:
+            log.error(f"Transport error: {transport}")

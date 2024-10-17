@@ -1,6 +1,7 @@
+import asyncio
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop
-from typing import Self
+from asyncio import Task
+from typing import Self, Callable, Coroutine, Any
 
 from ..client import BaseClient
 from ..exceptions import RequestError
@@ -9,7 +10,10 @@ from ..tags import Where, Who, What, Dimension, Value
 
 __all__ = [
     "BaseItem",
+    "CoroutineCallback",
 ]
+
+CoroutineCallback = Callable[..., Coroutine[None, None, None]]
 
 
 class BaseItem(ABC):
@@ -57,9 +61,13 @@ class BaseItem(ABC):
     def client(self, client: BaseClient):
         self._client = client
 
+    @staticmethod
+    def _create_tasks(funcs: list[CoroutineCallback], *args: Any) -> list[Task]:
+        return [asyncio.create_task(func(*args)) for func in funcs]
+
     @classmethod
     @abstractmethod
-    def call_callbacks(cls, item: Self, message: BaseMessage, *, loop: AbstractEventLoop | None = None) -> None:
+    def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
         raise NotImplementedError
 
     async def _send_message(self, message: BaseMessage) -> None:
