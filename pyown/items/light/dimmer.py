@@ -1,7 +1,8 @@
-from typing import Callable, Self, Coroutine
+from typing import Callable, Self, Coroutine, AsyncIterator
 
 from .base import BaseLight, WhatLight, LightEvents
 from ...tags import Value, Dimension
+from ...tags import Where
 
 __all__ = [
     "Dimmer",
@@ -14,8 +15,11 @@ class Dimmer(BaseLight):
         Turn the light on.
 
         Args:
-            speed: turn on the light with a specific speed
+            speed: turn on the light with a specific speed [0-255]
         """
+        if speed is not None and (speed < 0 or speed > 255):
+            raise ValueError("Invalid speed value")
+
         what = WhatLight.ON
         # I do not own a dimmer, so I cannot test this.
         # Also, the documentation is not clear on what is the range of the speed parameter
@@ -28,8 +32,11 @@ class Dimmer(BaseLight):
         Turn the light off.
 
         Args:
-            speed: turn off the light with a specific speed
+            speed: turn off the light with a specific speed [0-255]
         """
+        if speed is not None and (speed < 0 or speed > 255):
+            raise ValueError("Invalid speed value")
+
         what = WhatLight.OFF
 
         if speed is not None:
@@ -81,9 +88,12 @@ class Dimmer(BaseLight):
         Increase the light percentage.
 
         Args:
-            value: the percentage to increase, by default 1
-            speed: increase the light percentage with a specific speed
+            value: the percentage to increase, by default, 1
+            speed: increase the light percentage with a specific speed [0-255]
         """
+        if value is not None and (value < 0 or value > 100):
+            raise ValueError("Invalid value")
+
         what = WhatLight.UP_1_PERCENT
 
         if value is not None:
@@ -103,8 +113,11 @@ class Dimmer(BaseLight):
 
         Args:
             value: the percentage to decrease, by default 1
-            speed: decrease the light percentage with a specific speed
+            speed: decrease the light percentage with a specific speed [0-255]
         """
+        if value is not None and (value < 0 or value > 100):
+            raise ValueError("Invalid value")
+
         what = WhatLight.DOWN_1_PERCENT
 
         if value is not None:
@@ -114,16 +127,16 @@ class Dimmer(BaseLight):
 
         await self.send_normal_message(what)
 
-    async def get_status(self) -> int:
+    async def get_status(self) -> AsyncIterator[tuple[Where, int]]:
         """
         Get the status of the light.
 
-        Returns:
-            True if the light is on, False if the light is off.
+        Yields:
+            tuple[Where, int]: the first element is the location of the light,
+            the second is the brightness level [0-100]
         """
-        resp = await self.send_status_request()
-
-        return int(resp.what.tag)
+        async for message in self.send_status_request():
+            yield message.where, int(message.what.tag) * 10  # type: ignore[arg-type]
 
     async def set_brightness_with_speed(self, brightness: int | str, speed: int | str):
         """
@@ -132,9 +145,6 @@ class Dimmer(BaseLight):
         Args:
             brightness: the brightness to set
             speed: the speed to set the brightness
-
-        Raises:
-            RequestError: If the server does not acknowledge the message.
         """
         await self.send_dimension_writing(Dimension("1"), Value(brightness), Value(speed))
 
@@ -143,11 +153,11 @@ class Dimmer(BaseLight):
         Set the color of the light in HSV format.
 
         Args:
-            hue: the hue value
-            saturation: the saturation value
-            value:  the value to set
+            hue: the hue value to set [0-359]
+            saturation: the saturation value [0-100]
+            value:  the value to set  [0-100]
         """
-        if hue < 0 or hue > 360:
+        if hue < 0 or hue > 359:
             raise ValueError("Invalid hue value")
 
         if saturation < 0 or saturation > 100:
@@ -163,46 +173,53 @@ class Dimmer(BaseLight):
         Set the white temperature of the light.
 
         Args:
-            temperature: the temperature to set
+            temperature: the temperature to set [1-65534] using the Mired scale.
         """
-        # It's not clear what is the range of the temperature parameter
+        if temperature < 1 or temperature > 65534:
+            raise ValueError("Invalid temperature value")
+
         await self.send_dimension_writing("13", Value(temperature))
 
-    async def request_current_brightness_speed(self):
+    async def request_current_brightness_speed(self) -> AsyncIterator[tuple[Where, int, int]]:
         """
-        Request the gateway the last set brightness and speed command that was sent.
+        Request the current brightness and speed of the light.
 
-        The response will be sent to the event session.
+        Yields:
+            A tuple with the where of the item, its brightness level, and its current speed.
+            The speed is in the range [0-255].
+            The brightness is in the range [100-200].
         """
-        msg = self.create_dimension_request_message(Dimension("2"))
-        await self._send_message(msg)
+        async for message in self.send_dimension_request("1"):
+            brightness = int(message.values[0].tag)  # type: ignore[arg-type]
+            speed = int(message.values[1].tag)  # type: ignore[arg-type]
+            yield message.where, brightness, speed
 
-        resp = await self._read_message()
-        self._check_ack(resp)
-
-    async def request_current_hsv(self):
+    async def request_current_hsv(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
-        Request the gateway the last set HSV command that was sent.
+        Request the current HSV of the light, valid only for RGB lights.
 
-        The response will be sent to the event session.
+        Yields:
+            A tuple with the where of the item, the hue, the saturation, and the value.
+            The hue is in the range [0-359].
+            The saturation is in the range [0-100].
+            The value is in the range [0-100].
         """
-        msg = self.create_dimension_request_message(Dimension("12"))
-        await self._send_message(msg)
+        async for message in self.send_dimension_request("12"):
+            hue = int(message.values[0].tag)  # type: ignore[arg-type]
+            saturation = int(message.values[1].tag)  # type: ignore[arg-type]
+            value = int(message.values[2].tag)  # type: ignore[arg-type]
+            yield message.where, hue, saturation, value
 
-        resp = await self._read_message()
-        self._check_ack(resp)
-
-    async def request_current_white_temperature(self):
+    async def request_current_white_temperature(self) -> AsyncIterator[tuple[Where, int]]:
         """
-        Request the gateway the last set white temperature command that was sent.
+        Request the current white temperature of the light.
 
-        The response will be sent to the event session.
+        Yields:
+            The where of the item and the temperature.
+            The temperature is in the range [1-65534] using the Mired scale.
         """
-        msg = self.create_dimension_request_message(Dimension("14"))
-        await self._send_message(msg)
-
-        resp = await self._read_message()
-        self._check_ack(resp)
+        async for message in self.send_dimension_request("14"):
+            yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
 
     @classmethod
     def on_luminosity_change(cls, callback: Callable[[Self, int, int], Coroutine[None, None, None]]):

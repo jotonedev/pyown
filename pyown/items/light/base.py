@@ -1,13 +1,11 @@
-import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
 from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine
+from typing import Callable, Self, Coroutine, AsyncIterator
 
 from ..base import BaseItem, CoroutineCallback
-from ...exceptions import RequestError
 from ...messages import DimensionResponse, BaseMessage, NormalMessage
-from ...tags import Who, What, Value, Dimension
+from ...tags import Who, What, Value, Where
 
 __all__ = [
     "BaseLight",
@@ -113,9 +111,9 @@ class BaseLight(BaseItem, ABC):
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
 
     @abstractmethod
-    async def get_status(self) -> bool | int:
+    async def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
         """Get the status of the light"""
-        raise NotImplementedError
+        yield None  # type: ignore[misc]
 
     async def temporization_command(self, hour: int, minute: int, second: int):
         """
@@ -124,55 +122,38 @@ class BaseLight(BaseItem, ABC):
         It will turn the light immediately on and then off after the specified time passed.
 
         Args:
-            hour: The number of hours to wait before turning off the light.
-            minute: The number of minutes to wait before turning off the light.
-            second: The number of seconds to wait before turning off the light.
+            hour: It indicates show many hours the actuator has to stay ON
+            minute: It indicates show many minutes the actuator has to stay ON
+            second: It indicates show many seconds the actuator has to stay ON
         """
         if hour >= 24 or minute >= 60 or second >= 60:
             raise ValueError("Invalid time")
 
         await self.send_dimension_writing("2", Value(hour), Value(minute), Value(second))
 
-    async def request_current_temporization(self):
+    async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
-        Request the gateway the last temporization command sent.
+        Request the gateway the current temporization settings of the actuator.
 
-        The response will be sent to the event session.
+        Yields:
+            A tuple with the hour, minute, and second of the temporization.
         """
-        msg = self.create_dimension_request_message(Dimension("1"))
-        await self._send_message(msg)
+        async for message in self.send_dimension_request("2"):
+            hour = int(message.values[0].tag)  # type: ignore[arg-type]
+            minute = int(message.values[1].tag)  # type: ignore[arg-type]
+            second = int(message.values[2].tag)  # type: ignore[arg-type]
+            yield message.where, hour, minute, second
 
-        resp = await self._read_message()
-        self._check_ack(resp)
-
-    async def request_working_time_lamp(self) -> int:
+    async def request_working_time_lamp(self) -> AsyncIterator[tuple[Where, int]]:
         """
         Request the gateway for how long the light has been on.
 
-        Returns:
-            The time in seconds the light has been on.
-
-        Raises:
-            RequestError: If the response is not what was expected.
+        Yields:
+            The time in hours the light has been on.
+            The value is in the range [1-100000].
         """
-
-        msg = self.create_dimension_request_message(Dimension("8"))
-        await asyncio.sleep(1)
-        await self._send_message(msg)
-
-        resp = await self._read_message()
-        self._check_nack(resp)
-
-        ack = await self._read_message()
-        self._check_ack(ack)
-
-        if not isinstance(resp, DimensionResponse):
-            raise RequestError(f"Error sending message: {msg}, response: {resp}")
-
-        if resp.values[0].tag is not None:
-            return int(resp.values[0].tag)
-        else:
-            raise RequestError(f"Invalid response: {resp}")
+        async for message in self.send_dimension_request("3"):
+            yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
 
     @classmethod
     def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):

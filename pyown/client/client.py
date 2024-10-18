@@ -4,7 +4,7 @@ from asyncio import AbstractEventLoop, Task
 from typing import Optional
 
 from .base import BaseClient
-from ..exceptions import InvalidSession, ParseError, InvalidMessage, InvalidTag, RequestError
+from ..exceptions import InvalidSession, ParseError, InvalidMessage, InvalidTag
 from ..items.base import BaseItem
 from ..items.utils import ITEM_TYPES
 from ..messages import MessageType
@@ -113,7 +113,7 @@ class Client(BaseClient):
             try:
                 # by putting timeout as None, it will wait indefinitely for a message
                 message = await self.read_message(timeout=None)
-            except (ParseError, InvalidMessage, InvalidTag, RequestError) as e:
+            except (ParseError, InvalidMessage, InvalidTag) as e:
                 log.warning("Error reading message: %s", e)
                 continue
 

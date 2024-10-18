@@ -1,11 +1,12 @@
 import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
-from typing import Self, Callable, Coroutine, Any
+from typing import Self, Callable, Coroutine, Any, AsyncIterator
 
 from ..client import BaseClient
-from ..exceptions import RequestError
-from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType
+from ..exceptions import ResponseError
+from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType, \
+    DimensionResponse
 from ..tags import Where, Who, What, Dimension, Value
 
 __all__ = [
@@ -100,10 +101,10 @@ class BaseItem(ABC):
             resp: The response to check.
 
         Raises:
-            RequestError: If the response is not an ACK message.
+            ResponseError: If the response is not an ACK message.
         """
         if resp.type != MessageType.ACK:
-            raise RequestError(f"Received {resp} instead of ACK")
+            raise ResponseError(f"Received {resp} instead of ACK")
 
     @staticmethod
     def _check_nack(resp: BaseMessage) -> None:
@@ -113,10 +114,10 @@ class BaseItem(ABC):
             resp: The response to check.
 
         Raises:
-            RequestError: If the response is a NACK message.
+            ResponseError: If the response is a NACK message.
         """
         if resp.type == MessageType.NACK:
-            raise RequestError(f"Received {resp} instead of NACK")
+            raise ResponseError(f"Received {resp} instead of NACK")
 
     def create_normal_message(self, what: What | str) -> NormalMessage:
         """
@@ -196,7 +197,7 @@ class BaseItem(ABC):
             what: The action to perform.
 
         Raises:
-            RequestError: If the server does not acknowledge the message.
+            ResponseError: If the server does not acknowledge the message.
         """
         msg = self.create_normal_message(what)
         await self._send_message(msg)
@@ -204,26 +205,60 @@ class BaseItem(ABC):
         resp = await self._read_message()
         self._check_ack(resp)
 
-    async def send_status_request(self) -> NormalMessage:
+    async def send_status_request(self) -> AsyncIterator[NormalMessage]:
         """
-        Send a status request to the server and check the response.
+        Send a status request and receive multiple responses from the server.
 
         Raises:
-            RequestError: If the server does not acknowledge the message.
+            ResponseError: If the server responds with an invalid message.
+
+        Returns:
+            The responses from the server.
         """
         msg = self.create_status_message()
         await self._send_message(msg)
 
-        resp = await self._read_message()
-        self._check_nack(resp)
+        while True:
+            resp = await self._read_message()
+            self._check_nack(resp)
 
-        ack = await self._read_message()
-        self._check_ack(ack)
+            # when the server responds with an ACK message, it means that the server has finished sending the responses
+            if resp.type == MessageType.ACK:
+                break
 
-        if not isinstance(resp, NormalMessage):
-            raise RequestError(f"Error sending message: {msg}, response: {ack}")
+            if not isinstance(resp, NormalMessage):
+                raise ResponseError(f"Received {resp} instead of a normal message")
 
-        return resp
+            yield resp
+
+    async def send_dimension_request(self, dimension: Dimension | str) -> AsyncIterator[DimensionResponse]:
+        """
+        Send a dimension request and receive multiple responses from the server.
+
+        Raises:
+            ResponseError: If the server responds with an invalid message.
+
+        Returns:
+            The responses from the server.
+        """
+        if isinstance(dimension, str):
+            dimension = Dimension(dimension)
+
+        msg = self.create_dimension_request_message(dimension)
+        await self._send_message(msg)
+
+        while True:
+            resp = await self._read_message()
+            self._check_nack(resp)
+
+            # when the server responds with an ACK message, it means that the server has finished sending the responses
+            if resp.type == MessageType.ACK:
+                break
+
+            if not isinstance(resp, DimensionResponse):
+                raise ResponseError(f"Received {resp} instead of a dimension response message")
+
+            yield resp
 
     async def send_dimension_writing(self, dimension: Dimension | str, *args: Value) -> None:
         """
@@ -234,7 +269,7 @@ class BaseItem(ABC):
             *args: the values to set.
 
         Raises:
-            RequestError: If the server does not acknowledge the message.
+            ResponseError: If the server does not acknowledge the message.
         """
         if isinstance(dimension, str):
             dimension = Dimension(dimension)

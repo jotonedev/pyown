@@ -21,8 +21,8 @@ async def run(host: str, port: int, password: str):
 
     await light.turn_on_1_min()
 
-    time = await light.request_working_time_lamp()
-    print(f"Working time: {time}")
+    r = await light.get_status()
+    print(f"Current light status: {r}")
 
     await client.close()
 

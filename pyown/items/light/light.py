@@ -1,4 +1,7 @@
+from typing import AsyncIterator
+
 from .base import BaseLight, WhatLight
+from ...tags import Where
 
 __all__ = [
     "Light",
@@ -54,13 +57,15 @@ class Light(BaseLight):
         """Blink the light every 5.0 seconds."""
         await self.send_normal_message(WhatLight.BLINKING_5_0_SEC)
 
-    async def get_status(self) -> bool:
+    async def get_status(self) -> AsyncIterator[tuple[Where, bool]]:
         """
         Get the status of the light.
 
-        Returns:
-            True if the light is on, False if the light is off.
+        Yields:
+            tuple[Where, bool]: The where and the status of the light.
         """
-        resp = await self.send_status_request()
-
-        return resp.what == WhatLight.ON
+        async for message in self.send_status_request():
+            if message.what == WhatLight.ON:
+                yield message.where, True
+            elif message.what == WhatLight.OFF:
+                yield message.where, False

@@ -48,6 +48,6 @@ class InvalidAuthentication(InvalidSession):
         super().__init__(message)
 
 
-class RequestError(OWNException):
+class ResponseError(OWNException):
     def __init__(self, message: str = "") -> None:
         super().__init__(message)
