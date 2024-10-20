@@ -42,7 +42,7 @@ async def run(host: str, port: int, password: str):
     if status == ACK():
         logging.info("The server acknowledged the message")
         ip = resp.tags[-4:]
-        print(f"The ip address of the server is {ip}")
+        print(f"The ip address of the server is {ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}")
     else:
         logging.error("The server did not acknowledge the message")
 

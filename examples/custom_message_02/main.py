@@ -15,7 +15,7 @@ async def run(host: str, port: int, password: str):
 
     await client.start()
 
-    # Get the ip address of the server
+    # Request the 7 october energy management data
     await client.send_message(
         DimensionRequest(
             (
@@ -25,9 +25,6 @@ async def run(host: str, port: int, password: str):
             )
         )
     )
-
-    # Parse response
-    resp = None
 
     while True:
         try:
@@ -49,6 +46,8 @@ async def run(host: str, port: int, password: str):
             tag = resp.values[0]
             value = resp.values[1]
             logging.info(f"Month: {month}, Day: {day}, Number of the measure: {tag}, Value: {value}")
+
+    await client.close()
 
 
 def main(host: str, port: int, password: str):

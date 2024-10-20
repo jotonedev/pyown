@@ -21,8 +21,10 @@ async def run(host: str, port: int, password: str):
 
     await light.turn_on_1_min()
 
-    r = await light.get_status()
-    print(f"Current light status: {r}")
+    # If where is set to a GROUP, get_status will return the status of all the lights in the group
+    # But, if where is set to a specific light, get_status will only return the status of that light
+    async for where, status in light.get_status():
+        print(f"Light {where} status: {'ON' if status else 'OFF'}")
 
     await client.close()
 
