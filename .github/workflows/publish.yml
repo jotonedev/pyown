@@ -32,7 +32,7 @@ jobs:
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: "3.12"
-          poetry-version: "1.8.3"
+          poetry-version: "1.8.4"
           install-args: --without test,docs
 
       - name: Package project
