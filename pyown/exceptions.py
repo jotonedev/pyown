@@ -1,3 +1,17 @@
+__all__ = [
+    "OWNException",
+    "ParseError",
+    "InvalidData",
+    "InvalidMessage",
+    "InvalidTag",
+    "InvalidSession",
+    "InvalidAuthentication",
+    "ResponseError",
+]
+
+from typing import Any
+
+
 class OWNException(Exception):
     def __init__(self, message: str = "") -> None:
         super().__init__(message)
@@ -25,7 +39,7 @@ class InvalidData(OWNException):
 class InvalidMessage(OWNException):
     message: str
 
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: Any) -> None:
         self.message = message
         super().__init__(f"Invalid message: {message}")
 
@@ -33,7 +47,7 @@ class InvalidMessage(OWNException):
 class InvalidTag(OWNException):
     tag: str
 
-    def __init__(self, tag: str) -> None:
+    def __init__(self, tag: Any) -> None:
         self.tag = tag
         super().__init__(f"Invalid tag: {tag}")
 

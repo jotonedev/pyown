@@ -1,36 +1,37 @@
 import asyncio
 import logging
 
-from pyown import Client
-from pyown.items import Light
-from pyown.protocol import SessionType
-
-log = logging.getLogger(__name__)
+from pyown.client import Client
+from pyown.items.automation import Automation
 
 
-async def on_light_state_change(light: Light, state: bool):
-    if state:
-        log.info(f"Light at {light.where} is now on")
-    else:
-        log.info(f"Light at {light.where} is now off")
-
-
-# noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
     client = Client(
         host=host,
         port=port,
-        password=password,
-        session_type=SessionType.EventSession
+        password=password
     )
 
-    Light.on_status_change(on_light_state_change)
-
     await client.start()
-    await client.loop()
+
+    shutter = Automation(
+        client=client,
+        where="15"
+    )
+
+    await shutter.up()
+    await asyncio.sleep(2)
+    await shutter.stop()
+
+    await asyncio.sleep(2)
+
+    await shutter.down()
+    await asyncio.sleep(2)
+    await shutter.stop()
+
+    await client.close()
 
 
-# noinspection DuplicatedCode
 def main(host: str, port: int, password: str):
     # Set the logging level to DEBUG
     logging.basicConfig(

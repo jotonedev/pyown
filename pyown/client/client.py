@@ -142,8 +142,8 @@ class Client(BaseClient):
                 if message.who == item_obj.who:
                     try:
                         tasks = item_obj.call_callbacks(item, message)
-                    except ValueError:
-                        log.warning(f"Message not supported {message}")
+                    except InvalidMessage as e:
+                        log.warning(f"Message not supported {e.message}")
                     else:
                         self._loop.create_task(self._check_task_result(tasks))
                         break

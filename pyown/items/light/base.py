@@ -4,6 +4,7 @@ from enum import StrEnum, Enum, auto
 from typing import Callable, Self, Coroutine, AsyncIterator
 
 from ..base import BaseItem, CoroutineCallback
+from ...exceptions import InvalidMessage
 from ...messages import DimensionResponse, BaseMessage, NormalMessage
 from ...tags import Who, What, Value, Where
 
@@ -185,6 +186,9 @@ class BaseLight(BaseItem, ABC):
         Args:
             item: The item that triggered the event.
             message: The message that triggered the event.
+
+        Raises:
+            InvalidMessage: If the message is not valid.
         """
         tasks: list[Task] = []
 
@@ -225,6 +229,6 @@ class BaseLight(BaseItem, ABC):
                 message.what == WhatLight.ON
             )
         else:
-            raise ValueError(f"Invalid message: {message}")
+            raise InvalidMessage(message)
 
         return tasks
