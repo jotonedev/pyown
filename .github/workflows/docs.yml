@@ -3,6 +3,10 @@ name: Docs
 on:
   release:
     types: [ published ]
+  push:
+    branches:
+      - docs
+      - main
   workflow_dispatch:
 
 jobs:
@@ -22,6 +26,12 @@ jobs:
           python-version: "3.12"
           poetry-version: "1.8.4"
           install-args: --with docs
+
+      - name: Set git credentials
+        id: setup
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Build the docs
         id: build

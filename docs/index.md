@@ -15,6 +15,17 @@ It is used to communicate to a gateway that is connected to the SCS bus where al
 
 The already existent libraries for python are either not maintained or not complete, so I decided to create a new one that is easy to use and completely type annotated.
 
+## Features
+
+- Fully type annotated
+- Asynchronous
+- Easy to use
+
+## Manuals
+
+- API Reference: [API Reference](api/index.md)
+- Official OpenWebNet protocol documentation: [OpenWebNet protocol](https://developer.legrand.com/Documentation/)
+
 ## Disclaimer
 
 - This library is not associated by any means with BTicino or Legrand companies 
