@@ -33,7 +33,7 @@ jobs:
         with:
           python-version: "3.12"
           poetry-version: "1.8.3"
-          install-args: --all-extras
+          install-args: --without test,docs
 
       - name: Package project
         run: poetry build

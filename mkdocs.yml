@@ -1,0 +1,10 @@
+site_name: PyOWN Documentation
+site_url: https://jotonedev.github.io/pyown/
+repo_url: https://github.com/jotonedev/pyown
+
+theme: readthedocs
+
+plugins:
+- mkdocstrings:
+    default_handler: python
+

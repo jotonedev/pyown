@@ -30,6 +30,10 @@ pytest-cov = "^5.0"
 pytest-asyncio = "^0.24"
 mypy = "^1.11"
 
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6"
+mkdocstrings-python = "^1.12"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
