@@ -16,11 +16,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        id: setup
         uses: actions/checkout@v4
 
       - name: Setup and Cache Python Poetry
-        id: setup
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: "3.12"
@@ -28,7 +26,6 @@ jobs:
           install-args: --with docs
 
       - name: Set git credentials
-        id: setup
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
