@@ -1,15 +1,12 @@
-import asyncio
-from abc import ABC, abstractmethod
 from asyncio import Task
-from dataclasses import dataclass
 from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, NamedTuple, AsyncGenerator, AsyncIterator
+from typing import Callable, Self, Coroutine, AsyncIterator
 
 from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
-from ...messages import DimensionResponse, BaseMessage, NormalMessage
-from ...tags import Who, What, Value, Dimension
-from ...tags.where import WhereType, Where
+from ...messages import BaseMessage, NormalMessage
+from ...tags import Who, What
+from ...tags.where import Where
 
 __all__ = [
     "Automation",
@@ -102,4 +99,3 @@ class Automation(BaseItem):
             raise InvalidMessage(message)
 
         return tasks
-

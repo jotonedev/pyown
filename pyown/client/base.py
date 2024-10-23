@@ -104,7 +104,6 @@ class BaseClient(ABC):
         # if it's a ∗98∗## open command, the server requires the hmac authentication algorithm
         if resp.type == MessageType.ACK:
             log.info("No authentication required")
-            pass
         elif len(resp.tags) == 1:
             log.info("Using open authentication")
             await self._authenticate_open(nonce=resp.tags[0])
