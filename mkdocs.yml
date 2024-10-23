@@ -37,6 +37,9 @@ plugins:
     default_handler: python
     handlers:
       python:
+        import:
+          - url: https://docs.python.org/3/objects.inv
+            domains: [ py, std ]
         options:
           members_order: source
           separate_signature: true

@@ -23,7 +23,6 @@ The already existent libraries for python are either not maintained or not compl
 
 ## Manuals
 
-- API Reference: [API Reference](api.md)
 - Official OpenWebNet protocol documentation: [OpenWebNet protocol](https://developer.legrand.com/Documentation/)
 
 ## Disclaimer

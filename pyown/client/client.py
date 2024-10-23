@@ -39,7 +39,7 @@ class Client(BaseClient):
             port (int): The port to connect to
             password (str): The password to authenticate with
             session_type (SessionType): The session type to use, can be a command session or an event session.
-            Default is CommandSession
+                Default is CommandSession
             loop (Optional[AbstractEventLoop]): The event loop to use
         """
         super().__init__(host, port, password, session_type, loop=loop)
@@ -90,13 +90,12 @@ class Client(BaseClient):
         ```
 
         Args:
-            client: The client to use to declare the items for the callbacks.
-            Default is self.
-            This is useful when you want the items to have a command client to allow sending commands with them.
+            client: The client to use to declare the items for the callbacks. Default is self.
+                This is useful when you want the items to have a command client to allow sending commands with them.
 
         Raises:
             InvalidSession: if called when the client is set as a command client and not as an event client or
-            if the client is not connected
+                if the client is not connected
         """
         if self.is_cmd_session():
             raise InvalidSession("Cannot run loop on a command session")
