@@ -1,7 +1,7 @@
 from typing import Type, Final
 
 from .base import BaseItem
-from .light import Light
+from .lighting import Light
 from ..tags import Who
 
 __all__ = [
