@@ -2,7 +2,7 @@ import re
 from typing import Self, Pattern, AnyStr, Final
 
 from .base import BaseMessage, MessageType
-from ..exceptions import ParseError
+from ..exceptions import InvalidMessage
 
 __all__ = [
     "NACK",
@@ -32,6 +32,6 @@ class NACK(BaseMessage):
         """Parse the tags of a message from the OpenWebNet bus."""
         # the first tag bust be #
         if tags[0] != "#" and tags[1] != "0":
-            raise ParseError(tags=tags, message="Invalid ACK message")
+            raise InvalidMessage(tags)
 
         return cls()

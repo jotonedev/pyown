@@ -161,10 +161,12 @@ def parse_message(message: str) -> BaseMessage:
 
     tags = message.removeprefix(BaseMessage.prefix).removesuffix(BaseMessage.suffix).split(BaseMessage.separator)
 
-    # First of all, check if the message is valid
+    # First, check if the message is valid
     if GenericMessage.pattern().match(message) is None:
-        raise ParseError(tags=tags, message="Invalid message")
+        raise InvalidMessage(message)
 
+    # Then, check if the message is a known message
+    # if not, return a GenericMessage
     for subclass in BaseMessage.__subclasses__():
         if subclass is GenericMessage:
             continue

@@ -93,7 +93,7 @@ class BaseClient(ABC):
             message = await self.read_message()
 
         if message.type != MessageType.ACK:
-            raise InvalidSession("Expected ACK message")
+            raise InvalidAuthentication("Expected ACK message")
 
         log.debug("Starting handshake")
 
@@ -118,7 +118,7 @@ class BaseClient(ABC):
                 hash_algorithm=tag,
             )
         else:
-            raise InvalidSession("Invalid authentication response")
+            raise InvalidAuthentication("Invalid authentication response")
 
         log.info("Client ready")
 
