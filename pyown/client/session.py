@@ -12,7 +12,7 @@ class SessionType(StrEnum):
     Represents the all allowed values for session types in the OpenWebNet protocol.
 
     Attributes:
-        OldCommandSession: Legacy command session value not documented
+        OldCommandSession: Legacy command session value not present in the official OpenWebNet documentation.
         CommandSession: Official command session value. Used to create a session for sending commands.
         EventSession: Event session value. Used to create a session for receiving events, sending commands is not allowed.
     """

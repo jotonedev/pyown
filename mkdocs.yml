@@ -1,4 +1,5 @@
-site_name: PyOWN Documentation
+site_name: pyown documentation
+repo_name: pyown
 site_url: https://jotonedev.github.io/pyown/
 repo_url: https://github.com/jotonedev/pyown
 
@@ -17,23 +18,26 @@ theme:
       - content.tabs.link
       - content.code.annotate
       - content.code.copy
-      - announce.dismiss
+
       - navigation.tabs
+      - navigation.tabs.sticky
+
       - navigation.instant
       - navigation.instant.prefetch
-      - navigation.instant.preview
       - navigation.instant.progress
+
       - navigation.path
-      - navigation.sections
       - navigation.top
       - navigation.tracking
+
+      - search.highlight
+      - search.share
       - search.suggest
       - toc.follow
-      - toc.integrate
-
 
 plugins:
-- mkdocstrings:
+  search:
+  mkdocstrings:
     default_handler: python
     handlers:
       python:
@@ -51,6 +55,8 @@ plugins:
           inherit_docstrings: true
           inherited_members: true
           show_source: false
+          unwrap_annotated: true
+          show_symbol_type_toc: true
           show_root_heading: true
           show_root_full_path: true
           show_inheritance_diagram: false
@@ -60,6 +66,16 @@ plugins:
 
 markdown_extensions:
   - tables
+  - abbr
+  - attr_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      title: Page contents
+      toc_depth: 3
+
+  # Python markdown extensions
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -71,7 +87,3 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
-  - toc:
-      permalink: true
-      title: Page contents
-      toc_depth: 3
