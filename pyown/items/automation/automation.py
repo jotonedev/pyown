@@ -103,6 +103,6 @@ class Automation(BaseItem):
                 WhatAutomation(str(message.what))
             )
         else:
-            raise InvalidMessage(message)
+            raise InvalidMessage(str(message))
 
         return tasks

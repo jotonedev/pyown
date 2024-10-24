@@ -267,6 +267,6 @@ class BaseLight(BaseItem, ABC):
                 message.what == WhatLight.ON
             )
         else:
-            raise InvalidMessage(message)
+            raise InvalidMessage(str(message))
 
         return tasks
