@@ -1,8 +1,11 @@
 name: Docs
 
 on:
-  release:
-    types: [ published ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
