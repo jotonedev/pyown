@@ -14,7 +14,8 @@ class SessionType(StrEnum):
     Attributes:
         OldCommandSession: Legacy command session value not present in the official OpenWebNet documentation.
         CommandSession: Official command session value. Used to create a session for sending commands.
-        EventSession: Event session value. Used to create a session for receiving events, sending commands is not allowed.
+        EventSession: Event session value. Used to create a session for receiving events,
+            sending commands is not allowed.
     """
     OldCommandSession: str = "0"
     CommandSession: str = "9"

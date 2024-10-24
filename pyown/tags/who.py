@@ -12,7 +12,7 @@ class Who(Tag, StrEnum):
     """
     Who tag class.
 
-    This is an enum class because the value allowed in this tag are limited the the ones listed.
+    This is an enum class because the value allowed in this tag is limited to the ones listed.
 
     Attributes:
         SCENE: used for scenarios modules
@@ -33,10 +33,14 @@ class Who(Tag, StrEnum):
         SOUND_DIFFUSION_2: extension of SOUND_DIFFUSION_1
         LIGHTING_MANAGEMENT: extension of LIGHTING
         CEN_2: extension of CEN_1
-        AUTOMATION_DIAGNOSTICS: used to read and set low level values to automation devices (only used by the official MyHome software)
-        THERMOREGULATION_DIAGNOSTICS: used to read and set low level values to thermoregulation devices (only used by the official MyHome software)
-        DEVICE_DIAGNOSTICS: used to read and set low level values to devices (only used by the official MyHome software)
-        ENERGY_DIAGNOSTICS: used to read and set low level values to energy management devices (only used by the official MyHome software)
+        AUTOMATION_DIAGNOSTICS: used to read and set low level values to automation devices
+            (only used by the official MyHome software)
+        THERMOREGULATION_DIAGNOSTICS: used to read and set low level values to thermoregulation devices
+            (only used by the official MyHome software)
+        DEVICE_DIAGNOSTICS: used to read and set low level values to devices
+            (only used by the official MyHome software)
+        ENERGY_DIAGNOSTICS: used to read and set low level values to energy management devices .
+            (only used by the official MyHome software)
     """
     SCENE: str = "0"
     LIGHTING: str = "1"

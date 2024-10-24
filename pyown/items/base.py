@@ -22,7 +22,7 @@ class BaseItem(ABC):
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """
-        Initialize the item.
+        Initializes the item.
         Args:
             client: The client to use to communicate with the server.
             where: The location of the item.
@@ -73,7 +73,7 @@ class BaseItem(ABC):
 
     async def _send_message(self, message: BaseMessage) -> None:
         """
-        Send a message to the server
+        Sends a message to the server
         Args:
             message: The message to send.
 
@@ -84,7 +84,7 @@ class BaseItem(ABC):
 
     async def _read_message(self, timeout: int | None = 5) -> BaseMessage:
         """
-        Read a message from the server
+        Reads a message from the server
         Args:
             timeout: The time to wait for a message, None to wait indefinitely.
 
@@ -96,7 +96,7 @@ class BaseItem(ABC):
     @staticmethod
     def _check_ack(resp: BaseMessage) -> None:
         """
-        Check if the response is an ACK message.
+        Checks if the response is an ACK message.
         Args:
             resp: The response to check.
 
@@ -109,7 +109,7 @@ class BaseItem(ABC):
     @staticmethod
     def _check_nack(resp: BaseMessage) -> None:
         """
-        Check if the response is a NACK message.
+        Checks if the response is a NACK message.
         Args:
             resp: The response to check.
 
@@ -121,7 +121,7 @@ class BaseItem(ABC):
 
     def create_normal_message(self, what: What | str) -> NormalMessage:
         """
-        Create a normal message for the item.
+        Creates a normal message for the item.
         Args:
             what: The action to perform.
         Returns:
@@ -140,7 +140,7 @@ class BaseItem(ABC):
 
     def create_status_message(self) -> StatusRequest:
         """
-        Create a status message for the item.
+        Creates a status message for the item.
 
         Returns:
             A status message.
@@ -154,7 +154,7 @@ class BaseItem(ABC):
 
     def create_dimension_writing_message(self, dimension: Dimension, *args: Value) -> DimensionWriting:
         """
-        Create a dimension message for the item.
+        Creates a dimension message for the item.
         Args:
             dimension: the dimension value to set.
             *args: the values to set.
@@ -174,7 +174,7 @@ class BaseItem(ABC):
 
     def create_dimension_request_message(self, dimension: Dimension) -> DimensionRequest:
         """
-        Create a dimension request message for the item.
+        Creates a dimension request message for the item.
         Args:
             dimension: the dimension value to request.
 
@@ -191,7 +191,7 @@ class BaseItem(ABC):
 
     async def send_normal_message(self, what: What | str) -> None:
         """
-        Send a normal message to the server and check the response.
+        Sends a normal message to the server and check the response.
 
         Args:
             what: The action to perform.
@@ -207,7 +207,7 @@ class BaseItem(ABC):
 
     async def send_status_request(self) -> AsyncIterator[NormalMessage]:
         """
-        Send a status request and receive multiple responses from the server.
+        Sends a status request and receive multiple responses from the server.
 
         Raises:
             ResponseError: If the server responds with an invalid message.
@@ -233,7 +233,7 @@ class BaseItem(ABC):
 
     async def send_dimension_request(self, dimension: Dimension | str) -> AsyncIterator[DimensionResponse]:
         """
-        Send a dimension request and receive multiple responses from the server.
+        Sends a dimension request and receive multiple responses from the server.
 
         Raises:
             ResponseError: If the server responds with an invalid message.
@@ -262,7 +262,7 @@ class BaseItem(ABC):
 
     async def send_dimension_writing(self, dimension: Dimension | str, *args: Value) -> None:
         """
-        Send a dimension writing message to the server and check the response.
+        Sends a dimension writing message to the server and check the response.
 
         Args:
             dimension: the dimension value to set.

@@ -4,7 +4,7 @@ import abc
 import copy
 import re
 from enum import StrEnum
-from typing import Final, Pattern, Self, Any, Sequence
+from typing import Final, Pattern, Self, Any
 
 from ..exceptions import InvalidMessage, InvalidTag
 from ..tags import Who, Where
@@ -155,6 +155,7 @@ class GenericMessage(BaseMessage):
     This is used when the message has an unknown structure, or to send specific messages that
     don't need a specific class to represent them.
     """
+
     def __init__(self, tags: list[str]):
         self._tags = tags
 

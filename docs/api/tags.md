@@ -10,6 +10,8 @@ Each tag can have a set of parameters that further define its meaning.
 
 ::: pyown.tags.base.VALID_TAG_CHARS
 
+::: pyown.tags.base.is_valid_tag
+
 ::: pyown.tags.base.Tag
 
 ::: pyown.tags.base.TagWithParameters

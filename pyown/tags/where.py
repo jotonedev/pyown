@@ -18,7 +18,7 @@ class WhereType(Enum):
         AMBIENT: usually an ambient is a room, but it depends on how the devices where configured.
         LIGHT_POINT: it refers to a single device.
         GROUP: it refers to a group of devices.
-        LOCAL_BUS: it refers all devices connected to a specific bus.
+        LOCAL_BUS: it refers to all devices connected to a specific bus.
     """
     GENERAL = auto()
     AMBIENT = auto()
@@ -29,7 +29,7 @@ class WhereType(Enum):
 
 class Where(TagWithParameters):
     """
-    Represent the WHERE tag.
+    Represents the WHERE tag.
 
     The tag WHERE is the address on the bus for the related device.
     This can indicate, also, a group of devices or a local bus.
@@ -38,7 +38,7 @@ class Where(TagWithParameters):
     @property
     def type(self) -> WhereType:
         """
-        Get what the where tag indicates to.
+        Gets what the where tag indicates to.
 
         Returns:
             WhereType: The type of the WHERE tag.

@@ -31,7 +31,7 @@ class Client(BaseClient):
             loop: Optional[AbstractEventLoop] = None
     ):
         """
-        Represents a client connection that connects to a OpenWebNet gateway.
+        Represents a client connection that connects to an OpenWebNet gateway.
         This class can be used to send commands and receive events from the gateway.
 
         Args:
@@ -48,7 +48,7 @@ class Client(BaseClient):
 
     def get_item(self, who: Who, where: Where, *, client: BaseClient) -> BaseItem:
         """
-        Instantiates an item if it is not already cached in the client, and returns it.
+        Instantiates an item if it is not already cached in the client and returns it.
 
         Args:
             who: The type of the item.
@@ -66,7 +66,7 @@ class Client(BaseClient):
         else:
             factory = ITEM_TYPES.get(who)
             if factory is not None:
-                item = self._items[(who, where)] = factory(self, where)
+                item = self._items[(who, where)] = factory(client, where)
                 return item
             else:
                 raise KeyError(f"Item factory not found: {who}, {where}")
@@ -129,7 +129,7 @@ class Client(BaseClient):
                 continue
 
             try:
-                # get item if already declared, otherwise instantiate it
+                # get the item if already declared, otherwise instantiate it
                 item = self.get_item(who, where, client=client)
             except KeyError:
                 log.info(f"Item type not supported, WHO={who}, WHERE={where}")

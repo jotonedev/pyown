@@ -214,14 +214,14 @@ class BaseClient(ABC):
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
         """
-        Awaits a message from the server and returns it
+        Awaits a message from the server and returns it.
 
         Returns:
-            BaseMessage: the message from the server, it will be a subclass of BaseMessage
+            BaseMessage: the message from the server, it will be a subclass of BaseMessage.
 
         Raises:
-            TimeoutError: if the server does not respond in the given time
-            InvalidSession: if the client is not started
+            TimeoutError: if the server does not respond in the given time.
+            InvalidSession: if the client is not started.
         """
         if self._protocol is None:
             raise InvalidSession("Client not started")

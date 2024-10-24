@@ -23,7 +23,7 @@ class OWNProtocol(Protocol):
             on_connection_end: Future[Exception | None],
     ):
         """
-        Creates the TCP connection with the gateway, parses the incoming data and sends the outgoing messages.
+        Creates the TCP connection with the gateway, parses the incoming data, and sends the outgoing messages.
 
         Args:
             on_connection_start (Future): The future to set when the connection starts.
@@ -63,7 +63,7 @@ class OWNProtocol(Protocol):
         Called by the transport class when a packet with data is received.
 
         The data argument is a bytes object containing the incoming data.
-        It tries to parse the data and if a valid message is found, it is added to the messages queue.
+        It tries to parse the data, and if a valid message is found, it is added to the message queue.
 
         Args:
             raw (bytes): The incoming data
@@ -79,7 +79,7 @@ class OWNProtocol(Protocol):
         try:
             messages = [parse_message(msg + "##") for msg in data.split("##") if msg]
         except ParseError as e:
-            log.warning(f"Received invalid message: {e.tags}")
+            log.warning(f"Received invalid message: {e}")
             raise e
 
         # If there are no messages, return

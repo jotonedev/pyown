@@ -7,7 +7,7 @@ __all__ = [
 
 class Dimension(TagWithParameters):
     """
-    Represent the DIMENSION tag.
+    Represents the DIMENSION tag.
 
     It's used in dimension messages.
 

@@ -71,53 +71,53 @@ class BaseLight(BaseItem, ABC):
     _event_callbacks: dict[LightEvents, list[CoroutineCallback]] = {}
 
     async def turn_on(self):
-        """Turn the light on."""
+        """Turns the light on."""
         await self.send_normal_message(WhatLight.ON)
 
     async def turn_off(self):
-        """Turn the light off."""
+        """Turns the light off."""
         await self.send_normal_message(WhatLight.OFF)
 
     async def turn_on_1_min(self):
-        """Turn the light on for 1 minute."""
+        """Turns the light on for 1 minute."""
         await self.send_normal_message(WhatLight.ON_1_MIN)
 
     async def turn_on_2_min(self):
-        """Turn the light on for 2 minutes."""
+        """Turns the light on for 2 minutes."""
         await self.send_normal_message(WhatLight.ON_2_MIN)
 
     async def turn_on_3_min(self):
-        """Turn the light on for 3 minutes."""
+        """Turns the light on for 3 minutes."""
         await self.send_normal_message(WhatLight.ON_3_MIN)
 
     async def turn_on_4_min(self):
-        """Turn the light on for 4 minutes."""
+        """Turns the light on for 4 minutes."""
         await self.send_normal_message(WhatLight.ON_4_MIN)
 
     async def turn_on_5_min(self):
-        """Turn the light on for 5 minutes."""
+        """Turns the light on for 5 minutes."""
         await self.send_normal_message(WhatLight.ON_5_MIN)
 
     async def turn_on_15_min(self):
-        """Turn the light on for 15 minutes."""
+        """Turns the light on for 15 minutes."""
         await self.send_normal_message(WhatLight.ON_15_MIN)
 
     async def turn_on_30_min(self):
-        """Turn the light on for 30 minutes."""
+        """Turns the light on for 30 minutes."""
         await self.send_normal_message(WhatLight.ON_30_MIN)
 
     async def turn_on_0_5_sec(self):
-        """Turn the light on for 0.5 seconds."""
+        """Turns the light on for 0.5 seconds."""
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
 
     @abstractmethod
     async def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
-        """Get the status of the light"""
+        """Gets the status of the light"""
         yield None  # type: ignore[misc]
 
     async def temporization_command(self, hour: int, minute: int, second: int):
         """
-        Send a temporization command
+        Sends a temporization command
 
         It will turn the light immediately on and then off after the specified time passed.
 
@@ -133,7 +133,7 @@ class BaseLight(BaseItem, ABC):
 
     async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
-        Request the gateway the current temporization settings of the actuator.
+        Requests the gateway the current temporization settings of the actuator.
 
         Yields:
             A tuple with the hour, minute, and second of the temporization.
@@ -146,7 +146,7 @@ class BaseLight(BaseItem, ABC):
 
     async def request_working_time_lamp(self) -> AsyncIterator[tuple[Where, int]]:
         """
-        Request the gateway for how long the light has been on.
+        Requests the gateway for how long the light has been on.
 
         Yields:
             The time in hours the light has been on.
@@ -158,7 +158,7 @@ class BaseLight(BaseItem, ABC):
     @classmethod
     def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the light status changes.
+        Registers a callback function to be called when the light status changes.
 
         Args:
             callback: The callback function to call.
@@ -169,7 +169,7 @@ class BaseLight(BaseItem, ABC):
     @classmethod
     def on_temporization_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the temporization changes.
+        Registers a callback function to be called when the temporization changes.
 
         Args:
             callback: The callback function to call.
@@ -180,7 +180,7 @@ class BaseLight(BaseItem, ABC):
     @classmethod
     def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
         """
-        Call the registered callbacks for the event.
+        Calls the registered callbacks for the event.
 
         Args:
             item: The item that triggered the event.
