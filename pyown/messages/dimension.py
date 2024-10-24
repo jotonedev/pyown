@@ -13,11 +13,9 @@ __all__ = [
 
 class DimensionRequest(BaseMessage):
     """
-    Represent a dimension request message
+    Represents a dimension request message
 
-    Syntax: *#who*where*dimension##
-
-    This is sent by the client to the server
+    Syntax: `*#who*where*dimension##`
     """
     _type: MessageType = MessageType.DIMENSION_REQUEST
     _tags: tuple[Who, Where, Dimension]
@@ -45,7 +43,7 @@ class DimensionRequest(BaseMessage):
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
-        """Parse the tags of a message from the OpenWebNet bus."""
+        """Parses the tags of a message from the OpenWebNet bus."""
 
         return cls(
             tags=(
@@ -58,11 +56,9 @@ class DimensionRequest(BaseMessage):
 
 class DimensionWriting(BaseMessage):
     """
-    Represent a dimension writing message
+    Represents a dimension writing message
 
-    Syntax: *#who*where*#dimension*value1*value2*...*valueN##
-
-    This is sent by the client to the server
+    Syntax: `*#who*where*#dimension*value1*value2*...*valueN##`
     """
     _type: MessageType = MessageType.DIMENSION_WRITING
     _tags: tuple[Who, Where, Dimension, Value, ...]  # type: ignore[misc]
@@ -94,7 +90,7 @@ class DimensionWriting(BaseMessage):
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
-        """Parse the tags of a message from the OpenWebNet bus."""
+        """Parses the tags of a message from the OpenWebNet bus."""
 
         values: list[Value] = [Value(t) for t in tags[3:]]
 
@@ -111,11 +107,9 @@ class DimensionWriting(BaseMessage):
 
 class DimensionResponse(DimensionWriting, BaseMessage):
     """
-    Represent a dimension writing message
+    Represents a dimension writing message
 
-    Syntax: *#who*where*dimension*value1*value2*...*valueN##
-
-    This is sent by the server to the client
+    Syntax: `*#who*where*dimension*value1*value2*...*valueN##`
     """
     _type: MessageType = MessageType.DIMENSION_RESPONSE
     _regex: Pattern[str] = re.compile(

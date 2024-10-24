@@ -1,0 +1,53 @@
+name: Docs
+
+on:
+  release:
+    types: [ published ]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build the docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup and Cache Python Poetry
+        uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
+        with:
+          python-version: "3.12"
+          poetry-version: "1.8.4"
+          install-args: --with docs
+
+      - name: Set git credentials
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Build the docs
+        id: build
+        run: poetry run mkdocs build
+
+      - name: Upload docs
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  deploy:
+    name: Deploy the docs
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from pyown.client import Client
-from pyown.items.light import Light
+from pyown.items import Light
 
 
 async def run(host: str, port: int, password: str):

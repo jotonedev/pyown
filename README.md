@@ -42,3 +42,11 @@ This project is licensed under the GNU GPL v3 license - see the [LICENSE](LICENS
   by [mvalla](https://github.com/mvalla)
 * [another python implementation](https://github.com/karel1980/ReOpenWebNet) developed
   by [karel1980](https://github.com/karel1980)
+
+## Disclaimer
+
+- This library is not associated by any means with BTicino or Legrand companies
+- The Open Web Net protocol is maintained and Copyright by BTicino/Legrand. The documentation of the protocol if freely
+  accessible for developers on the Legrand developer web site
+- "Open Web Net", "SCS", "MyHOME_Up", "MyHOME", "MyHOME_Play" and "Living Now" are registered trademarks by
+  BTicino/Legrand

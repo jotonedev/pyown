@@ -12,7 +12,7 @@ __all__ = [
 class Dimmer(BaseLight):
     async def turn_on(self, speed: int | None = None):
         """
-        Turn the light on.
+        Turns the light on.
 
         Args:
             speed: turn on the light with a specific speed [0-255]
@@ -29,7 +29,7 @@ class Dimmer(BaseLight):
 
     async def turn_off(self, speed: int | None = None):
         """
-        Turn the light off.
+        Turns the light off.
 
         Args:
             speed: turn off the light with a specific speed [0-255]
@@ -44,39 +44,39 @@ class Dimmer(BaseLight):
         await self.send_normal_message(what)
 
     async def set_20_percent(self):
-        """Set the light to 20%."""
+        """Sets the light to 20%."""
         await self.send_normal_message(WhatLight.ON_20_PERCENT)
 
     async def set_30_percent(self):
-        """Set the light to 30%."""
+        """Sets the light to 30%."""
         await self.send_normal_message(WhatLight.ON_30_PERCENT)
 
     async def set_40_percent(self):
-        """Set the light to 40%."""
+        """Sets the light to 40%."""
         await self.send_normal_message(WhatLight.ON_40_PERCENT)
 
     async def set_50_percent(self):
-        """Set the light to 50%."""
+        """Sets the light to 50%."""
         await self.send_normal_message(WhatLight.ON_50_PERCENT)
 
     async def set_60_percent(self):
-        """Set the light to 60%."""
+        """Sets the light to 60%."""
         await self.send_normal_message(WhatLight.ON_60_PERCENT)
 
     async def set_70_percent(self):
-        """Set the light to 70%."""
+        """Sets the light to 70%."""
         await self.send_normal_message(WhatLight.ON_70_PERCENT)
 
     async def set_80_percent(self):
-        """Set the light to 80%."""
+        """Sets the light to 80%."""
         await self.send_normal_message(WhatLight.ON_80_PERCENT)
 
     async def set_90_percent(self):
-        """Set the light to 90%."""
+        """Sets the light to 90%."""
         await self.send_normal_message(WhatLight.ON_90_PERCENT)
 
     async def set_100_percent(self):
-        """Set the light to 100%."""
+        """Sets the light to 100%."""
         await self.send_normal_message(WhatLight.ON_100_PERCENT)
 
     async def up_percent(
@@ -85,7 +85,7 @@ class Dimmer(BaseLight):
             speed: int | None = None
     ):
         """
-        Increase the light percentage.
+        Increases the light percentage.
 
         Args:
             value: the percentage to increase, by default, 1
@@ -109,7 +109,7 @@ class Dimmer(BaseLight):
             speed: int | None = None
     ):
         """
-        Decrease the light percentage.
+        Decreases the light percentage.
 
         Args:
             value: the percentage to decrease, by default 1
@@ -129,7 +129,7 @@ class Dimmer(BaseLight):
 
     async def get_status(self) -> AsyncIterator[tuple[Where, int]]:
         """
-        Get the status of the light.
+        Gets the status of the light.
 
         Yields:
             tuple[Where, int]: the first element is the location of the light,
@@ -140,7 +140,7 @@ class Dimmer(BaseLight):
 
     async def set_brightness_with_speed(self, brightness: int | str, speed: int | str):
         """
-        Set the brightness of the light with a specific speed.
+        Sets the brightness of the light with a specific speed.
 
         Args:
             brightness: the brightness to set
@@ -150,12 +150,12 @@ class Dimmer(BaseLight):
 
     async def set_hsv(self, hue: int, saturation: int, value: int):
         """
-        Set the color of the light in HSV format.
+        Sets the color of the light in HSV format.
 
         Args:
             hue: the hue value to set [0-359]
             saturation: the saturation value [0-100]
-            value:  the value to set  [0-100]
+            value:  the value to set [0-100]
         """
         if hue < 0 or hue > 359:
             raise ValueError("Invalid hue value")
@@ -170,7 +170,7 @@ class Dimmer(BaseLight):
 
     async def set_white_temperature(self, temperature: int):
         """
-        Set the white temperature of the light.
+        Sets the white temperature of the light.
 
         Args:
             temperature: the temperature to set [1-65534] using the Mired scale.
@@ -182,7 +182,7 @@ class Dimmer(BaseLight):
 
     async def request_current_brightness_speed(self) -> AsyncIterator[tuple[Where, int, int]]:
         """
-        Request the current brightness and speed of the light.
+        Requests the current brightness and speed of the light.
 
         Yields:
             A tuple with the where of the item, its brightness level, and its current speed.
@@ -196,13 +196,13 @@ class Dimmer(BaseLight):
 
     async def request_current_hsv(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
-        Request the current HSV of the light, valid only for RGB lights.
+        Requests the current HSV of the light, valid only for RGB lights.
 
         Yields:
             A tuple with the where of the item, the hue, the saturation, and the value.
-            The hue is in the range [0-359].
-            The saturation is in the range [0-100].
-            The value is in the range [0-100].
+                The hue is in the range [0-359].
+                The saturation is in the range [0-100].
+                The value is in the range [0-100].
         """
         async for message in self.send_dimension_request("12"):
             hue = int(message.values[0].tag)  # type: ignore[arg-type]
@@ -212,11 +212,11 @@ class Dimmer(BaseLight):
 
     async def request_current_white_temperature(self) -> AsyncIterator[tuple[Where, int]]:
         """
-        Request the current white temperature of the light.
+        Requests the current white temperature of the light.
 
         Yields:
             The where of the item and the temperature.
-            The temperature is in the range [1-65534] using the Mired scale.
+                The temperature is in the range [1-65534] using the Mired scale.
         """
         async for message in self.send_dimension_request("14"):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
@@ -224,31 +224,32 @@ class Dimmer(BaseLight):
     @classmethod
     def on_luminosity_change(cls, callback: Callable[[Self, int, int], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the luminosity changes.
+        Registers a callback function to be called when the luminosity changes.
 
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item, dimmer level and speed
+                It will receive as arguments the item, dimmer level and speed
         """
         cls._event_callbacks.setdefault(LightEvents.LUMINOSITY_CHANGE, []).append(callback)
 
     @classmethod
     def on_hsv_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the HSV changes.
+        Registers a callback function to be called when the HSV changes.
 
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item, the hue, the saturation, and the value.
+                It will receive as arguments the item, the hue, the saturation, and the value.
         """
         cls._event_callbacks.setdefault(LightEvents.HSV_CHANGE, []).append(callback)
 
     @classmethod
     def on_white_temp_change(cls, callback: Callable[[Self, int], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the white temperature changes.
+        Registers a callback function to be called when the white temperature changes.
+
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item and the temperature.
+                It will receive as arguments the item and the temperature.
         """
         cls._event_callbacks.setdefault(LightEvents.WHITE_TEMP_CHANGE, []).append(callback)

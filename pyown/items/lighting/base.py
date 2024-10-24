@@ -16,6 +16,16 @@ __all__ = [
 
 
 class LightEvents(Enum):
+    """
+    This enum is used internally to register the callbacks to the correct event.
+
+    Attributes:
+        STATUS_CHANGE: The light status has changed.
+        LUMINOSITY_CHANGE: The light luminosity has changed.
+        LIGHT_TEMPORIZATION: The light temporization has changed.
+        HSV_CHANGE: The light color has changed.
+        WHITE_TEMP_CHANGE: The white temperature has changed.
+    """
     STATUS_CHANGE = auto()
     LUMINOSITY_CHANGE = auto()
     LIGHT_TEMPORIZATION = auto()
@@ -24,6 +34,44 @@ class LightEvents(Enum):
 
 
 class WhatLight(What, StrEnum):
+    """
+    This enum contains the possible commands for the lights.
+    It is used only internally to send the correct command to the gateway.
+
+    Attributes:
+        OFF: Turns the light off.
+        ON: Turns the light on.
+        ON_20_PERCENT: Turns the light on at 20%.
+        ON_30_PERCENT: Turns the light on at 30%.
+        ON_40_PERCENT: Turns the light on at 40%.
+        ON_50_PERCENT: Turns the light on at 50%.
+        ON_60_PERCENT: Turns the light on at 60%.
+        ON_70_PERCENT: Turns the light on at 70%.
+        ON_80_PERCENT: Turns the light on at 80%.
+        ON_90_PERCENT: Turns the light on at 90%.
+        ON_100_PERCENT: Turns the light on at 100%.
+        ON_1_MIN: Turns the light on for 1 minute.
+        ON_2_MIN: Turns the light on for 2 minutes.
+        ON_3_MIN: Turns the light on for 3 minutes.
+        ON_4_MIN: Turns the light on for 4 minutes.
+        ON_5_MIN: Turns the light on for 5 minutes.
+        ON_15_MIN: Turns the light on for 15 minutes.
+        ON_30_MIN: Turns the light on for 30 minutes.
+        ON_0_5_SEC: Turns the light on for 0.5 seconds.
+        BLINKING_0_5_SEC: Blinks the light every 0.5 seconds.
+        BLINKING_1_0_SEC: Blinks the light every 1.0 seconds.
+        BLINKING_1_5_SEC: Blinks the light every 1.5 seconds.
+        BLINKING_2_0_SEC: Blinks the light every 2.0 seconds.
+        BLINKING_2_5_SEC: Blinks the light every 2.5 seconds.
+        BLINKING_3_0_SEC: Blinks the light every 3.0 seconds.
+        BLINKING_3_5_SEC: Blinks the light every 3.5 seconds.
+        BLINKING_4_0_SEC: Blinks the light every 4.0 seconds.
+        BLINKING_4_5_SEC: Blinks the light every 4.5 seconds.
+        BLINKING_5_0_SEC: Blinks the light every 5.0 seconds.
+        UP_1_PERCENT: Increases the light luminosity by 1
+        DOWN_1_PERCENT: Decreases the light luminosity by 1
+        COMMAND_TRANSLATION: Not clear what this does.
+    """
     OFF = "0"
     ON = "1"
 
@@ -72,53 +120,53 @@ class BaseLight(BaseItem, ABC):
     _event_callbacks: dict[LightEvents, list[CoroutineCallback]] = {}
 
     async def turn_on(self):
-        """Turn the light on."""
+        """Turns the light on."""
         await self.send_normal_message(WhatLight.ON)
 
     async def turn_off(self):
-        """Turn the light off."""
+        """Turns the light off."""
         await self.send_normal_message(WhatLight.OFF)
 
     async def turn_on_1_min(self):
-        """Turn the light on for 1 minute."""
+        """Turns the light on for 1 minute."""
         await self.send_normal_message(WhatLight.ON_1_MIN)
 
     async def turn_on_2_min(self):
-        """Turn the light on for 2 minutes."""
+        """Turns the light on for 2 minutes."""
         await self.send_normal_message(WhatLight.ON_2_MIN)
 
     async def turn_on_3_min(self):
-        """Turn the light on for 3 minutes."""
+        """Turns the light on for 3 minutes."""
         await self.send_normal_message(WhatLight.ON_3_MIN)
 
     async def turn_on_4_min(self):
-        """Turn the light on for 4 minutes."""
+        """Turns the light on for 4 minutes."""
         await self.send_normal_message(WhatLight.ON_4_MIN)
 
     async def turn_on_5_min(self):
-        """Turn the light on for 5 minutes."""
+        """Turns the light on for 5 minutes."""
         await self.send_normal_message(WhatLight.ON_5_MIN)
 
     async def turn_on_15_min(self):
-        """Turn the light on for 15 minutes."""
+        """Turns the light on for 15 minutes."""
         await self.send_normal_message(WhatLight.ON_15_MIN)
 
     async def turn_on_30_min(self):
-        """Turn the light on for 30 minutes."""
+        """Turns the light on for 30 minutes."""
         await self.send_normal_message(WhatLight.ON_30_MIN)
 
     async def turn_on_0_5_sec(self):
-        """Turn the light on for 0.5 seconds."""
+        """Turns the light on for 0.5 seconds."""
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
 
     @abstractmethod
     async def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
-        """Get the status of the light"""
+        """Gets the status of the light"""
         yield None  # type: ignore[misc]
 
     async def temporization_command(self, hour: int, minute: int, second: int):
         """
-        Send a temporization command
+        Sends a temporization command
 
         It will turn the light immediately on and then off after the specified time passed.
 
@@ -134,7 +182,7 @@ class BaseLight(BaseItem, ABC):
 
     async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
-        Request the gateway the current temporization settings of the actuator.
+        Requests the gateway the current temporization settings of the actuator.
 
         Yields:
             A tuple with the hour, minute, and second of the temporization.
@@ -147,11 +195,11 @@ class BaseLight(BaseItem, ABC):
 
     async def request_working_time_lamp(self) -> AsyncIterator[tuple[Where, int]]:
         """
-        Request the gateway for how long the light has been on.
+        Requests the gateway for how long the light has been on.
 
         Yields:
             The time in hours the light has been on.
-            The value is in the range [1-100000].
+                The value is in the range [1-100000].
         """
         async for message in self.send_dimension_request("3"):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
@@ -159,37 +207,27 @@ class BaseLight(BaseItem, ABC):
     @classmethod
     def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the light status changes.
+        Registers a callback function to be called when the light status changes.
 
         Args:
-            callback: The callback function to call.
-            It will receive as arguments the item and the status.
+            callback (Callable[[Self, bool]): The callback function to call.
+                It will receive as arguments the item and the status.
         """
         cls._event_callbacks.setdefault(LightEvents.STATUS_CHANGE, []).append(callback)
 
     @classmethod
     def on_temporization_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
         """
-        Register a callback function to be called when the temporization changes.
+        Registers a callback function to be called when the temporization changes.
 
         Args:
-            callback: The callback function to call.
-            It will receive as arguments the item, the hour, the minute, and the second.
+            callback (Callable[[Self, int, int, int]): The callback function to call.
+                It will receive as arguments the item, the hour, the minute, and the second.
         """
         cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
 
     @classmethod
     def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
-        """
-        Call the registered callbacks for the event.
-
-        Args:
-            item: The item that triggered the event.
-            message: The message that triggered the event.
-
-        Raises:
-            InvalidMessage: If the message is not valid.
-        """
         tasks: list[Task] = []
 
         if isinstance(message, DimensionResponse):

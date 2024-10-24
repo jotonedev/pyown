@@ -3,7 +3,7 @@ __all__ = ["own_calc_pass"]
 
 def own_calc_pass(password: str | int, nonce: str | int) -> str:  # noqa: C901
     """
-    Encode the password using the OPEN algorithm.
+    Encodes the password using the OPEN algorithm.
     Source: https://rosettacode.org/wiki/OpenWebNet_password#Python
 
     Parameters:

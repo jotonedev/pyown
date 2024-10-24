@@ -11,9 +11,9 @@ __all__ = [
 
 class StatusRequest(BaseMessage):
     """
-    Represent a status request message
+    Represents a status request message
 
-    Syntax: *#who*where##
+    Syntax: `*#who*where##`
     """
     _type: MessageType = MessageType.STATUS_REQUEST
     _tags: tuple[Who, Where]
@@ -37,7 +37,7 @@ class StatusRequest(BaseMessage):
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
-        """Parse the tags of a message from the OpenWebNet bus."""
+        """Parses the tags of a message from the OpenWebNet bus."""
 
         return cls(
             tags=(

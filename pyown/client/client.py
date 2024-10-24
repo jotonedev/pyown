@@ -4,11 +4,11 @@ from asyncio import AbstractEventLoop, Task
 from typing import Optional
 
 from .base import BaseClient
+from .session import SessionType
 from ..exceptions import InvalidSession, ParseError, InvalidMessage, InvalidTag
 from ..items.base import BaseItem
 from ..items.utils import ITEM_TYPES
 from ..messages import MessageType
-from ..protocol import SessionType
 from ..tags import Who, Where
 
 __all__ = [
@@ -31,14 +31,15 @@ class Client(BaseClient):
             loop: Optional[AbstractEventLoop] = None
     ):
         """
-        Create a new client.
+        Represents a client connection that connects to an OpenWebNet gateway.
+        This class can be used to send commands and receive events from the gateway.
 
         Args:
             host (str): The host to connect to (ip address)
             port (int): The port to connect to
             password (str): The password to authenticate with
-            session_type (SessionType): The session type to use.
-            Default is CommandSession
+            session_type (SessionType): The session type to use, can be a command session or an event session.
+                Default is CommandSession
             loop (Optional[AbstractEventLoop]): The event loop to use
         """
         super().__init__(host, port, password, session_type, loop=loop)
@@ -47,34 +48,34 @@ class Client(BaseClient):
 
     def get_item(self, who: Who, where: Where, *, client: BaseClient) -> BaseItem:
         """
-        Get an item from the client.
+        Instantiates an item if it is not already cached in the client and returns it.
 
         Args:
             who: The type of the item.
             where: The location of the item.
-            client: The client to use to declare the items if they are already declared.
+            client: The client to assign to the item if it's not already defined.
 
         Returns:
-            The item.
+            The item requested.
 
         Raises:
-            KeyError: if the item is not found.
+            KeyError: if the item WHO is not supported.
         """
         if (who, where) in self._items:
             return self._items[(who, where)]
         else:
             factory = ITEM_TYPES.get(who)
             if factory is not None:
-                item = self._items[(who, where)] = factory(self, where)
+                item = self._items[(who, where)] = factory(client, where)
                 return item
             else:
-                raise KeyError(f"Item not found: {who}, {where}")
+                raise KeyError(f"Item factory not found: {who}, {where}")
 
     async def loop(self, *, client: BaseClient | None = None):
         """
-        Run the event loop until the client is closed
-        This is not associated with the asyncio event loop.
-        This will loop until the client is closed, and it will call the callbacks when a message is received.
+        Runs the client loop.
+        This is a loop that runs the entire event system for the client, it will read messages from the gateway and
+        dispatch them to the correct callbacks.
 
         Typical usage:
         ```python
@@ -89,15 +90,12 @@ class Client(BaseClient):
         ```
 
         Args:
-            client: The client to use to declare the items for the callbacks.
-            Default is self.
-
-        Returns:
-            None
+            client: The client to use to declare the items for the callbacks. Default is self.
+                This is useful when you want the items to have a command client to allow sending commands with them.
 
         Raises:
             InvalidSession: if called when the client is set as a command client and not as an event client or
-            if the client is not connected
+                if the client is not connected
         """
         if self.is_cmd_session():
             raise InvalidSession("Cannot run loop on a command session")
@@ -131,7 +129,7 @@ class Client(BaseClient):
                 continue
 
             try:
-                # get item if already declared, otherwise instantiate it
+                # get the item if already declared, otherwise instantiate it
                 item = self.get_item(who, where, client=client)
             except KeyError:
                 log.info(f"Item type not supported, WHO={who}, WHERE={where}")

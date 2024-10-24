@@ -13,21 +13,32 @@ from typing import Any
 
 
 class OWNException(Exception):
-    def __init__(self, message: str = "") -> None:
-        super().__init__(message)
+    """
+    Base exception for all exceptions in the pyown package.
+
+    This exception should not be raised directly.
+    It is useful for catching all exceptions in the package.
+    """
+    pass
 
 
 class ParseError(OWNException):
-    tags: list[str]
-    message: str
+    """
+    Raised when an error occurs while parsing a message or a tag.
 
-    def __init__(self, tags: list[str], message: str) -> None:
-        self.tags = tags
-        self.message = message
-        super().__init__(f"Error parsing message: {message}")
+    It is a generic exception and should not be raised directly.
+    """
+    pass
 
 
-class InvalidData(OWNException):
+class InvalidData(ParseError):
+    """
+    Raised when an error occurs when not valid data or characters not allowed are received.
+    This should not happen with official gateways.
+
+    Args:
+        data: The data that caused the error.
+    """
     data: bytes
 
     def __init__(self, data: bytes):
@@ -36,15 +47,31 @@ class InvalidData(OWNException):
         super().__init__(f"Error parsing data: {data.hex()}")
 
 
-class InvalidMessage(OWNException):
+class InvalidMessage(ParseError):
+    """
+    Raised when a message does not follow the protocol standards.
+
+    Args:
+        message: The message or tags that caused the error.
+    """
     message: str
 
-    def __init__(self, message: Any) -> None:
-        self.message = message
-        super().__init__(f"Invalid message: {message}")
+    def __init__(self, message: str | list[str]) -> None:
+        if isinstance(message, list):
+            self.message = "*" + "*".join(message) + "##"
+        else:
+            self.message = message
+
+        super().__init__(f"Invalid message: {self.message}")
 
 
-class InvalidTag(OWNException):
+class InvalidTag(ParseError):
+    """
+    Raised when a tag is not valid or does not follow the protocol standards.
+
+    Args:
+        tag: The tag that caused the error.
+    """
     tag: str
 
     def __init__(self, tag: Any) -> None:
@@ -53,15 +80,21 @@ class InvalidTag(OWNException):
 
 
 class InvalidSession(OWNException):
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
+    """
+    Raised when a command is sent using an event session or when event methods are called using a command session.
+    """
+    pass
 
 
-class InvalidAuthentication(InvalidSession):
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
+class InvalidAuthentication(OWNException):
+    """
+    Raised when the authentication fails or an unsupported authentication method is used.
+    """
+    pass
 
 
 class ResponseError(OWNException):
-    def __init__(self, message: str = "") -> None:
-        super().__init__(message)
+    """
+    Raised when an error the server responds with a NACK or responds with an unexpected message.
+    """
+    pass

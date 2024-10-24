@@ -1,4 +1,4 @@
-from pyown.protocol.session import SessionType
+from pyown.client.session import SessionType
 
 
 def test_session_type_message_generation():

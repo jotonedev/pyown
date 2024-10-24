@@ -4,12 +4,13 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Transport, Future
 from typing import Optional, Any
 
+from .session import SessionType
 from ..auth import AuthAlgorithm
 from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
 from ..auth.open import own_calc_pass
 from ..exceptions import InvalidAuthentication, InvalidSession
 from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
-from ..protocol import OWNProtocol, SessionType
+from ..protocol import OWNProtocol
 
 __all__ = [
     "BaseClient",
@@ -30,6 +31,7 @@ class BaseClient(ABC):
     ):
         """
         BaseClient constructor
+        This class should not be instantiated directly, use the Client class instead
 
         Args:
             host (str): The host to connect to (ip address)
@@ -54,19 +56,20 @@ class BaseClient(ABC):
 
     def is_cmd_session(self) -> bool:
         """
-        Check if the session is a command session
+        Checks if the session is a command session
 
         Returns:
-            bool: True if the session is a command session
+            bool: True if the session is a command session, False otherwise
         """
         return self._session_type == SessionType.CommandSession or self._session_type == SessionType.OldCommandSession
 
     async def start(self) -> None:
         """
-        Start the client
+        Creates a connection with the gateway and does the initial handshake
 
         Raises:
             TimeoutError: if the server does not respond
+            InvalidSession: if the server requires an unknown authentication algorithm
         """
         self._transport, self._protocol = await self._loop.create_connection(
             lambda: OWNProtocol(
@@ -90,7 +93,7 @@ class BaseClient(ABC):
             message = await self.read_message()
 
         if message.type != MessageType.ACK:
-            raise InvalidSession("Expected ACK message")
+            raise InvalidAuthentication("Expected ACK message")
 
         log.debug("Starting handshake")
 
@@ -114,13 +117,13 @@ class BaseClient(ABC):
                 hash_algorithm=tag,
             )
         else:
-            raise InvalidSession("Invalid authentication response")
+            raise InvalidAuthentication("Invalid authentication response")
 
         log.info("Client ready")
 
     async def _authenticate_open(self, nonce: str) -> None:
         """
-        Authenticate the client using the open authentication algorithm
+        Authenticates the client using the open authentication algorithm
 
         Args:
             nonce (str): The nonce sent by the server
@@ -135,7 +138,7 @@ class BaseClient(ABC):
 
     async def _authenticate_hmac(self, hash_algorithm: AuthAlgorithm | str) -> None:
         """
-        Authenticate the client using the hmac authentication algorithm
+        Authenticates the client using the hmac authentication algorithm
 
         Args:
             hash_algorithm (AuthAlgorithm | str): The hash algorithm to use
@@ -192,7 +195,7 @@ class BaseClient(ABC):
 
     async def send_message(self, message: BaseMessage, *, force: bool = False) -> None:
         """
-        Send a message to the server
+        Sends a message to the server
 
         Args:
             message (BaseMessage): send to the server a subclass of BaseMessage
@@ -210,14 +213,14 @@ class BaseClient(ABC):
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
         """
-        Read a message from the server
+        Awaits a message from the server and returns it.
 
         Returns:
-            BaseMessage: the message from the server
+            BaseMessage: the message from the server, it will be a subclass of BaseMessage.
 
         Raises:
-            TimeoutError: if the server does not respond
-            InvalidSession: if the client is not started
+            TimeoutError: if the server does not respond in the given time.
+            InvalidSession: if the client is not started.
         """
         if self._protocol is None:
             raise InvalidSession("Client not started")
@@ -234,12 +237,15 @@ class BaseClient(ABC):
         if self._transport is not None:
             self._transport.close()
 
+        self._protocol = None
+        self._transport = None
+
     @abstractmethod
     async def loop(self):
         """
-        Run the event loop until the client is closed
-        This is not associated with the asyncio event loop.
-        This will loop until the client is closed, and it will call the callbacks when a message is received.
+        Runs the client loop.
+        This is a loop that runs the entire event system for the client, it will read messages from the gateway and
+        dispatch them to the correct callbacks.
         """
         raise NotImplementedError
 

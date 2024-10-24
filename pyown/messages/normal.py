@@ -11,10 +11,9 @@ __all__ = [
 
 class NormalMessage(BaseMessage):
     """
-    Represent a Normal message
+    Represents a Normal message
 
-    Syntax: *who*what*where##
-
+    Syntax: `*who*what*where##`
     """
     _type: MessageType = MessageType.NORMAL
     _tags: tuple[Who, What, Where]
@@ -42,7 +41,7 @@ class NormalMessage(BaseMessage):
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
-        """Parse the tags of a message from the OpenWebNet bus."""
+        """Parses the tags of a message from the OpenWebNet bus."""
 
         return cls(
             tags=(
