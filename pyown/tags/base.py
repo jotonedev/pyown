@@ -10,10 +10,16 @@ __all__ = [
 ]
 
 VALID_TAG_CHARS: Final[str] = "0123456789#"
+"""This are the only valid characters for a tag"""
 
 
 class Tag:
-    """Tag class."""
+    """
+    Tag class.
+
+    This a base class for all the other type of tags.
+    This class does not support parameters. To use parameters, use the TagWithParameters class.
+    """
 
     def __init__(self, string: str | int = "", *args, **kwargs):
         if isinstance(string, int):
@@ -38,11 +44,14 @@ class Tag:
 
     @property
     def parameters(self) -> list[str] | None:
-        """Return the parameters of the tag"""
+        """
+        Return the parameters of the tag.
+        For a tag without parameters, this function returns None.
+        """
         return None
 
     def with_parameter(self, parameter: str | int) -> "TagWithParameters":
-        """Return the tag with parameters"""
+        """Return the tag with the specified parameter"""
         return TagWithParameters(f"{self}#{parameter}")
 
     def __str__(self) -> str:
@@ -66,6 +75,12 @@ class Tag:
 
 
 class TagWithParameters(Tag):
+    """
+    Tag with parameters class.
+
+    A tag with parameters is a tag that contains a value and a list of parameters.
+    So, it follows the following format value#parameter1#parameter2#...#parameterN
+    """
     @property
     def tag(self) -> str:
         """Return the value of the tag without its parameters or prefix"""
@@ -78,7 +93,7 @@ class TagWithParameters(Tag):
         return self.string.split("#")[1:]
 
     def with_parameter(self, parameter: str | int) -> Self:
-        """Return the tag with parameters"""
+        """Return the tag with the specified parameter"""
         return self.__class__(f"{self}#{parameter}")
 
 

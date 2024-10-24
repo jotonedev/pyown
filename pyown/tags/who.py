@@ -9,6 +9,35 @@ __all__ = [
 
 
 class Who(Tag, StrEnum):
+    """
+    Who tag class.
+
+    This is an enum class because the value allowed in this tag are limited the the ones listed.
+
+    Attributes:
+        SCENE: used for scenarios modules
+        LIGHTING: used to manage all lighting devices
+        AUTOMATION: used to control shutter, rolling shutters, and other automation devices
+        LOAD_CONTROL: used to control power management devices
+        THERMOREGULATION: used to control heating and cooling centralized systems or probes
+        BURGLAR_ALARM: used to control security systems
+        DOOR_ENTRY_SYSTEM: used to control outdoor entry systems
+        VIDEO_DOOR_ENTRY: used to control video door entry systems
+        AUXILIARY: used to control auxiliary devices
+        GATEWAY: used to get information about the gateway
+        ACTUATORS_LOCKS: used to control actuators and locks
+        CEN_1: similar to the SCENE who
+        SOUND_DIFFUSION_1: used to control sound diffusion systems
+        MH200N_SCENE: used to control scenarios on the MH200N (similar to SCENE)
+        ENERGY_MANAGEMENT: used to read data from energy measurement devices
+        SOUND_DIFFUSION_2: extension of SOUND_DIFFUSION_1
+        LIGHTING_MANAGEMENT: extension of LIGHTING
+        CEN_2: extension of CEN_1
+        AUTOMATION_DIAGNOSTICS: used to read and set low level values to automation devices (only used by the official MyHome software)
+        THERMOREGULATION_DIAGNOSTICS: used to read and set low level values to thermoregulation devices (only used by the official MyHome software)
+        DEVICE_DIAGNOSTICS: used to read and set low level values to devices (only used by the official MyHome software)
+        ENERGY_DIAGNOSTICS: used to read and set low level values to energy management devices (only used by the official MyHome software)
+    """
     SCENE: str = "0"
     LIGHTING: str = "1"
     AUTOMATION: str = "2"
@@ -37,6 +66,7 @@ class Who(Tag, StrEnum):
 
     @property
     def name(self) -> str:
+        """Get a string description of the tag"""
         return who_map[self]
 
 
