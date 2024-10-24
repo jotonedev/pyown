@@ -3,9 +3,6 @@ name: Docs
 on:
   release:
     types: [ published ]
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -42,6 +39,7 @@ jobs:
   deploy:
     name: Deploy the docs
     runs-on: ubuntu-latest
+    needs: build
 
     permissions:
       contents: read
