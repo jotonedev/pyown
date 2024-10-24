@@ -1,5 +1,5 @@
 import re
-from typing import Self, Pattern, AnyStr, Final
+from typing import Self, Pattern
 
 from .base import BaseMessage, MessageType
 from ..tags import Who, What, Where

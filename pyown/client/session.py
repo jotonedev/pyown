@@ -28,4 +28,3 @@ class SessionType(StrEnum):
             GenericMessage: The message to send to the gateway.
         """
         return GenericMessage.parse(tags=["99", self.value])
-

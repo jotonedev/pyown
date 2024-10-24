@@ -4,9 +4,9 @@ import abc
 import copy
 import re
 from enum import StrEnum
-from typing import Final, TypeVar, Pattern, AnyStr, Self, Any
+from typing import Final, Pattern, Self, Any
 
-from ..exceptions import ParseError, InvalidMessage
+from ..exceptions import InvalidMessage
 from ..tags import Who, Where
 
 __all__ = [

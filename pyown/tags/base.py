@@ -81,6 +81,7 @@ class TagWithParameters(Tag):
     A tag with parameters is a tag that contains a value and a list of parameters.
     So, it follows the following format value#parameter1#parameter2#...#parameterN
     """
+
     @property
     def tag(self) -> str:
         """Return the value of the tag without its parameters or prefix"""

@@ -1,8 +1,8 @@
 import re
-from typing import Self, Pattern, AnyStr, Final
+from typing import Self, Pattern
 
 from .base import BaseMessage, MessageType
-from ..exceptions import ParseError, InvalidMessage
+from ..exceptions import InvalidMessage
 
 __all__ = [
     "ACK",
