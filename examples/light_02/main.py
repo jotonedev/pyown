@@ -3,7 +3,7 @@ import logging
 
 from pyown import Client
 from pyown.items import Light
-from pyown.protocol import SessionType
+from pyown.client import SessionType
 
 log = logging.getLogger(__name__)
 

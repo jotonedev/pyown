@@ -8,6 +8,8 @@ __all__ = [
     "ITEM_TYPES"
 ]
 
+
 ITEM_TYPES: Final[dict[Who, Type[BaseItem]]] = {
     Who.LIGHTING: Light,
 }
+"""A dictionary that maps the Who tag to the corresponding item class."""

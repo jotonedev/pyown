@@ -15,6 +15,16 @@ __all__ = [
 
 
 class LightEvents(Enum):
+    """
+    This enum is used internally to register the callbacks to the correct event.
+
+    Attributes:
+        STATUS_CHANGE: The light status has changed.
+        LUMINOSITY_CHANGE: The light luminosity has changed.
+        LIGHT_TEMPORIZATION: The light temporization has changed.
+        HSV_CHANGE: The light color has changed.
+        WHITE_TEMP_CHANGE: The white temperature has changed.
+    """
     STATUS_CHANGE = auto()
     LUMINOSITY_CHANGE = auto()
     LIGHT_TEMPORIZATION = auto()
@@ -23,6 +33,44 @@ class LightEvents(Enum):
 
 
 class WhatLight(What, StrEnum):
+    """
+    This enum contains the possible commands for the lights.
+    It is used only internally to send the correct command to the gateway.
+
+    Attributes:
+        OFF: Turns the light off.
+        ON: Turns the light on.
+        ON_20_PERCENT: Turns the light on at 20%.
+        ON_30_PERCENT: Turns the light on at 30%.
+        ON_40_PERCENT: Turns the light on at 40%.
+        ON_50_PERCENT: Turns the light on at 50%.
+        ON_60_PERCENT: Turns the light on at 60%.
+        ON_70_PERCENT: Turns the light on at 70%.
+        ON_80_PERCENT: Turns the light on at 80%.
+        ON_90_PERCENT: Turns the light on at 90%.
+        ON_100_PERCENT: Turns the light on at 100%.
+        ON_1_MIN: Turns the light on for 1 minute.
+        ON_2_MIN: Turns the light on for 2 minutes.
+        ON_3_MIN: Turns the light on for 3 minutes.
+        ON_4_MIN: Turns the light on for 4 minutes.
+        ON_5_MIN: Turns the light on for 5 minutes.
+        ON_15_MIN: Turns the light on for 15 minutes.
+        ON_30_MIN: Turns the light on for 30 minutes.
+        ON_0_5_SEC: Turns the light on for 0.5 seconds.
+        BLINKING_0_5_SEC: Blinks the light every 0.5 seconds.
+        BLINKING_1_0_SEC: Blinks the light every 1.0 seconds.
+        BLINKING_1_5_SEC: Blinks the light every 1.5 seconds.
+        BLINKING_2_0_SEC: Blinks the light every 2.0 seconds.
+        BLINKING_2_5_SEC: Blinks the light every 2.5 seconds.
+        BLINKING_3_0_SEC: Blinks the light every 3.0 seconds.
+        BLINKING_3_5_SEC: Blinks the light every 3.5 seconds.
+        BLINKING_4_0_SEC: Blinks the light every 4.0 seconds.
+        BLINKING_4_5_SEC: Blinks the light every 4.5 seconds.
+        BLINKING_5_0_SEC: Blinks the light every 5.0 seconds.
+        UP_1_PERCENT: Increases the light luminosity by 1
+        DOWN_1_PERCENT: Decreases the light luminosity by 1
+        COMMAND_TRANSLATION: Not clear what this does.
+    """
     OFF = "0"
     ON = "1"
 
@@ -150,7 +198,7 @@ class BaseLight(BaseItem, ABC):
 
         Yields:
             The time in hours the light has been on.
-            The value is in the range [1-100000].
+                The value is in the range [1-100000].
         """
         async for message in self.send_dimension_request("3"):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
@@ -161,8 +209,8 @@ class BaseLight(BaseItem, ABC):
         Registers a callback function to be called when the light status changes.
 
         Args:
-            callback: The callback function to call.
-            It will receive as arguments the item and the status.
+            callback (Callable[[Self, bool]): The callback function to call.
+                It will receive as arguments the item and the status.
         """
         cls._event_callbacks.setdefault(LightEvents.STATUS_CHANGE, []).append(callback)
 
@@ -172,20 +220,13 @@ class BaseLight(BaseItem, ABC):
         Registers a callback function to be called when the temporization changes.
 
         Args:
-            callback: The callback function to call.
-            It will receive as arguments the item, the hour, the minute, and the second.
+            callback (Callable[[Self, int, int, int]): The callback function to call.
+                It will receive as arguments the item, the hour, the minute, and the second.
         """
         cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
 
     @classmethod
     def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
-        """
-        Calls the registered callbacks for the event.
-
-        Args:
-            item: The item that triggered the event.
-            message: The message that triggered the event.
-        """
         tasks: list[Task] = []
 
         if isinstance(message, DimensionResponse):

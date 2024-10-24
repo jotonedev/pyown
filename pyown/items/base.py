@@ -15,9 +15,14 @@ __all__ = [
 ]
 
 CoroutineCallback = Callable[..., Coroutine[None, None, None]]
+"""Type alias for a coroutine function that does not return anything."""
 
 
 class BaseItem(ABC):
+    """
+    The base class for all items.
+    This class provides the basic functionality to communicate with the server using the client.
+    """
     _who = Who.LIGHTING
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
@@ -47,15 +52,18 @@ class BaseItem(ABC):
 
     @property
     def where(self) -> Where:
+        """Returns the where value of the item."""
         return self._where
 
     @classmethod  # type: ignore[misc]
     @property
     def who(cls) -> Who:
+        """Returns the who value of the item."""
         return cls._who
 
     @property
     def client(self) -> BaseClient:
+        """Returns the client used to communicate with the server."""
         return self._client
 
     @client.setter
@@ -69,6 +77,17 @@ class BaseItem(ABC):
     @classmethod
     @abstractmethod
     def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+        """
+        Calls the registered callbacks for the event.
+        Used internally by the client to dispatch the events to the correct callbacks.
+
+        Args:
+            item (BaseItem): The item that triggered the event.
+            message (BaseMessage): The message that triggered the event.
+
+        Returns:
+            list[Task]: A list of tasks scheduled to run the callbacks.
+        """
         raise NotImplementedError
 
     async def _send_message(self, message: BaseMessage) -> None:

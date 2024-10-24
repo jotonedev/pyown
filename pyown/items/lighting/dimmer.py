@@ -216,7 +216,7 @@ class Dimmer(BaseLight):
 
         Yields:
             The where of the item and the temperature.
-            The temperature is in the range [1-65534] using the Mired scale.
+                The temperature is in the range [1-65534] using the Mired scale.
         """
         async for message in self.send_dimension_request("14"):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
@@ -228,7 +228,7 @@ class Dimmer(BaseLight):
 
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item, dimmer level and speed
+                It will receive as arguments the item, dimmer level and speed
         """
         cls._event_callbacks.setdefault(LightEvents.LUMINOSITY_CHANGE, []).append(callback)
 
@@ -239,7 +239,7 @@ class Dimmer(BaseLight):
 
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item, the hue, the saturation, and the value.
+                It will receive as arguments the item, the hue, the saturation, and the value.
         """
         cls._event_callbacks.setdefault(LightEvents.HSV_CHANGE, []).append(callback)
 
@@ -250,6 +250,6 @@ class Dimmer(BaseLight):
 
         Args:
             callback: The callback function to call.
-            It will receive as arguments the item and the temperature.
+                It will receive as arguments the item and the temperature.
         """
         cls._event_callbacks.setdefault(LightEvents.WHITE_TEMP_CHANGE, []).append(callback)

@@ -1,1 +1,1 @@
-from .light import Light, Dimmer
+from .lighting import Light, Dimmer

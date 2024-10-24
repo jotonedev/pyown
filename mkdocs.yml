@@ -100,5 +100,6 @@ nav:
       - Auth: api/auth.md
       - Exceptions: api/exceptions.md
       - Items:
+          - Base: api/items/base.md
           - Lighting: api/items/lighting.md
           - Automation: api/items/automation.md
