@@ -1,7 +1,9 @@
 ---
-title: Client module
+title: Exceptions module
 summary: Exceptions raised by the library
 ---
+
+These are all the exceptions raised by the library.
 
 ::: pyown.exceptions.OWNException
 
