@@ -35,6 +35,7 @@ This project is licensed under the GNU GPL v3 license—see the [LICENSE](LICENS
 
 ## Acknowledgments
 
+* [old openwebnet documentation](https://web.archive.org/web/20090311005636/http://www.myopen-bticino.it/openwebnet/openwebnet.php)
 * [openwebnet documentation](https://developer.legrand.com/Documentation/)
 * [another openwebnet documentation page](https://developer.legrand.com/local-interoperability/#PDF%20documentation)
 * [old password algorithm](https://rosettacode.org/wiki/OpenWebNet_password#Python)
