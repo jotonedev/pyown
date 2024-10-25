@@ -1,17 +1,14 @@
-import time
+import datetime
 import datetime
 import ipaddress
-
-from abc import ABC, abstractmethod
 from asyncio import Task
-from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator
+from enum import StrEnum
+from typing import Self
 
 from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
-from ...messages import DimensionResponse, BaseMessage, NormalMessage, DimensionWriting
-from ...tags import Who, What, Value, Where
-
+from ...messages import DimensionResponse, BaseMessage, DimensionWriting
+from ...tags import Who, What, Value
 
 __all__ = [
     "Gateway",
@@ -72,7 +69,7 @@ class WhatGateway(What, StrEnum):
     DATE_TIME: str = "22"
     KERNEL_VERSION: str = "23"
     DISTRIBUTION_VERSION: str = "24"
-    
+
 
 EventMessage = DimensionResponse | DimensionWriting | None
 
@@ -81,7 +78,7 @@ class Gateway(BaseItem):
     _who = Who.GATEWAY
 
     _event_callbacks: dict[WhatGateway, list[CoroutineCallback]] = {}
-    
+
     async def _single_dim_req(self, what: WhatGateway) -> EventMessage:
         messages = [msg async for msg in self.send_dimension_request(what)]
 
@@ -191,7 +188,7 @@ class Gateway(BaseItem):
         if bus_date.weekday() == 6:
             w = Value("00")
         else:
-            w = Value(f"{bus_date.weekday()+1:02d}")
+            w = Value(f"{bus_date.weekday() + 1:02d}")
 
         await self.send_dimension_writing(WhatGateway.DATE, w, d, m, a)
 
