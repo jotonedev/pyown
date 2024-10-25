@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import ipaddress
 from asyncio import Task
 from enum import StrEnum
@@ -79,7 +78,7 @@ class Gateway(BaseItem):
 
     _event_callbacks: dict[WhatGateway, list[CoroutineCallback]] = {}
 
-    async def _single_dim_req(self, what: WhatGateway) -> EventMessage:
+    async def _single_dim_req(self, what: WhatGateway) -> DimensionResponse:
         messages = [msg async for msg in self.send_dimension_request(what)]
 
         resp = messages[0]
@@ -87,6 +86,30 @@ class Gateway(BaseItem):
             raise InvalidMessage("The message is not a DimensionResponse message.")
         else:
             return resp
+
+    @staticmethod
+    def _parse_own_timezone(t: Value) -> datetime.timezone:
+        sign = t.string[0]
+        hours = int(t.string[1:3])
+
+        return datetime.timezone(
+            datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
+        )
+
+    @staticmethod
+    def _tz_to_own_tz(tzinfo: datetime.tzinfo | None) -> Value:
+        if tzinfo is None:
+            raise ValueError("The timezone must be set in the datetime object.")
+
+        tz = tzinfo.utcoffset(None)
+        if tz is None:
+            raise ValueError("The timezone must be set in the datetime object.")
+
+        sign = "0" if tz >= datetime.timedelta(0) else "1"  # type: ignore[union-attr]
+        hours = abs(tz.seconds) // 3600  # type: ignore[union-attr]
+
+        t = Value(f"{sign}{hours:03d}")
+        return t
 
     async def get_time(self, *, message: EventMessage = None) -> datetime.time:
         """
@@ -102,12 +125,9 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.TIME)
+            resp = await self._single_dim_req(WhatGateway.TIME)
 
         h_v, m_v, s_v, t_v = resp.values
-        # the timezone is in the format 001 where the first digit is the sign and the last two digits are the hours
-        sign = t_v.string[0]
-        hours = int(t_v.string[1:3])
 
         h = int(h_v.string)
         m = int(m_v.string)
@@ -118,9 +138,7 @@ class Gateway(BaseItem):
             h,
             m,
             s,
-            tzinfo=datetime.timezone(
-                datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
-            )
+            tzinfo=self._parse_own_timezone(t_v)
         )
 
         return bus_time
@@ -132,13 +150,13 @@ class Gateway(BaseItem):
         Args:
             bus_time: the time to set with the timezone.
 
+        Raises:
+            ValueError: if bus_time.tzinfo is None or bus_time.tzinfo.utcoffset(None) is None.
+
         Returns:
             None
         """
-        sign = "0" if bus_time.tzinfo.utcoffset(None) >= datetime.timedelta(0) else "1"
-        hours = abs(bus_time.tzinfo.utcoffset(None).seconds) // 3600
-
-        t = Value(f"{sign}{hours:03d}")
+        t = self._tz_to_own_tz(bus_time.tzinfo)
         h = Value(f"{bus_time.hour:02d}")
         m = Value(f"{bus_time.minute:02d}")
         s = Value(f"{bus_time.second:02d}")
@@ -159,7 +177,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.DATE)
+            resp = await self._single_dim_req(WhatGateway.DATE)
 
         w, d, m, a = resp.values
         # w is the day of the week, but we don't need it
@@ -206,7 +224,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.IP_ADDRESS)
+            resp = await self._single_dim_req(WhatGateway.IP_ADDRESS)
 
         oct1, oct2, oct3, oct4 = resp.values
 
@@ -227,7 +245,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.NET_MASK)
+            resp = await self._single_dim_req(WhatGateway.NET_MASK)
 
         oct1, oct2, oct3, oct4 = resp.values
 
@@ -247,7 +265,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.MAC_ADDRESS)
+            resp = await self._single_dim_req(WhatGateway.MAC_ADDRESS)
 
         oct1, oct2, oct3, oct4, oct5, oct6 = resp.values
 
@@ -279,7 +297,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.DEVICE_TYPE)
+            resp = await self._single_dim_req(WhatGateway.DEVICE_TYPE)
 
         return GatewayModel(resp.values[0].string)
 
@@ -297,7 +315,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.FIRMWARE_VERSION)
+            resp = await self._single_dim_req(WhatGateway.FIRMWARE_VERSION)
 
         v = resp.values[0].string
         r = resp.values[1].string
@@ -319,7 +337,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.UPTIME)
+            resp = await self._single_dim_req(WhatGateway.UPTIME)
 
         d = int(resp.values[0].string)
         h = int(resp.values[1].string)
@@ -343,28 +361,22 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.DATE_TIME)
+            resp = await self._single_dim_req(WhatGateway.DATE_TIME)
 
         h = int(resp.values[0].string)
         m = int(resp.values[1].string)
         s = int(resp.values[2].string)
-        t = resp.values[3].string
+        t = resp.values[3]
 
-        w = int(resp.values[4].string)
+        #w = int(resp.values[4].string)
         d = int(resp.values[5].string)
         mo = int(resp.values[6].string)
         y = int(resp.values[7].string)
 
-        # the timezone is in the format 001 where the first digit is the sign and the last two digits are the hours
-        sign = t[0]
-        hours = int(t[1:3])
-
         # parse the time with the timezone
         bus_time = datetime.datetime(
             y, mo, d, h, m, s,
-            tzinfo=datetime.timezone(
-                datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
-            )
+            tzinfo=self._parse_own_timezone(t)
         )
 
         return bus_time
@@ -373,16 +385,17 @@ class Gateway(BaseItem):
     async def set_datetime(self, bus_time: datetime.datetime):
         """
         Sets the date and time of the gateway.
+
         Args:
             bus_time: the date and time to set with the timezone.
+
+        Raises:
+            ValueError: if bus_time.tzinfo is None or bus_time.tzinfo.utcoffset(None) is None.
 
         Returns:
             None
         """
-        sign = "0" if bus_time.tzinfo.utcoffset(None) >= datetime.timedelta(0) else "1"
-        hours = abs(bus_time.tzinfo.utcoffset(None).seconds) // 3600
-
-        t = Value(f"{sign}{hours:03d}")
+        t = self._tz_to_own_tz(bus_time.tzinfo)
         h = Value(f"{bus_time.hour:02d}")
         m = Value(f"{bus_time.minute:02d}")
         s = Value(f"{bus_time.second:02d}")
@@ -407,7 +420,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.KERNEL_VERSION)
+            resp = await self._single_dim_req(WhatGateway.KERNEL_VERSION)
 
         v = resp.values[0].string
         r = resp.values[1].string
@@ -429,7 +442,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            resp = self._single_dim_req(WhatGateway.DISTRIBUTION_VERSION)
+            resp = await self._single_dim_req(WhatGateway.DISTRIBUTION_VERSION)
 
         v = resp.values[0].string
         r = resp.values[1].string
@@ -439,4 +452,4 @@ class Gateway(BaseItem):
 
     @classmethod
     def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
-        pass
+        raise NotImplementedError
