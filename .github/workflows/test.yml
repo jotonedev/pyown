@@ -17,6 +17,10 @@ jobs:
       matrix:
         python-version: [ "3.11", "3.12", "3.13" ]
 
+    permissions:
+      pull-requests: write
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
