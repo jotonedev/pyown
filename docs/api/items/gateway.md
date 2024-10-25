@@ -9,7 +9,7 @@ The Gateway module provides the main interface to the OpenWebNet gateway.
     options:
         show_inheritance_diagram: true
 
-::: pyown.items.gateway.gateway.GatewayTypes
+::: pyown.items.gateway.gateway.GatewayModel
     options:
         show_inheritance_diagram: true
 
