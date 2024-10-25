@@ -16,11 +16,11 @@ from ...tags import Who, What, Value, Where
 __all__ = [
     "Gateway",
     "WhatGateway",
-    "GatewayType",
+    "GatewayModel",
 ]
 
 
-class GatewayType(StrEnum):
+class GatewayModel(StrEnum):
     """
     This enum is used to define the various models of gateways that are supported by the library.
 
@@ -72,14 +72,26 @@ class WhatGateway(What, StrEnum):
     DATE_TIME: str = "22"
     KERNEL_VERSION: str = "23"
     DISTRIBUTION_VERSION: str = "24"
+    
+
+EventMessage = DimensionResponse | DimensionWriting | None
 
 
 class Gateway(BaseItem):
     _who = Who.GATEWAY
 
     _event_callbacks: dict[WhatGateway, list[CoroutineCallback]] = {}
+    
+    async def _single_dim_req(self, what: WhatGateway) -> EventMessage:
+        messages = [msg async for msg in self.send_dimension_request(what)]
 
-    async def get_time(self, *, message: DimensionResponse | DimensionWriting | None = None) -> datetime.time:
+        resp = messages[0]
+        if not isinstance(resp, DimensionResponse):
+            raise InvalidMessage("The message is not a DimensionResponse message.")
+        else:
+            return resp
+
+    async def get_time(self, *, message: EventMessage = None) -> datetime.time:
         """
         Requests the time of the gateway and bus.
 
@@ -93,11 +105,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            messages = [msg async for msg in self.send_dimension_request(WhatGateway.TIME)]
-
-            resp = messages[0]
-            if not isinstance(resp, DimensionResponse):
-                raise InvalidMessage("The message is not a DimensionResponse message.")
+            resp = self._single_dim_req(WhatGateway.TIME)
 
         h_v, m_v, s_v, t_v = resp.values
         # the timezone is in the format 001 where the first digit is the sign and the last two digits are the hours
@@ -120,6 +128,7 @@ class Gateway(BaseItem):
 
         return bus_time
 
+    # noinspection DuplicatedCode
     async def set_time(self, bus_time: datetime.time):
         """
         Sets the time of the gateway and bus.
@@ -139,7 +148,7 @@ class Gateway(BaseItem):
 
         await self.send_dimension_writing(WhatGateway.TIME, h, m, s, t)
 
-    async def get_date(self, *, message: DimensionResponse | DimensionWriting | None = None) -> datetime.date:
+    async def get_date(self, *, message: EventMessage = None) -> datetime.date:
         """
         Requests the date of the gateway and bus.
 
@@ -153,11 +162,7 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            messages = [msg async for msg in self.send_dimension_request(WhatGateway.DATE)]
-
-            resp = messages[0]
-            if not isinstance(resp, DimensionResponse):
-                raise InvalidMessage("The message is not a DimensionResponse message.")
+            resp = self._single_dim_req(WhatGateway.DATE)
 
         w, d, m, a = resp.values
         # w is the day of the week, but we don't need it
@@ -190,7 +195,7 @@ class Gateway(BaseItem):
 
         await self.send_dimension_writing(WhatGateway.DATE, w, d, m, a)
 
-    async def get_ip(self, *, message: DimensionResponse | DimensionWriting | None = None) -> ipaddress.IPv4Address:
+    async def get_ip(self, *, message: EventMessage = None) -> ipaddress.IPv4Address:
         """
         Requests the IP address of the gateway.
 
@@ -204,17 +209,236 @@ class Gateway(BaseItem):
         if message is not None:
             resp = message
         else:
-            messages = [msg async for msg in self.send_dimension_request(WhatGateway.IP_ADDRESS)]
-
-            resp = messages[0]
-            if not isinstance(resp, DimensionResponse):
-                raise InvalidMessage("The message is not a DimensionResponse message.")
+            resp = self._single_dim_req(WhatGateway.IP_ADDRESS)
 
         oct1, oct2, oct3, oct4 = resp.values
 
         ip = ipaddress.IPv4Address(f"{int(oct1.string)}.{int(oct2.string)}.{int(oct3.string)}.{int(oct4.string)}")
         return ip
 
+    async def get_netmask(self, *, message: EventMessage = None) -> str:
+        """
+        Requests the net mask of the gateway.
+
+        Args:
+            message: The message to parse the net mask from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            str: The net mask of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.NET_MASK)
+
+        oct1, oct2, oct3, oct4 = resp.values
+
+        return f"{int(oct1.string)}.{int(oct2.string)}.{int(oct3.string)}.{int(oct4.string)}"
+
+    async def get_macaddress(self, *, message: EventMessage = None) -> str:
+        """
+        Requests the MAC address of the gateway.
+
+        Args:
+            message: The message to parse the MAC address from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            str: The MAC address of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.MAC_ADDRESS)
+
+        oct1, oct2, oct3, oct4, oct5, oct6 = resp.values
+
+        mac = f"{oct1.string}:{oct2.string}:{oct3.string}:{oct4.string}:{oct5.string}:{oct6.string}"
+        return mac
+
+    async def get_netinfo(self) -> ipaddress.IPv4Network:
+        """
+        Combines the net mask and the IP address to get the network info.
+        Returns:
+            ipaddress.IPv4Network: The network info.
+        """
+        ip = await self.get_ip()
+        netmask = await self.get_netmask()
+
+        return ipaddress.IPv4Network(f"{ip}/{netmask}", strict=False)
+
+    async def get_model(self, *, message: EventMessage = None) -> GatewayModel:
+        """
+        Requests the device type of the gateway.
+
+        Args:
+            message: The message to parse the device type from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            GatewayModel: The device type of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.DEVICE_TYPE)
+
+        return GatewayModel(resp.values[0].string)
+
+    async def get_firmware(self, *, message: EventMessage = None) -> str:
+        """
+        Requests the firmware version of the gateway.
+
+        Args:
+            message: The message to parse the firmware version from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            str: The firmware version of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.FIRMWARE_VERSION)
+
+        v = resp.values[0].string
+        r = resp.values[1].string
+        b = resp.values[2].string
+
+        return f"{v}.{r}.{b}"
+
+    async def get_uptime(self, *, message: EventMessage = None) -> datetime.timedelta:
+        """
+        Requests the uptime of the gateway.
+
+        Args:
+            message: The message to parse the uptime from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            datetime.timedelta: The uptime of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.UPTIME)
+
+        d = int(resp.values[0].string)
+        h = int(resp.values[1].string)
+        m = int(resp.values[2].string)
+        s = int(resp.values[3].string)
+
+        uptime = datetime.timedelta(days=d, hours=h, minutes=m, seconds=s)
+        return uptime
+
+    async def get_datetime(self, *, message: EventMessage = None) -> datetime.datetime:
+        """
+        Requests the date and time of the gateway.
+
+        Args:
+            message: The message to parse the date and time from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            datetime.datetime: The date and time of the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.DATE_TIME)
+
+        h = int(resp.values[0].string)
+        m = int(resp.values[1].string)
+        s = int(resp.values[2].string)
+        t = resp.values[3].string
+
+        w = int(resp.values[4].string)
+        d = int(resp.values[5].string)
+        mo = int(resp.values[6].string)
+        y = int(resp.values[7].string)
+
+        # the timezone is in the format 001 where the first digit is the sign and the last two digits are the hours
+        sign = t[0]
+        hours = int(t[1:3])
+
+        # parse the time with the timezone
+        bus_time = datetime.datetime(
+            y, mo, d, h, m, s,
+            tzinfo=datetime.timezone(
+                datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
+            )
+        )
+
+        return bus_time
+
+    # noinspection DuplicatedCode
+    async def set_datetime(self, bus_time: datetime.datetime):
+        """
+        Sets the date and time of the gateway.
+        Args:
+            bus_time: the date and time to set with the timezone.
+
+        Returns:
+            None
+        """
+        sign = "0" if bus_time.tzinfo.utcoffset(None) >= datetime.timedelta(0) else "1"
+        hours = abs(bus_time.tzinfo.utcoffset(None).seconds) // 3600
+
+        t = Value(f"{sign}{hours:03d}")
+        h = Value(f"{bus_time.hour:02d}")
+        m = Value(f"{bus_time.minute:02d}")
+        s = Value(f"{bus_time.second:02d}")
+
+        d = Value(f"{bus_time.day:02d}")
+        mo = Value(f"{bus_time.month:02d}")
+        y = Value(f"{bus_time.year}")
+
+        await self.send_dimension_writing(WhatGateway.DATE_TIME, h, m, s, t, d, mo, y)
+
+    async def get_kernel_version(self, *, message: EventMessage = None) -> str:
+        """
+        Requests the linux kernel version of the gateway.
+
+        Args:
+            message: The message to parse the kernel version from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            str: The linux kernel version used by the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.KERNEL_VERSION)
+
+        v = resp.values[0].string
+        r = resp.values[1].string
+        b = resp.values[2].string
+
+        return f"{v}.{r}.{b}"
+
+    async def get_distribution_version(self, *, message: EventMessage = None) -> str:
+        """
+        Requests the os distribution version of the gateway.
+
+        Args:
+            message: The message to parse the distribution version from. If not provided, send a request to the gateway.
+                It's used by call_callbacks to parse the message.
+
+        Returns:
+            str: The os distribution version used by the gateway.
+        """
+        if message is not None:
+            resp = message
+        else:
+            resp = self._single_dim_req(WhatGateway.DISTRIBUTION_VERSION)
+
+        v = resp.values[0].string
+        r = resp.values[1].string
+        b = resp.values[2].string
+
+        return f"{v}.{r}.{b}"
 
     @classmethod
     def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
