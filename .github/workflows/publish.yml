@@ -46,7 +46,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
+          retention-days: 1
           path: "dist/"
+
 
   pypi-publish:
     name: Publish to PyPI
