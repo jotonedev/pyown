@@ -42,7 +42,6 @@ class GatewayModel(StrEnum):
     HL4684 = "23"
 
 
-
 class WhatGateway(What, StrEnum):
     """
     This enum is used to define the various types of data that can be retrieved from a gateway.
@@ -541,4 +540,3 @@ class Gateway(BaseItem):
             raise InvalidMessage("The message is not a DimensionResponse message.")
 
         return tasks
-

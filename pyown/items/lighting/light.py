@@ -12,6 +12,7 @@ class Light(BaseLight):
     """
     Light items are item with only two states: on and off.
     """
+
     async def turn_on(self):
         """Turns the light on."""
         await self.send_normal_message(WhatLight.ON)

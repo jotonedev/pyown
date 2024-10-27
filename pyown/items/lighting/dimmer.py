@@ -13,6 +13,7 @@ class Dimmer(BaseLight):
     """
     Dimmer items are items that can have their brightness level changed or colors changed.
     """
+
     async def turn_on(self, speed: int | None = None):
         """
         Turns the light on.

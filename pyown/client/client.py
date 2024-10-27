@@ -8,7 +8,7 @@ from .session import SessionType
 from ..exceptions import InvalidSession, ParseError, InvalidMessage, InvalidTag
 from ..items.base import BaseItem
 from ..items.utils import ITEM_TYPES
-from ..messages import MessageType
+from ..messages import MessageType, BaseMessage
 from ..tags import Who, Where
 
 __all__ = [
@@ -135,18 +135,27 @@ class Client(BaseClient):
                 log.info(f"Item type not supported, WHO={who}, WHERE={where}")
                 continue
 
-            # because callbacks are defined inside items, we need to loop through all items to find the correct one
-            for item_obj in BaseItem.__subclasses__():
-                if message.who == item_obj.who:
-                    try:
-                        tasks = await item_obj.call_callbacks(item, message)
-                    except InvalidMessage as e:
-                        log.warning(f"Message not supported {e.message}")
-                    else:
-                        self._loop.create_task(self._check_task_result(tasks))
-                        break
-            else:
-                log.warning(f"Item not found for message {message}")
+            await self._dispatch_callbacks(item, message)
+
+    async def _dispatch_callbacks(self, item: BaseItem, message: BaseMessage):
+        """
+        Dispatches the message to the correct callbacks for the item.
+        Args:
+            item: The item that triggered the event.
+            message: The message that triggered the event.
+        """
+        # because callbacks are defined inside items, we need to loop through all items to find the correct one
+        for item_obj in BaseItem.__subclasses__():
+            if message.who == item_obj.who:
+                try:
+                    tasks = await item_obj.call_callbacks(item, message)
+                except InvalidMessage as e:
+                    log.warning(f"Message not supported {e.message}")
+                else:
+                    self._loop.create_task(self._check_task_result(tasks))
+                    break
+        else:
+            log.warning(f"Item not found for message {message}")
 
     @staticmethod
     async def _check_task_result(tasks: list[Task]):

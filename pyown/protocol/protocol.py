@@ -41,7 +41,7 @@ class OWNProtocol(Protocol):
         """
         Called by the transport class when the socket is connected to the server.
         """
-        log.info(f"Connection made")
+        log.info("Connection made")
         self._transport = transport
         self._on_connection_start.set_result(transport)
 
@@ -52,7 +52,7 @@ class OWNProtocol(Protocol):
         if exc is not None:
             log.info(f"Connection lost with exception: {exc}")
         else:
-            log.info(f"Connection lost")
+            log.info("Connection lost")
         if exc is None:
             self._on_connection_end.set_result(None)
         else:
