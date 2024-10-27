@@ -227,7 +227,7 @@ class BaseLight(BaseItem, ABC):
         cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
 
     @classmethod
-    def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
         tasks: list[Task] = []
 
         if isinstance(message, DimensionResponse):

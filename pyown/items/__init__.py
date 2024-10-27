@@ -1,1 +1,3 @@
-from .lighting import Light, Dimmer
+from .lighting import *
+from .automation import *
+from .gateway import *

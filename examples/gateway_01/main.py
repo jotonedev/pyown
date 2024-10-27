@@ -1,34 +1,40 @@
 import asyncio
 import logging
 
-from pyown.client import Client, SessionType
-from pyown.items.automation import Automation, WhatAutomation
-
-log = logging.getLogger(__name__)
+from pyown.client import Client
+from pyown.items import Gateway
 
 
-async def on_shutter_state_change(light: Automation, state: WhatAutomation):
-    if state == WhatAutomation.UP:
-        log.info(f"Shutter at {light.where} is now up")
-    elif state == WhatAutomation.DOWN:
-        log.info(f"Shutter at {light.where} is now down")
-    elif state == WhatAutomation.STOP:
-        log.info(f"Shutter at {light.where} is now stopped")
-
-
-# noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
     client = Client(
         host=host,
         port=port,
         password=password,
-        session_type=SessionType.EventSession
     )
 
-    Automation.on_status_change(on_shutter_state_change)
-
     await client.start()
-    await client.loop()
+
+    gateway = Gateway(
+        client=client
+    )
+
+    # get ip address of the gateway
+    ip = await gateway.get_ip()
+    print(ip)
+
+    # get the model of the gateway
+    model = await gateway.get_model()
+    print(model.name)
+
+    # get datetime of the gateway
+    datetime = await gateway.get_datetime()
+    print(datetime)
+
+    # get the kernel version of the gateway
+    kernel = await gateway.get_kernel_version()
+    print(kernel)
+
+    await client.close()
 
 
 def main(host: str, port: int, password: str):

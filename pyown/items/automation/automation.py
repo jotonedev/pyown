@@ -93,7 +93,7 @@ class Automation(BaseItem):
         cls._event_callbacks.setdefault(AutomationEvents.ALL, []).append(callback)
 
     @classmethod
-    def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
         tasks: list[Task] = []
 
         if isinstance(message, NormalMessage):

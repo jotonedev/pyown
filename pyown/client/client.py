@@ -139,7 +139,7 @@ class Client(BaseClient):
             for item_obj in BaseItem.__subclasses__():
                 if message.who == item_obj.who:
                     try:
-                        tasks = item_obj.call_callbacks(item, message)
+                        tasks = await item_obj.call_callbacks(item, message)
                     except InvalidMessage as e:
                         log.warning(f"Message not supported {e.message}")
                     else:

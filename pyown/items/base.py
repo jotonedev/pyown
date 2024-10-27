@@ -76,7 +76,7 @@ class BaseItem(ABC):
 
     @classmethod
     @abstractmethod
-    def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
         """
         Calls the registered callbacks for the event.
         Used internally by the client to dispatch the events to the correct callbacks.
