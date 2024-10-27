@@ -1,22 +1,16 @@
 import asyncio
 import logging
 
+from black import datetime
+
 from pyown.client import Client, SessionType
-from pyown.items.automation import Automation, WhatAutomation
-
-log = logging.getLogger(__name__)
+from pyown.items import Gateway,  WhatGateway
 
 
-async def on_shutter_state_change(light: Automation, state: WhatAutomation):
-    if state == WhatAutomation.UP:
-        log.info(f"Shutter at {light.where} is now up")
-    elif state == WhatAutomation.DOWN:
-        log.info(f"Shutter at {light.where} is now down")
-    elif state == WhatAutomation.STOP:
-        log.info(f"Shutter at {light.where} is now stopped")
+async def on_time_change(gateway: Gateway, time: datetime.time):
+    print(f"Time of the gateway is now {time}")
 
 
-# noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
     client = Client(
         host=host,
@@ -25,7 +19,10 @@ async def run(host: str, port: int, password: str):
         session_type=SessionType.EventSession
     )
 
-    Automation.on_status_change(on_shutter_state_change)
+    Gateway.register_callback(
+        WhatGateway.TIME,
+        on_time_change
+    )
 
     await client.start()
     await client.loop()
@@ -34,7 +31,7 @@ async def run(host: str, port: int, password: str):
 def main(host: str, port: int, password: str):
     # Set the logging level to DEBUG
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.WARN,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )

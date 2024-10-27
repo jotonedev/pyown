@@ -2,12 +2,13 @@ import datetime
 import ipaddress
 from asyncio import Task
 from enum import StrEnum
-from typing import Self
+from typing import Self, Any
 
 from ..base import BaseItem, CoroutineCallback
+from ...client import BaseClient
 from ...exceptions import InvalidMessage
 from ...messages import DimensionResponse, BaseMessage, DimensionWriting
-from ...tags import Who, What, Value
+from ...tags import Who, What, Value, Where
 
 __all__ = [
     "Gateway",
@@ -20,9 +21,9 @@ class GatewayModel(StrEnum):
     """
     This enum is used to define the various models of gateways that are supported by the library.
 
-    This is not a complete list of all the gateways, because there are many different models of gateways that are not
-    listed in the official documentation. So, if you have a gateway that is not listed here, you can send an issue
-    on GitHub.
+    This is not a complete list of all the gateways because there are many different models of gateways that are not
+    listed in the official documentation.
+    So, if you have a gateway not listed here, you can send an issue on GitHub.
 
     Attributes:
         MHServer:
@@ -38,6 +39,8 @@ class GatewayModel(StrEnum):
     F452V = "7"
     MHServer2 = "11"
     H4684 = "12"
+    HL4684 = "23"
+
 
 
 class WhatGateway(What, StrEnum):
@@ -78,6 +81,14 @@ class Gateway(BaseItem):
 
     _event_callbacks: dict[WhatGateway, list[CoroutineCallback]] = {}
 
+    def __init__(self, client: BaseClient, where: Where | str = ""):
+        """
+        Initializes the item.
+        Args:
+            client: The client to use to communicate with the server.
+        """
+        super().__init__(client, Where(""))
+
     async def _single_dim_req(self, what: WhatGateway) -> DimensionResponse:
         messages = [msg async for msg in self.send_dimension_request(what)]
 
@@ -89,6 +100,10 @@ class Gateway(BaseItem):
 
     @staticmethod
     def _parse_own_timezone(t: Value) -> datetime.timezone:
+        if t.string == "":
+            # return UTC if the timezone is not set
+            return datetime.timezone.utc
+
         sign = t.string[0]
         hours = int(t.string[1:3])
 
@@ -368,7 +383,7 @@ class Gateway(BaseItem):
         s = int(resp.values[2].string)
         t = resp.values[3]
 
-        #w = int(resp.values[4].string)
+        # w = int(resp.values[4].string)
         d = int(resp.values[5].string)
         mo = int(resp.values[6].string)
         y = int(resp.values[7].string)
@@ -450,6 +465,80 @@ class Gateway(BaseItem):
 
         return f"{v}.{r}.{b}"
 
+    # this does not follow the same pattern as the other item class because that would add too much complexity,
+    # and event messages for the gateway are very rarely sent
     @classmethod
-    def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
-        raise NotImplementedError
+    def register_callback(cls, what: WhatGateway, callback: CoroutineCallback):
+        """
+        Register a callback for a specific event.
+
+        Args:
+            what: The event to register the callback for.
+            callback: The callback to call when the event occurs.
+
+        Returns:
+            None
+        """
+        if what not in cls._event_callbacks:
+            cls._event_callbacks[what] = []
+
+        cls._event_callbacks[what].append(callback)
+
+    @classmethod
+    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+        tasks = []
+
+        if isinstance(message, DimensionWriting):
+            # convert the DimensionWriting message to a DimensionResponse message
+            # noinspection PyTypeChecker
+            message = DimensionResponse(
+                (
+                    message.who,
+                    message.where,
+                    message.dimension,
+                    *message.values
+                )  # type: ignore[arg-type]
+            )
+
+        if isinstance(message, DimensionResponse):
+            what = WhatGateway(message.dimension.string)
+            callbacks = cls._event_callbacks.get(what, [])
+
+            # noinspection PyUnusedLocal
+            args: Any = None
+            match what:
+                case WhatGateway.TIME:
+                    args = await item.get_time(message=message)
+                case WhatGateway.DATE:
+                    args = await item.get_date(message=message)
+                case WhatGateway.IP_ADDRESS:
+                    args = await item.get_ip(message=message)
+                case WhatGateway.NET_MASK:
+                    args = await item.get_netmask(message=message)
+                case WhatGateway.MAC_ADDRESS:
+                    args = await item.get_macaddress(message=message)
+                case WhatGateway.DEVICE_TYPE:
+                    args = await item.get_model(message=message)
+                case WhatGateway.FIRMWARE_VERSION:
+                    args = await item.get_firmware(message=message)
+                case WhatGateway.UPTIME:
+                    args = await item.get_uptime(message=message)
+                case WhatGateway.DATE_TIME:
+                    args = await item.get_datetime(message=message)
+                case WhatGateway.KERNEL_VERSION:
+                    args = await item.get_kernel_version(message=message)
+                case WhatGateway.DISTRIBUTION_VERSION:
+                    args = await item.get_distribution_version(message=message)
+                case _:
+                    return []
+
+            tasks += cls._create_tasks(
+                callbacks,
+                item,
+                *args
+            )
+        else:
+            raise InvalidMessage("The message is not a DimensionResponse message.")
+
+        return tasks
+
