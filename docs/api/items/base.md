@@ -11,4 +11,6 @@ This module provides the base class for all items.
 
 ::: pyown.items.base.CoroutineCallback
 
+::: pyown.items.base.EventMessage
+
 ::: pyown.items.utils.ITEM_TYPES

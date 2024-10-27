@@ -4,7 +4,7 @@ from asyncio import Task
 from enum import StrEnum
 from typing import Self, Any
 
-from ..base import BaseItem, CoroutineCallback
+from ..base import BaseItem, CoroutineCallback, EventMessage
 from ...client import BaseClient
 from ...exceptions import InvalidMessage
 from ...messages import DimensionResponse, BaseMessage, DimensionWriting
@@ -70,9 +70,6 @@ class WhatGateway(What, StrEnum):
     DATE_TIME: str = "22"
     KERNEL_VERSION: str = "23"
     DISTRIBUTION_VERSION: str = "24"
-
-
-EventMessage = DimensionResponse | DimensionWriting | None
 
 
 class Gateway(BaseItem):
@@ -166,9 +163,6 @@ class Gateway(BaseItem):
 
         Raises:
             ValueError: if bus_time.tzinfo is None or bus_time.tzinfo.utcoffset(None) is None.
-
-        Returns:
-            None
         """
         t = self._tz_to_own_tz(bus_time.tzinfo)
         h = Value(f"{bus_time.hour:02d}")
@@ -207,11 +201,9 @@ class Gateway(BaseItem):
     async def set_date(self, bus_date: datetime.date):
         """
         Sets the date of the gateway and bus.
+
         Args:
             bus_date: the date to set.
-
-        Returns:
-            None
         """
         d = Value(f"{bus_date.day:02d}")
         m = Value(f"{bus_date.month:02d}")
@@ -405,9 +397,6 @@ class Gateway(BaseItem):
 
         Raises:
             ValueError: if bus_time.tzinfo is None or bus_time.tzinfo.utcoffset(None) is None.
-
-        Returns:
-            None
         """
         t = self._tz_to_own_tz(bus_time.tzinfo)
         h = Value(f"{bus_time.hour:02d}")
@@ -474,9 +463,6 @@ class Gateway(BaseItem):
         Args:
             what: The event to register the callback for.
             callback: The callback to call when the event occurs.
-
-        Returns:
-            None
         """
         if what not in cls._event_callbacks:
             cls._event_callbacks[what] = []

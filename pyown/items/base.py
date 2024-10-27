@@ -12,10 +12,15 @@ from ..tags import Where, Who, What, Dimension, Value
 __all__ = [
     "BaseItem",
     "CoroutineCallback",
+    "EventMessage"
 ]
 
 CoroutineCallback = Callable[..., Coroutine[None, None, None]]
 """Type alias for a coroutine function that does not return anything."""
+
+
+EventMessage = DimensionResponse | DimensionWriting | None
+"""Type alias for the event messages that can be received by the item."""
 
 
 class BaseItem(ABC):
