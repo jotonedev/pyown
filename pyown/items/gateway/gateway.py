@@ -127,7 +127,7 @@ class Gateway(BaseItem):
         Requests the time of the gateway and bus.
 
         Args:
-            message: The message to parse the time from. If not provided, send a request to the gateway.
+            message: The message to parse the time from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -176,7 +176,7 @@ class Gateway(BaseItem):
         Requests the date of the gateway and bus.
 
         Args:
-            message: The message to parse the date from. If not provided, send a request to the gateway.
+            message: The message to parse the date from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -221,7 +221,7 @@ class Gateway(BaseItem):
         Requests the IP address of the gateway.
 
         Args:
-            message: The message to parse the IP address from. If not provided, send a request to the gateway.
+            message: The message to parse the IP address from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -242,7 +242,7 @@ class Gateway(BaseItem):
         Requests the net mask of the gateway.
 
         Args:
-            message: The message to parse the net mask from. If not provided, send a request to the gateway.
+            message: The message to parse the net mask from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -262,7 +262,7 @@ class Gateway(BaseItem):
         Requests the MAC address of the gateway.
 
         Args:
-            message: The message to parse the MAC address from. If not provided, send a request to the gateway.
+            message: The message to parse the MAC address from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -294,7 +294,7 @@ class Gateway(BaseItem):
         Requests the device type of the gateway.
 
         Args:
-            message: The message to parse the device type from. If not provided, send a request to the gateway.
+            message: The message to parse the device type from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -312,7 +312,7 @@ class Gateway(BaseItem):
         Requests the firmware version of the gateway.
 
         Args:
-            message: The message to parse the firmware version from. If not provided, send a request to the gateway.
+            message: The message to parse the firmware version from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -334,7 +334,7 @@ class Gateway(BaseItem):
         Requests the uptime of the gateway.
 
         Args:
-            message: The message to parse the uptime from. If not provided, send a request to the gateway.
+            message: The message to parse the uptime from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -358,7 +358,7 @@ class Gateway(BaseItem):
         Requests the date and time of the gateway.
 
         Args:
-            message: The message to parse the date and time from. If not provided, send a request to the gateway.
+            message: The message to parse the date and time from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -414,7 +414,7 @@ class Gateway(BaseItem):
         Requests the linux kernel version of the gateway.
 
         Args:
-            message: The message to parse the kernel version from. If not provided, send a request to the gateway.
+            message: The message to parse the kernel version from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
@@ -436,7 +436,7 @@ class Gateway(BaseItem):
         Requests the os distribution version of the gateway.
 
         Args:
-            message: The message to parse the distribution version from. If not provided, send a request to the gateway.
+            message: The message to parse the distribution version from. If not provided, it will send a request to the server.
                 It's used by call_callbacks to parse the message.
 
         Returns:
