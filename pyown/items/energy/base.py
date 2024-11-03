@@ -1,17 +1,18 @@
-from abc import ABC, abstractmethod
 from asyncio import Task
 from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator
+from typing import Self
 
 from ..base import BaseItem, CoroutineCallback
-from ...exceptions import InvalidMessage
-from ...messages import DimensionResponse, BaseMessage, NormalMessage
-from ...tags import Who, What, Value, Where, Dimension
+from ...client import BaseClient
+from ...exceptions import InvalidTag
+from ...messages import BaseMessage
+from ...tags import Who, What, Where, Dimension
 
 __all__ = [
-    "BaseEnergyManagement",
+    "EnergyManagement",
     "DimensionEnergy",
-    "WhatEnergy"
+    "WhatEnergy",
+    "TypeEnergy",
 ]
 
 
@@ -46,8 +47,10 @@ class DimensionEnergy(Dimension, StrEnum):
         STATUS_STOP_GO_POWER_FAILURE_UPSTREAM: Status Stop&Go (Power failure upstream/close)
         DAILY_TOTALIZERS_HOURLY_16BIT: Daily totalizers on an hourly basis for 16-bit Daily graphics
         MONTHLY_AVERAGE_HOURLY_16BIT: Monthly average on an hourly basis for 16-bit Media Daily graphics
-        MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT: Monthly totalizers current year on a daily basis for 32-bit Monthly graphics
-        MONTHLY_TOTALIZERS_LAST_YEAR_32BIT: Monthly totalizers on a daily basis last year compared to 32-bit graphics TouchX Previous Year
+        MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT: Monthly totalizers current year on a daily basis for
+            32-bit Monthly graphics
+        MONTHLY_TOTALIZERS_LAST_YEAR_32BIT: Monthly totalizers on a daily basis last year compared to
+            32-bit graphics TouchX Previous Year
     """
     ACTIVE_POWER = "113"
     END_AUTOMATIC_UPDATE_SIZE = "1200"
@@ -107,13 +110,68 @@ class WhatEnergy(What, StrEnum):
     RESET_REPORT = "75"
 
 
-class BaseEnergyManagement(BaseItem):
+class TypeEnergy(Enum):
     """
-    Base class for energy management items.
+    Type of energy management items.
+
+    Attributes:
+        POWER_METER: Power meter.
+        ACTUATOR: Actuator.
+        STOP_GO: Stop&Go device.
+    """
+    POWER_METER = auto()
+    ACTUATOR = auto()
+    STOP_GO = auto()
+
+
+class EnergyManagement(BaseItem):
+    """
+    Used to control energy management items, like actuators with current sensors, etc...
+
+    Allowed where tags:
+    - 1N (N=[1-127]): Stop&Go devices,
+        these are circuit breakers capable of detecting a fault and opening the circuit.
+    - 5N (N=[1-255]): Power meters, these are devices that measure the power consumption.
+    - 7N#0 (N=[1-255]): Actuators,
+        these implement the same functionalities as power meters but can also control the power flow.
     """
     _who = Who.ENERGY_MANAGEMENT
 
     _event_callbacks: dict[DimensionEnergy, list[CoroutineCallback]] = {}
+
+    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
+        """
+        Initializes the item and check if the where tag is valid.
+
+        Args:
+            client: The client to use to communicate with the server.
+            where: The location of the item.
+            who: The type of item.
+
+        Raises:
+            InvalidTag: If the where tag is not valid.
+        """
+        super().__init__(client, where, who=who)
+        self.get_type()
+
+    def get_type(self) -> TypeEnergy:
+        """
+        The type of the item.
+
+        Returns:
+            The type of the item.
+
+        Raises:
+            InvalidTag: If the where tag is not valid.
+        """
+        if self.where.string.startswith("1") and self.where.string[1:].isnumeric():
+            return TypeEnergy.STOP_GO
+        elif self.where.string.startswith("5") and self.where.string[1:].isnumeric():
+            return TypeEnergy.POWER_METER
+        elif self.where.string.startswith("7") and self.where.parameters[0] == "0" and self.where.tag[1:].isnumeric():
+            return TypeEnergy.ACTUATOR
+        else:
+            raise InvalidTag(self.where)
 
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
