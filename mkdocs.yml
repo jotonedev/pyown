@@ -36,7 +36,6 @@ theme:
     - toc.follow
 
 plugins:
-  optimize:
   privacy:
   search:
   mkdocstrings:
