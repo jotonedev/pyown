@@ -36,6 +36,8 @@ theme:
     - toc.follow
 
 plugins:
+  optimize:
+  privacy:
   search:
   mkdocstrings:
     default_handler: python
@@ -89,6 +91,15 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
+
+extra:
+  consent:
+    title: Cookie consent
+    description: >-     
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
 
 nav:
   - Home: index.md
