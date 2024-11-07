@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import AsyncIterator
 
-from .base import EnergyManagement, TypeEnergy, DimensionEnergy, WhatEnergy
+from .energy import EnergyManagement, TypeEnergy, DimensionEnergy, WhatEnergy
 from ...client import BaseClient
 from ...exceptions import InvalidTag, InvalidMessage
 from ...messages import DimensionResponse

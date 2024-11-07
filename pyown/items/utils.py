@@ -2,7 +2,7 @@ from typing import Type, Final
 
 from .automation import Automation
 from .base import BaseItem
-from .energy.base import EnergyManagement
+from .energy.energy import EnergyManagement
 from .gateway import Gateway
 from .lighting import Light
 from ..tags import Who

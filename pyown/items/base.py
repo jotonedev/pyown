@@ -4,7 +4,7 @@ from asyncio import Task
 from typing import Self, Callable, Coroutine, Any, AsyncIterator
 
 from ..client import BaseClient
-from ..exceptions import ResponseError
+from ..exceptions import ResponseError, InvalidMessage
 from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType, \
     DimensionResponse
 from ..tags import Where, Who, What, Dimension, Value
@@ -23,6 +23,7 @@ EventMessage = DimensionResponse | DimensionWriting | None
 """Type alias for the event messages that can be received by the item."""
 
 
+# TODO: Refactor this class
 class BaseItem(ABC):
     """
     The base class for all items.
@@ -303,3 +304,20 @@ class BaseItem(ABC):
 
         resp = await self._read_message()
         self._check_ack(resp)
+
+    # TODO: Refactor this method
+    async def _single_dim_req(self, what: What | Dimension) -> DimensionResponse:
+        """Makes a dimension request and returns only the first response while consuming the rest."""
+        if isinstance(what, What):
+            what = Dimension(what.string)
+
+        messages = [msg async for msg in self.send_dimension_request(what)]
+
+        if len(messages) == 0:
+            raise ResponseError("The server did not respond with data.")
+
+        resp = messages[0]
+        if not isinstance(resp, DimensionResponse):
+            raise InvalidMessage("The message is not a DimensionResponse message.")
+        else:
+            return resp

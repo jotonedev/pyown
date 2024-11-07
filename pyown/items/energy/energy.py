@@ -1,13 +1,14 @@
 from asyncio import Task
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum, Enum, auto
-from typing import Self
+from typing import Self, AsyncIterator
 
 from ..base import BaseItem, CoroutineCallback
 from ...client import BaseClient
 from ...exceptions import InvalidTag
-from ...messages import BaseMessage
-from ...tags import Who, What, Where, Dimension
+from ...messages import BaseMessage, DimensionResponse
+from ...tags import Who, What, Where, Dimension, Value
 
 __all__ = [
     "EnergyManagement",
@@ -81,7 +82,8 @@ class DimensionEnergy(Dimension, StrEnum):
     MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT = "513"
     MONTHLY_TOTALIZERS_LAST_YEAR_32BIT = "514"
 
-    def with_parameter(self, parameter: str | int) -> Dimension:
+    # TODO: Refactor this
+    def with_parameter(self, parameter: str | int) -> Dimension:  # type: ignore[override]
         """Returns the tag with the specified parameter"""
         return Dimension(f"{self}#{parameter}")
 
@@ -114,7 +116,8 @@ class WhatEnergy(What, StrEnum):
     FORCE_ACTUATOR_OFF = "74"
     RESET_REPORT = "75"
 
-    def with_parameter(self, parameter: str | int) -> What:
+    # TODO: Refactor this
+    def with_parameter(self, parameter: str | int) -> What:  # type: ignore[override]
         """Returns the tag with the specified parameter"""
         return What(f"{self}#{parameter}")
 
@@ -131,6 +134,27 @@ class TypeEnergy(Enum):
     POWER_METER = auto()
     ACTUATOR = auto()
     STOP_GO = auto()
+
+
+@dataclass
+class ActuatorStatus:
+    """
+    Represents the status of an actuator.
+
+    Attributes:
+        disabled: The actuator is disabled.
+        forcing: The actuator is forced.
+        threshold: The actuator is below the threshold.
+        protection: The actuator is in protection.
+        phase: The local phase is disabled.
+        advanced: It's set in advanced mode, otherwise it is basic
+    """
+    disabled: bool
+    forcing: bool
+    threshold: bool
+    protection: bool
+    phase: bool
+    advanced: bool
 
 
 class EnergyManagement(BaseItem):
@@ -324,7 +348,192 @@ class EnergyManagement(BaseItem):
             ResponseError: When the gateway does not acknowledge the command
         """
         await self.send_normal_message(WhatEnergy.RESET_REPORT.with_parameter(tot_n))
-        
+
+    async def start_sending_instant_power(self, time: int, power_type: int = 1):
+        """
+        Start sending the instant power consumption on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+            time: Indicates after how many minutes it sends the consumption if it changes [1-255]
+            power_type: 1 for active power
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        await self.send_dimension_writing(
+            DimensionEnergy.END_AUTOMATIC_UPDATE_SIZE.with_parameter(power_type),
+            Value(time)
+        )
+
+    async def stop_sending_instant_power(self, power_type: int = 1):
+        """
+        Stop sending the instant power consumption on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+            power_type: 1 for active power
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        await self.send_dimension_writing(
+            DimensionEnergy.END_AUTOMATIC_UPDATE_SIZE.with_parameter(power_type),
+            Value(0)
+        )
+
+    async def get_active_power(self) -> float:
+        """
+        Get the active power.
+
+        Returns:
+            The active power in W.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.ACTIVE_POWER)
+
+        return float(resp.values[0].string)
+
+    async def get_energy_unit_totalizer(self) -> float:
+        """
+        Get the energy/unit totalizer.
+
+        Returns:
+            The energy/unit totalizer in kWh.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.ENERGY_UNIT_TOTALIZER)
+
+        return float(resp.values[0].string)
+
+    async def get_energy_unit_per_month(self, month: int | None = None, year: int | None = None) -> float:
+        """
+        Get the energy/unit per month.
+
+        Args:
+            month: The month to get the energy from [1-12]. Use the current month if None.
+            year: The year to get the energy from. Format: YY (e.g., 21).
+                Use the current year if None.
+
+        Returns:
+            The energy measured in kWh.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        if month is None:
+            month = datetime.now().month
+        if year is None:
+            year = datetime.now().year % 100
+
+        resp = await self._single_dim_req(
+            DimensionEnergy.ENERGY_UNIT_PER_MONTH.with_parameter(year).with_parameter(month)
+        )
+
+        return float(resp.values[0].string)
+
+    async def get_partial_totalizer_current_month(self) -> float:
+        """
+        Get the partial totalizer for the current month.
+        This is equivalent to get_energy_unit_per_month() without any args.
+
+        Returns:
+            The partial totalizer for the current month in kWh.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH)
+
+        return float(resp.values[0].string)
+
+    async def get_partial_totalizer_current_day(self) -> float:
+        """
+        Get the partial totalizer for the current day.
+
+        Returns:
+            The partial totalizer for the current day in kWh.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY)
+
+        return float(resp.values[0].string)
+
+    async def get_actuators_info(self) -> ActuatorStatus:
+        """
+        Get the actuator info.
+
+        Returns:
+            The status of the actuator.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.ACTUATORS_INFO)
+
+        return ActuatorStatus(
+            disabled=bool(int(resp.values[0].string[0])),
+            forcing=bool(int(resp.values[0].string[1])),
+            threshold=bool(int(resp.values[0].string[2])),
+            protection=bool(int(resp.values[0].string[3])),
+            phase=bool(int(resp.values[0].string[4])),
+            advanced=not bool(int(resp.values[0].string[5])-1),
+        )
+
+    async def get_totalizers(self, tot_n: int) -> tuple[datetime, float]:
+        """
+        Get the energy measured from the last reset.
+
+        Args:
+            tot_n: The totalizer number to get [1-2]
+
+        Returns:
+            A tuple containing the date and time of the last reset and the energy measured in kWh.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.TOTALIZERS.with_parameter(tot_n))
+
+        energy = float(resp.values[0].string)
+        d = resp.values[1].string
+        m = resp.values[2].string
+        y = resp.values[3].string
+        h = resp.values[4].string
+        mi = resp.values[5].string
+
+        return datetime(int(y), int(m), int(d), int(h), int(mi)), energy
+
+    async def get_differential_current_level(self) -> int:
+        """
+        Get the differential current level.
+
+        Returns:
+            The differential level [1-3].
+            !!! note
+                If you know the meaning of this value, please open an issue on GitHub.
+
+        Raises:
+            ResponseError: When the gateway does not respond with the requested data
+        """
+        resp = await self._single_dim_req(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL)
+
+        return int(resp.values[0].string)
+
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
         raise NotImplementedError
