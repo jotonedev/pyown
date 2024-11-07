@@ -1,4 +1,5 @@
 from asyncio import Task
+from datetime import datetime
 from enum import StrEnum, Enum, auto
 from typing import Self
 
@@ -80,6 +81,10 @@ class DimensionEnergy(Dimension, StrEnum):
     MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT = "513"
     MONTHLY_TOTALIZERS_LAST_YEAR_32BIT = "514"
 
+    def with_parameter(self, parameter: str | int) -> Dimension:
+        """Returns the tag with the specified parameter"""
+        return Dimension(f"{self}#{parameter}")
+
 
 class WhatEnergy(What, StrEnum):
     """
@@ -108,6 +113,10 @@ class WhatEnergy(What, StrEnum):
     FORCE_ACTUATOR_ON = "73"
     FORCE_ACTUATOR_OFF = "74"
     RESET_REPORT = "75"
+
+    def with_parameter(self, parameter: str | int) -> What:
+        """Returns the tag with the specified parameter"""
+        return What(f"{self}#{parameter}")
 
 
 class TypeEnergy(Enum):
@@ -173,6 +182,149 @@ class EnergyManagement(BaseItem):
         else:
             raise InvalidTag(self.where)
 
+    async def start_sending_daily_totalizers_hourly(self, day: int | None, month: int | None):
+        """
+        Start sending daily totalizers on an hourly basis on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        if day is None:
+            day = datetime.now().day
+        if month is None:
+            month = datetime.now().month
+
+        await self.send_normal_message(
+            WhatEnergy.SEND_DAILY_REPORT.with_parameter(day).with_parameter(month)
+        )
+
+    async def start_sending_monthly_average_hourly(self, month: int | None):
+        """
+        Start sending monthly average on an hourly basis on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        if month is None:
+            month = datetime.now().month
+
+        await self.send_normal_message(
+            WhatEnergy.SEND_MONTHLY_REPORT.with_parameter(month)
+        )
+
+    async def start_sending_monthly_totalizers_current_year(self, month: int | None):
+        """
+        Start sending monthly totalizers current year on a daily basis on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        if month is None:
+            month = datetime.now().month
+
+        await self.send_normal_message(
+            WhatEnergy.SEND_YEARLY_REPORT.with_parameter(month)
+        )
+
+    async def start_sending_monthly_totalizers_last_year(self, month: int | None):
+        """
+        Start sending monthly totalizers last year on a daily basis on an event session.
+        !!! note
+            Even if the data is sent to the event session, this command must be sent on a command session.
+
+        Args:
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        if month is None:
+            month = datetime.now().month
+
+        await self.send_normal_message(
+            WhatEnergy.SEND_LAST_YEAR_REPORT.with_parameter(month)
+        )
+
+    async def enable_actuator(self):
+        """
+        Enable the actuator.
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        await self.send_normal_message(WhatEnergy.ENABLE_ACTUATOR)
+
+    async def force_actuator_on(self, time: int | None = None):
+        """
+        Force the actuator on for a specific time.
+
+        Args:
+            time: The time in tens of minutes [1-254]. Use default time if None.
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        if time is None:
+            await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_ON)
+        else:
+            await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_ON.with_parameter(time))
+
+    async def force_actuator_off(self):
+        """
+        End the forced actuator.
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_OFF)
+
+    async def reset_totalizers(self, tot_n: int):
+        """
+        Reset the totalizers.
+
+        Args:
+            tot_n: The totalizer number to reset [1-2]
+
+        Returns:
+            None
+
+        Raises:
+            ResponseError: When the gateway does not acknowledge the command
+        """
+        await self.send_normal_message(WhatEnergy.RESET_REPORT.with_parameter(tot_n))
+        
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
         raise NotImplementedError

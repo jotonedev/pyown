@@ -163,3 +163,4 @@ class StopGo(EnergyManagement):
                     raise InvalidMessage(msg.message)
 
         return status
+
