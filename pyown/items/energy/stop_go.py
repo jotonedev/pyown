@@ -1,8 +1,8 @@
 from typing import AsyncIterator
 
-from . import TypeEnergy, StopGoStatus
+from .dataclass import StopGoStatus
 from .energy import EnergyManagement
-from .values import DimensionEnergy, WhatEnergy
+from .enums import TypeEnergy, DimensionEnergy, WhatEnergy
 from ...client import BaseClient
 from ...exceptions import InvalidTag, InvalidMessage
 from ...messages import DimensionResponse
@@ -129,4 +129,3 @@ class StopGo(EnergyManagement):
                     raise InvalidMessage(msg.message)
 
         return status
-

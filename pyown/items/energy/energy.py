@@ -4,7 +4,7 @@ from typing import Self, Callable, Coroutine
 
 from . import StopGoStatus
 from .dataclass import ActuatorStatus
-from .values import DimensionEnergy, WhatEnergy, TypeEnergy
+from .enums import DimensionEnergy, WhatEnergy, TypeEnergy
 from ..base import BaseItem, CoroutineCallback
 from ...client import BaseClient
 from ...exceptions import InvalidTag
@@ -350,7 +350,7 @@ class EnergyManagement(BaseItem):
             threshold=bool(int(resp.values[0].string[2])),
             protection=bool(int(resp.values[0].string[3])),
             phase=bool(int(resp.values[0].string[4])),
-            advanced=not bool(int(resp.values[0].string[5])-1),
+            advanced=not bool(int(resp.values[0].string[5]) - 1),
         )
 
     async def get_totalizers(self, tot_n: int) -> tuple[datetime, float]:
