@@ -1,160 +1,19 @@
 from asyncio import Task
-from dataclasses import dataclass
 from datetime import datetime
-from enum import StrEnum, Enum, auto
-from typing import Self, AsyncIterator
+from typing import Self, Callable, Coroutine
 
+from . import StopGoStatus
+from .dataclass import ActuatorStatus
+from .values import DimensionEnergy, WhatEnergy, TypeEnergy
 from ..base import BaseItem, CoroutineCallback
 from ...client import BaseClient
 from ...exceptions import InvalidTag
-from ...messages import BaseMessage, DimensionResponse
-from ...tags import Who, What, Where, Dimension, Value
+from ...messages import BaseMessage
+from ...tags import Who, Where, Value
 
 __all__ = [
     "EnergyManagement",
-    "DimensionEnergy",
-    "WhatEnergy",
-    "TypeEnergy",
 ]
-
-
-class DimensionEnergy(Dimension, StrEnum):
-    """
-    Dimension tags for energy management items.
-    It is used only internally to send the correct command and parse the event messages.
-
-    Attributes:
-        ACTIVE_POWER: Active Power
-        END_AUTOMATIC_UPDATE_SIZE: End Automatic Update size
-        ENERGY_UNIT_TOTALIZER: Energy/Unit Totalizer
-        ENERGY_UNIT_PER_MONTH: Energy/Unit per month
-        PARTIAL_TOTALIZER_CURRENT_MONTH: Partial totalizer for current month
-        PARTIAL_TOTALIZER_CURRENT_DAY: Partial totalizer for current day
-        ACTUATORS_INFO: Actuators info
-        TOTALIZERS: Totalizers
-        DIFFERENTIAL_CURRENT_LEVEL: Differential current level
-        STATUS_STOP_GO_GENERAL: Status Stop&Go (General)
-        STATUS_STOP_GO_OPEN_CLOSE: Status Stop&Go (open/close)
-        STATUS_STOP_GO_FAILURE_NO_FAILURE: Status Stop&Go (failure/no failure)
-        STATUS_STOP_GO_BLOCK_NOT_BLOCK: Status Stop&Go (block/not block)
-        STATUS_STOP_GO_OPEN_CC_BETWEEN_N: Status Stop&Go (open for CC between the N/not open for CC between the N)
-        STATUS_STOP_GO_OPENED_GROUND_FAULT: Status Stop&Go (opened ground fault/not opened ground fault)
-        STATUS_STOP_GO_OPEN_VMAX: Status Stop&Go (open for Vmax/Not open for Vmax)
-        STATUS_STOP_GO_SELF_TEST_DISABLED: Status Stop&Go (Self-test disabled/close)
-        STATUS_STOP_GO_AUTOMATIC_RESET_OFF: Status Stop&Go (Automatic reset off/close)
-        STATUS_STOP_GO_CHECK_OFF: Status Stop&Go (check off/close)
-        STATUS_STOP_GO_WAITING_FOR_CLOSING: Status Stop&Go (Waiting for closing/close)
-        STATUS_STOP_GO_FIRST_24H_OPENING: Status Stop&Go (First 24 hours of opening/close)
-        STATUS_STOP_GO_POWER_FAILURE_DOWNSTREAM: Status Stop&Go (Power failure downstream/close)
-        STATUS_STOP_GO_POWER_FAILURE_UPSTREAM: Status Stop&Go (Power failure upstream/close)
-        DAILY_TOTALIZERS_HOURLY_16BIT: Daily totalizers on an hourly basis for 16-bit Daily graphics
-        MONTHLY_AVERAGE_HOURLY_16BIT: Monthly average on an hourly basis for 16-bit Media Daily graphics
-        MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT: Monthly totalizers current year on a daily basis for
-            32-bit Monthly graphics
-        MONTHLY_TOTALIZERS_LAST_YEAR_32BIT: Monthly totalizers on a daily basis last year compared to
-            32-bit graphics TouchX Previous Year
-    """
-    ACTIVE_POWER = "113"
-    END_AUTOMATIC_UPDATE_SIZE = "1200"
-    ENERGY_UNIT_TOTALIZER = "51"
-    ENERGY_UNIT_PER_MONTH = "52"
-    PARTIAL_TOTALIZER_CURRENT_MONTH = "53"
-    PARTIAL_TOTALIZER_CURRENT_DAY = "54"
-    ACTUATORS_INFO = "71"
-    TOTALIZERS = "72"
-    DIFFERENTIAL_CURRENT_LEVEL = "73"
-    STATUS_STOP_GO_GENERAL = "250"
-    STATUS_STOP_GO_OPEN_CLOSE = "251"
-    STATUS_STOP_GO_FAILURE_NO_FAILURE = "252"
-    STATUS_STOP_GO_BLOCK_NOT_BLOCK = "253"
-    STATUS_STOP_GO_OPEN_CC_BETWEEN_N = "254"
-    STATUS_STOP_GO_OPENED_GROUND_FAULT = "255"
-    STATUS_STOP_GO_OPEN_VMAX = "256"
-    STATUS_STOP_GO_SELF_TEST_DISABLED = "257"
-    STATUS_STOP_GO_AUTOMATIC_RESET_OFF = "258"
-    STATUS_STOP_GO_CHECK_OFF = "259"
-    STATUS_STOP_GO_WAITING_FOR_CLOSING = "260"
-    STATUS_STOP_GO_FIRST_24H_OPENING = "261"
-    STATUS_STOP_GO_POWER_FAILURE_DOWNSTREAM = "262"
-    STATUS_STOP_GO_POWER_FAILURE_UPSTREAM = "263"
-    DAILY_TOTALIZERS_HOURLY_16BIT = "511"
-    MONTHLY_AVERAGE_HOURLY_16BIT = "512"
-    MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT = "513"
-    MONTHLY_TOTALIZERS_LAST_YEAR_32BIT = "514"
-
-    # TODO: Refactor this
-    def with_parameter(self, parameter: str | int) -> Dimension:  # type: ignore[override]
-        """Returns the tag with the specified parameter"""
-        return Dimension(f"{self}#{parameter}")
-
-
-class WhatEnergy(What, StrEnum):
-    """
-    What tags for energy management items.
-    It is used only internally to send the correct command to the gateway.
-
-    Attributes:
-        AUTO_RESET_ON: Activate the auto reset.
-        AUTO_RESET_OFF: Deactivate the auto reset.
-        SEND_DAILY_REPORT: Send the power consumption for the day for each hour.
-        SEND_MONTHLY_REPORT: Send the hourly average power consumption for the month.
-        SEND_YEARLY_REPORT: Send the daily average power consumption for the year.
-        SEND_LAST_YEAR_REPORT: Send the daily average power consumption for the last year.
-        ENABLE_ACTUATOR: Command to enable the actuator.
-        FORCE_ACTUATOR_ON: Command to force the actuator on for a specific time.
-        FORCE_ACTUATOR_OFF: End the forced actuator.
-        RESET_REPORT: Command to reset the measurements.
-    """
-    AUTO_RESET_ON = "26"
-    AUTO_RESET_OFF = "27"
-    SEND_DAILY_REPORT = "57"
-    SEND_MONTHLY_REPORT = "58"
-    SEND_YEARLY_REPORT = "59"
-    SEND_LAST_YEAR_REPORT = "510"
-    ENABLE_ACTUATOR = "71"
-    FORCE_ACTUATOR_ON = "73"
-    FORCE_ACTUATOR_OFF = "74"
-    RESET_REPORT = "75"
-
-    # TODO: Refactor this
-    def with_parameter(self, parameter: str | int) -> What:  # type: ignore[override]
-        """Returns the tag with the specified parameter"""
-        return What(f"{self}#{parameter}")
-
-
-class TypeEnergy(Enum):
-    """
-    Type of energy management items.
-
-    Attributes:
-        POWER_METER: Power meter.
-        ACTUATOR: Actuator.
-        STOP_GO: Stop&Go device.
-    """
-    POWER_METER = auto()
-    ACTUATOR = auto()
-    STOP_GO = auto()
-
-
-@dataclass
-class ActuatorStatus:
-    """
-    Represents the status of an actuator.
-
-    Attributes:
-        disabled: The actuator is disabled.
-        forcing: The actuator is forced.
-        threshold: The actuator is below the threshold.
-        protection: The actuator is in protection.
-        phase: The local phase is disabled.
-        advanced: It's set in advanced mode, otherwise it is basic
-    """
-    disabled: bool
-    forcing: bool
-    threshold: bool
-    protection: bool
-    phase: bool
-    advanced: bool
 
 
 class EnergyManagement(BaseItem):
@@ -533,6 +392,210 @@ class EnergyManagement(BaseItem):
         resp = await self._single_dim_req(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL)
 
         return int(resp.values[0].string)
+
+    #
+    # Event callbacks
+    #
+
+    @classmethod
+    def on_daily_totalizers_hourly(cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]):
+        """
+        Register a callback for the daily totalizers on an hourly basis event.
+        !!! note
+            To start receiving the event, use the start_sending_daily_totalizers_hourly() with a command session.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the day, the month, the hour, and the energy measured in Wh.
+                If the hour is 25, it means that the energy is the total for the day.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.DAILY_TOTALIZERS_HOURLY_16BIT, []).append(callback)
+
+    @classmethod
+    def on_monthly_average_hourly(cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]):
+        """
+        Register a callback for the monthly average on an hourly basis event.
+        !!! note
+            To start receiving the event, use the start_sending_monthly_average_hourly() with a command session.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the month, the hour, and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_AVERAGE_HOURLY_16BIT, []).append(callback)
+
+    @classmethod
+    def on_monthly_totalizers_current_year(
+            cls,
+            callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
+    ):
+        """
+        Register a callback for the monthly totalizers current year on a daily basis event.
+        !!! note
+            To start receiving the event,
+            use the start_sending_monthly_totalizers_current_year() with a command session.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the month, the day, and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT, []).append(callback)
+
+    @classmethod
+    def on_monthly_totalizers_last_year(
+            cls,
+            callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
+    ):
+        """
+        Register a callback for the monthly totalizers last year on a daily basis event.
+        !!! note
+            To start receiving the event,
+            use the start_sending_monthly_totalizers_last_year() with a command session.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the month, the day, and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_TOTALIZERS_LAST_YEAR_32BIT, []).append(callback)
+
+    @classmethod
+    def on_stop_go_status(cls, callback: Callable[[Self, StopGoStatus], Coroutine[None, None, None]]):
+        """
+        Register a callback for the stop&go status change event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the status of the stop&go device.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.STATUS_STOP_GO_GENERAL, []).append(callback)
+
+    @classmethod
+    def on_instant_power(cls, callback: Callable[[Self, int, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the instant power consumption event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the power type, and the power measured in Watts.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.ACTIVE_POWER, []).append(callback)
+
+    @classmethod
+    def on_energy_unit_totalizer(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the energy/unit totalizer event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_TOTALIZER, []).append(callback)
+
+    @classmethod
+    def on_energy_unit_per_month(cls, callback: Callable[[Self, int, int, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the energy/unit per month event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the month, the year, and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_PER_MONTH, []).append(callback)
+
+    @classmethod
+    def on_partial_totalizer_current_month(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the partial totalizer current month event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH, []).append(callback)
+
+    @classmethod
+    def on_partial_totalizer_current_day(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the partial totalizer current day event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY, []).append(callback)
+
+    @classmethod
+    def on_actuators_info(cls, callback: Callable[[Self, ActuatorStatus], Coroutine[None, None, None]]):
+        """
+        Register a callback for the actuator info event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the status of the actuator.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.ACTUATORS_INFO, []).append(callback)
+
+    @classmethod
+    def on_totalizer_since_reset(cls, callback: Callable[[Self, int, datetime, float], Coroutine[None, None, None]]):
+        """
+        Register a callback for the totalizer since reset event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item, the totalizer number, the date and time of the last reset,
+                and the energy measured in Wh.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.TOTALIZERS, []).append(callback)
+
+    @classmethod
+    def on_differential_current_level(cls, callback: Callable[[Self, int], Coroutine[None, None, None]]):
+        """
+        Register a callback for the differential current level event.
+
+        Args:
+            callback: The callback to call when the event is received.
+                It will receive the item and the differential current level.
+
+        Returns:
+            None
+        """
+        cls._event_callbacks.setdefault(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL, []).append(callback)
 
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
