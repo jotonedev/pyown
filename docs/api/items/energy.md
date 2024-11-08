@@ -5,17 +5,17 @@ summary: Provides the main interface to the OpenWebNet energy management system.
 
 The Energy Management module provides the main interface to the OpenWebNet energy management system.
 
-::: pyown.items.energy.base.WhatEnergy
+::: pyown.items.energy.energy.WhatEnergy
     options:
         show_inheritance_diagram: true
 
-::: pyown.items.energy.base.DimensionEnergy
+::: pyown.items.energy.energy.DimensionEnergy
     options:
         show_inheritance_diagram: true
 
-::: pyown.items.energy.base.TypeEnergy
+::: pyown.items.energy.energy.TypeEnergy
 
-::: pyown.items.energy.base.EnergyManagement
+::: pyown.items.energy.energy.EnergyManagement
     options:
         show_inheritance_diagram: true
 
