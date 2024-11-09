@@ -73,9 +73,6 @@ class EnergyManagement(BaseItem):
 
         Args:
 
-        Returns:
-            None
-
         Raises:
             ResponseError: When the gateway does not acknowledge the command
         """
@@ -96,9 +93,6 @@ class EnergyManagement(BaseItem):
 
         Args:
 
-        Returns:
-            None
-
         Raises:
             ResponseError: When the gateway does not acknowledge the command
         """
@@ -116,9 +110,6 @@ class EnergyManagement(BaseItem):
             Even if the data is sent to the event session, this command must be sent on a command session.
 
         Args:
-
-        Returns:
-            None
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -138,9 +129,6 @@ class EnergyManagement(BaseItem):
 
         Args:
 
-        Returns:
-            None
-
         Raises:
             ResponseError: When the gateway does not acknowledge the command
         """
@@ -155,9 +143,6 @@ class EnergyManagement(BaseItem):
         """
         Enable the actuator.
 
-        Returns:
-            None
-
         Raises:
             ResponseError: When the gateway does not acknowledge the command
         """
@@ -169,9 +154,6 @@ class EnergyManagement(BaseItem):
 
         Args:
             time: The time in tens of minutes [1-254]. Use default time if None.
-
-        Returns:
-            None
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -185,9 +167,6 @@ class EnergyManagement(BaseItem):
         """
         End the forced actuator.
 
-        Returns:
-            None
-
         Raises:
             ResponseError: When the gateway does not acknowledge the command
         """
@@ -199,9 +178,6 @@ class EnergyManagement(BaseItem):
 
         Args:
             tot_n: The totalizer number to reset [1-2]
-
-        Returns:
-            None
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -217,9 +193,6 @@ class EnergyManagement(BaseItem):
         Args:
             time: Indicates after how many minutes it sends the consumption if it changes [1-255]
             power_type: 1 for active power
-
-        Returns:
-            None
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -237,9 +210,6 @@ class EnergyManagement(BaseItem):
 
         Args:
             power_type: 1 for active power
-
-        Returns:
-            None
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -408,9 +378,6 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item, the day, the month, the hour, and the energy measured in Wh.
                 If the hour is 25, it means that the energy is the total for the day.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.DAILY_TOTALIZERS_HOURLY_16BIT, []).append(callback)
 
@@ -424,9 +391,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the hour, and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_AVERAGE_HOURLY_16BIT, []).append(callback)
 
@@ -444,9 +408,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the day, and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT, []).append(callback)
 
@@ -464,9 +425,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the day, and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_TOTALIZERS_LAST_YEAR_32BIT, []).append(callback)
 
@@ -478,9 +436,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the status of the stop&go device.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.STATUS_STOP_GO_GENERAL, []).append(callback)
 
@@ -492,9 +447,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item, the power type, and the power measured in Watts.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.ACTIVE_POWER, []).append(callback)
 
@@ -506,9 +458,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_TOTALIZER, []).append(callback)
 
@@ -520,9 +469,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the year, and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_PER_MONTH, []).append(callback)
 
@@ -534,9 +480,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH, []).append(callback)
 
@@ -548,9 +491,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY, []).append(callback)
 
@@ -562,9 +502,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the status of the actuator.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.ACTUATORS_INFO, []).append(callback)
 
@@ -577,9 +514,6 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item, the totalizer number, the date and time of the last reset,
                 and the energy measured in Wh.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.TOTALIZERS, []).append(callback)
 
@@ -591,9 +525,6 @@ class EnergyManagement(BaseItem):
         Args:
             callback: The callback to call when the event is received.
                 It will receive the item and the differential current level.
-
-        Returns:
-            None
         """
         cls._event_callbacks.setdefault(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL, []).append(callback)
 
