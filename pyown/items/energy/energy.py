@@ -1,14 +1,13 @@
 from asyncio import Task
 from datetime import datetime
-from typing import Self, Callable, Coroutine
+from typing import Self, Callable, Coroutine, Any
 
-from . import StopGoStatus
-from .dataclass import ActuatorStatus
+from .dataclass import ActuatorStatus, StopGoStatus
 from .enums import DimensionEnergy, WhatEnergy, TypeEnergy
-from ..base import BaseItem, CoroutineCallback
+from ..base import BaseItem, CoroutineCallback, EventMessage
 from ...client import BaseClient
-from ...exceptions import InvalidTag
-from ...messages import BaseMessage
+from ...exceptions import InvalidTag, InvalidMessage
+from ...messages import BaseMessage, DimensionResponse
 from ...tags import Who, Where, Value
 
 __all__ = [
@@ -229,9 +228,9 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.ACTIVE_POWER)
+        message = await self._single_dim_req(DimensionEnergy.ACTIVE_POWER)
 
-        return float(resp.values[0].string)
+        return float(message.values[0].string)
 
     async def get_energy_unit_totalizer(self) -> float:
         """
@@ -243,11 +242,15 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.ENERGY_UNIT_TOTALIZER)
+        message = await self._single_dim_req(DimensionEnergy.ENERGY_UNIT_TOTALIZER)
 
-        return float(resp.values[0].string)
+        return float(message.values[0].string)
 
-    async def get_energy_unit_per_month(self, month: int | None = None, year: int | None = None) -> float:
+    async def get_energy_unit_per_month(
+            self,
+            month: int | None = None,
+            year: int | None = None,
+    ) -> float:
         """
         Get the energy/unit per month.
 
@@ -267,11 +270,11 @@ class EnergyManagement(BaseItem):
         if year is None:
             year = datetime.now().year % 100
 
-        resp = await self._single_dim_req(
+        message = await self._single_dim_req(
             DimensionEnergy.ENERGY_UNIT_PER_MONTH.with_parameter(year).with_parameter(month)
         )
 
-        return float(resp.values[0].string)
+        return float(message.values[0].string)
 
     async def get_partial_totalizer_current_month(self) -> float:
         """
@@ -298,13 +301,17 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY)
+        message = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY)
 
-        return float(resp.values[0].string)
+        return float(message.values[0].string)
 
-    async def get_actuators_info(self) -> ActuatorStatus:
+    async def get_actuators_info(self, *, message: EventMessage = None) -> ActuatorStatus:
         """
         Get the actuator info.
+
+        Args:
+            message: The message to parse the status from.
+                It's used internally to avoid code duplication.
 
         Returns:
             The status of the actuator.
@@ -312,23 +319,26 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.ACTUATORS_INFO)
+        if message is None:
+            message = await self._single_dim_req(DimensionEnergy.ACTUATORS_INFO)
 
         return ActuatorStatus(
-            disabled=bool(int(resp.values[0].string[0])),
-            forcing=bool(int(resp.values[0].string[1])),
-            threshold=bool(int(resp.values[0].string[2])),
-            protection=bool(int(resp.values[0].string[3])),
-            phase=bool(int(resp.values[0].string[4])),
-            advanced=not bool(int(resp.values[0].string[5]) - 1),
+            disabled=bool(int(message.values[0].string[0])),
+            forcing=bool(int(message.values[0].string[1])),
+            threshold=bool(int(message.values[0].string[2])),
+            protection=bool(int(message.values[0].string[3])),
+            phase=bool(int(message.values[0].string[4])),
+            advanced=not bool(int(message.values[0].string[5]) - 1),
         )
 
-    async def get_totalizers(self, tot_n: int) -> tuple[datetime, float]:
+    async def get_totalizers(self, tot_n: int, *, message: EventMessage = None) -> tuple[datetime, float]:
         """
         Get the energy measured from the last reset.
 
         Args:
             tot_n: The totalizer number to get [1-2]
+            message: The message to parse the status from.
+                It's used internally to avoid code duplication.
 
         Returns:
             A tuple containing the date and time of the last reset and the energy measured in kWh.
@@ -336,14 +346,15 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.TOTALIZERS.with_parameter(tot_n))
+        if message is None:
+            message = await self._single_dim_req(DimensionEnergy.TOTALIZERS.with_parameter(tot_n))
 
-        energy = float(resp.values[0].string)
-        d = resp.values[1].string
-        m = resp.values[2].string
-        y = resp.values[3].string
-        h = resp.values[4].string
-        mi = resp.values[5].string
+        energy = float(message.values[0].string)
+        d = message.values[1].string
+        m = message.values[2].string
+        y = message.values[3].string
+        h = message.values[4].string
+        mi = message.values[5].string
 
         return datetime(int(y), int(m), int(d), int(h), int(mi)), energy
 
@@ -359,9 +370,9 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL)
+        message = await self._single_dim_req(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL)
 
-        return int(resp.values[0].string)
+        return int(message.values[0].string)
 
     #
     # Event callbacks
@@ -440,13 +451,13 @@ class EnergyManagement(BaseItem):
         cls._event_callbacks.setdefault(DimensionEnergy.STATUS_STOP_GO_GENERAL, []).append(callback)
 
     @classmethod
-    def on_instant_power(cls, callback: Callable[[Self, int, float], Coroutine[None, None, None]]):
+    def on_instant_power(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
         """
         Register a callback for the instant power consumption event.
 
         Args:
             callback: The callback to call when the event is received.
-                It will receive the item, the power type, and the power measured in Watts.
+                It will receive the item and the power measured in Watts.
         """
         cls._event_callbacks.setdefault(DimensionEnergy.ACTIVE_POWER, []).append(callback)
 
@@ -530,4 +541,82 @@ class EnergyManagement(BaseItem):
 
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
-        raise NotImplementedError
+        if not isinstance(message, DimensionResponse):
+            raise InvalidMessage("The message is not a DimensionResponse message.")
+
+        dim = DimensionEnergy(message.dimension)
+
+        tasks = []
+        callbacks = cls._event_callbacks.get(dim, [])
+
+        # noinspection PyUnusedLocal
+        args: tuple[Any, ...]
+        if dim.tag == DimensionEnergy.DAILY_TOTALIZERS_HOURLY_16BIT:
+            month = int(dim.parameters[0])
+            hour = int(message.values[0].string)
+            val = float(message.values[1].string)
+            args = (item, month, hour, val)
+        elif dim.tag == DimensionEnergy.MONTHLY_AVERAGE_HOURLY_16BIT:
+            month = int(dim.parameters[0])
+            hour = int(message.values[0].string)
+            val = float(message.values[1].string)
+            args = (item, month, hour, val)
+        elif dim.tag == DimensionEnergy.MONTHLY_TOTALIZERS_CURRENT_YEAR_32BIT:
+            month = int(dim.parameters[0])
+            day = int(message.values[0].string)
+            val = float(message.values[1].string)
+            args = (item, month, day, val)
+        elif dim.tag == DimensionEnergy.MONTHLY_TOTALIZERS_LAST_YEAR_32BIT:
+            month = int(dim.parameters[0])
+            day = int(message.values[0].string)
+            val = float(message.values[1].string)
+            args = (item, month, day, val)
+        elif dim.tag == DimensionEnergy.STATUS_STOP_GO_GENERAL:
+            status = StopGoStatus(
+                open=bool(int(message.values[0].string[0])),
+                failure=bool(int(message.values[0].string[1])),
+                block=bool(int(message.values[0].string[2])),
+                open_cc=bool(int(message.values[0].string[3])),
+                open_ground_fault=bool(int(message.values[0].string[4])),
+                open_vmax=bool(int(message.values[0].string[5])),
+                self_test_off=bool(int(message.values[0].string[6])),
+                auto_reset_off=bool(int(message.values[0].string[7])),
+                check_off=bool(int(message.values[0].string[8])),
+                waiting_closing=bool(int(message.values[0].string[9])),
+                first_24h_open=bool(int(message.values[0].string[10])),
+                power_fail_down=bool(int(message.values[0].string[11])),
+                power_fail_up=bool(int(message.values[0].string[12])),
+            )
+            args = (item, status)
+        elif dim.tag == DimensionEnergy.ACTUATORS_INFO:
+            info = await item.get_actuators_info(message=message)
+            args = (item, info)
+        elif dim.tag == DimensionEnergy.ACTIVE_POWER:
+            power = float(message.values[0].string)
+            args = (item, power)
+        elif dim.tag == DimensionEnergy.ENERGY_UNIT_TOTALIZER:
+            energy = float(message.values[0].string)
+            args = (item, energy)
+        elif dim.tag == DimensionEnergy.ENERGY_UNIT_PER_MONTH:
+            month = int(dim.parameters[1])
+            year = int(dim.parameters[0])
+            energy = float(message.values[0].string)
+            args = (item, month, year, energy)
+        elif dim.tag == DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH:
+            energy = float(message.values[0].string)
+            args = (item, energy)
+        elif dim.tag == DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY:
+            energy = float(message.values[0].string)
+            args = (item, energy)
+        elif dim.tag == DimensionEnergy.TOTALIZERS:
+            args = await item.get_totalizers(int(dim.parameters[0]), message=message)
+            args = (item, *args)
+        elif dim.tag == DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL:
+            level = int(message.values[0].string)
+            args = (item, level)
+        else:
+            return []
+
+        tasks += [
+            cls._create_tasks(callbacks, *args)
+        ]
