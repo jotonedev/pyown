@@ -1,8 +1,14 @@
 # OpenWebNet parser for Python
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyown?link=https%3A%2F%2Fpypi.org%2Fproject%2Fpyown%2F)
+![PyPI - Status](https://img.shields.io/pypi/status/pyown?link=https%3A%2F%2Fpypi.org%2Fproject%2Fpyown%2F)
+![PyPI - Version](https://img.shields.io/pypi/v/pyown?link=https%3A%2F%2Fpypi.org%2Fproject%2Fpyown%2F)
+
 This is a Python library to connect and parse OpenWebNet messages from Bticino/Legrand gateways.
 
 Currently, it is a WIP, but it is already able to connect to the gateway and manages lighting or automation devices.
+
+[PyPI page](https://pypi.org/project/pyown/)
 
 ## What is OpenWebNet?
 
