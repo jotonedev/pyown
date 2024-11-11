@@ -544,7 +544,8 @@ class EnergyManagement(BaseItem):
         if not isinstance(message, DimensionResponse):
             raise InvalidMessage("The message is not a DimensionResponse message.")
 
-        dim = DimensionEnergy(message.dimension)
+        # TODO: Refactor this
+        dim = DimensionEnergy(message.dimension.string)
 
         tasks = []
         callbacks = cls._event_callbacks.get(dim, [])
@@ -617,6 +618,6 @@ class EnergyManagement(BaseItem):
         else:
             return []
 
-        tasks += [
-            cls._create_tasks(callbacks, *args)
-        ]
+        tasks += cls._create_tasks(callbacks, *args)
+
+        return tasks
