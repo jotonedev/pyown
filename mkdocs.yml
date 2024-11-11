@@ -1,10 +1,23 @@
 site_name: pyown documentation
 repo_name: pyown
 site_url: https://jotonedev.github.io/pyown/
+site_description: >
+  pyown is a Python library to communicate with a OpenWebNet gateway.
 repo_url: https://github.com/jotonedev/pyown
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: site
+strict: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
 
 theme:
   name: material
+  font: false
   palette:
     - media: "(prefers-color-scheme)"
       scheme: default
@@ -35,7 +48,15 @@ theme:
     - search.suggest
     - toc.follow
 
+copyright: >
+  Copyright &copy; 2024 John Toniutti
+
+watch:
+  - pyown
+
 plugins:
+  social:
+  privacy:
   search:
   mkdocstrings:
     default_handler: python
@@ -67,28 +88,50 @@ plugins:
           signature_crossrefs: true
 
 markdown_extensions:
-  - tables
   - abbr
+  - admonition
   - attr_list
+  - def_list
   - footnotes
   - md_in_html
+  - tables
   - toc:
       permalink: true
       title: Page contents
       toc_depth: 3
 
   # Python markdown extensions
-  - admonition
+  - pymdownx.betterem:
+      smart_enable: all
   - pymdownx.details
-  - pymdownx.superfences
-  - pymdownx.highlight:
-      pygments_lang_class: true
-  - pymdownx.extra
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.extra
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  generator: false
+  manifest: site.webmanifest
+  social:
+    - icon: fontawesome/solid/globe
+      link: https://jotone.it
+    - icon: fontawesome/brands/github
+      link: https://github.com/jotonedev
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/john-toniutti/
+
+extra_css:
+  - 'stylesheets/fonts.css'
 
 nav:
   - Home: index.md
