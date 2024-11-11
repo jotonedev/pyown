@@ -85,15 +85,6 @@ class Gateway(BaseItem):
         """
         super().__init__(client, Where(""))
 
-    async def _single_dim_req(self, what: WhatGateway) -> DimensionResponse:
-        messages = [msg async for msg in self.send_dimension_request(what)]
-
-        resp = messages[0]
-        if not isinstance(resp, DimensionResponse):
-            raise InvalidMessage("The message is not a DimensionResponse message.")
-        else:
-            return resp
-
     @staticmethod
     def _parse_own_timezone(t: Value) -> datetime.timezone:
         if t.string == "":

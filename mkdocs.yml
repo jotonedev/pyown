@@ -147,3 +147,4 @@ nav:
           - Lighting: api/items/lighting.md
           - Automation: api/items/automation.md
           - Gateway: api/items/gateway.md
+          - Energy Management: api/items/energy.md
