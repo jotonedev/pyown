@@ -28,7 +28,7 @@ repository = "https://github.com/jotonedev/pyown"
 documentation = "https://jotonedev.github.io/pyown/"
 
 [tool.poetry]
-package-mode = false
+package-mode = true
 requires-poetry = ">=2.0"
 
 [tool.poetry.dependencies]
