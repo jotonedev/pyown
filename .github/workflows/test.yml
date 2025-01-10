@@ -30,7 +30,7 @@ jobs:
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-version: "1.8.4"
+          poetry-version: "2.0.0"
           install-args: --with test
 
       - name: Lint with flake8

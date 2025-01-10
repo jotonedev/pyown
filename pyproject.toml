@@ -1,12 +1,13 @@
-[tool.poetry]
+[project]
 name = "pyown"
-version = "0.3.0"
+version = "0.3.1"
+requires-python = ">=3.11"
 description = "Python wrapper for OpenWebNet protocol"
-authors = ["John Toniutti <john.toniutti@gmail.com>"]
-license = "GPL-3.0"
+authors = [
+    {name = "John Toniutti", email = "john.toniutti@gmail.com"}
+]
+license = { text = "GPL-3.0-or-later" }
 readme = "README.md"
-repository = "https://github.com/jotonedev/pyown"
-documentation = "https://jotonedev.github.io/pyown/"
 keywords = ["openwebnet", "myhome", "bticino", "legrand"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -20,6 +21,15 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
+dynamic = [ "dependencies" ]
+
+[project.urls]
+repository = "https://github.com/jotonedev/pyown"
+documentation = "https://jotonedev.github.io/pyown/"
+
+[tool.poetry]
+package-mode = false
+requires-poetry = ">=2.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -30,6 +40,9 @@ pytest = "^8.3"
 pytest-cov = "^5.0"
 pytest-asyncio = "^0.24"
 mypy = "^1.11"
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6"

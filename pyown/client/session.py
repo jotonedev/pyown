@@ -17,9 +17,9 @@ class SessionType(StrEnum):
         EventSession: Event session value. Used to create a session for receiving events,
             sending commands is not allowed.
     """
-    OldCommandSession: str = "0"
-    CommandSession: str = "9"
-    EventSession: str = "1"
+    OldCommandSession = "0"
+    CommandSession = "9"
+    EventSession = "1"
 
     def to_message(self) -> GenericMessage:
         """

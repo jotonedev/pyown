@@ -59,17 +59,17 @@ class WhatGateway(What, StrEnum):
         KERNEL_VERSION: get the linux kernel version of the gateway.
         DISTRIBUTION_VERSION: get the linux distribution version of the gateway.
     """
-    TIME: str = "0"
-    DATE: str = "1"
-    IP_ADDRESS: str = "10"
-    NET_MASK: str = "11"
-    MAC_ADDRESS: str = "12"
-    DEVICE_TYPE: str = "15"
-    FIRMWARE_VERSION: str = "16"
-    UPTIME: str = "19"
-    DATE_TIME: str = "22"
-    KERNEL_VERSION: str = "23"
-    DISTRIBUTION_VERSION: str = "24"
+    TIME = "0"
+    DATE = "1"
+    IP_ADDRESS = "10"
+    NET_MASK = "11"
+    MAC_ADDRESS = "12"
+    DEVICE_TYPE = "15"
+    FIRMWARE_VERSION = "16"
+    UPTIME = "19"
+    DATE_TIME = "22"
+    KERNEL_VERSION = "23"
+    DISTRIBUTION_VERSION = "24"
 
 
 class Gateway(BaseItem):

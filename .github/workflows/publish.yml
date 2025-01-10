@@ -31,8 +31,8 @@ jobs:
       - name: Setup and Cache Python Poetry
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
-          python-version: "3.12"
-          poetry-version: "1.8.4"
+          python-version: "3.13"
+          poetry-version: "2.0.0"
 
       - name: Package project
         run: poetry build
