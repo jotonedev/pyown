@@ -17,6 +17,7 @@ class DimensionRequest(BaseMessage):
 
     Syntax: `*#who*where*dimension##`
     """
+
     _type: MessageType = MessageType.DIMENSION_REQUEST
     _tags: tuple[Who, Where, Dimension]
 
@@ -46,11 +47,7 @@ class DimensionRequest(BaseMessage):
         """Parses the tags of a message from the OpenWebNet bus."""
 
         return cls(
-            tags=(
-                Who(tags[0].removeprefix("#")),
-                Where(tags[1]),
-                Dimension(tags[2])
-            )
+            tags=(Who(tags[0].removeprefix("#")), Where(tags[1]), Dimension(tags[2]))
         )
 
 
@@ -60,10 +57,13 @@ class DimensionWriting(BaseMessage):
 
     Syntax: `*#who*where*#dimension*value1*value2*...*valueN##`
     """
+
     _type: MessageType = MessageType.DIMENSION_WRITING
     _tags: tuple[Who, Where, Dimension, Value, ...]  # type: ignore[misc]
 
-    _regex: Pattern[str] = re.compile(r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*#[0-9]*(?:\*[0-9]*(?:#[0-9]*)*)*##$")
+    _regex: Pattern[str] = re.compile(
+        r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*#[0-9]*(?:\*[0-9]*(?:#[0-9]*)*)*##$"
+    )
 
     def __init__(self, tags: tuple[Who, Where, Dimension, Value, ...]):  # type: ignore[misc]
         self._tags = tags
@@ -100,7 +100,7 @@ class DimensionWriting(BaseMessage):
                 Who(tags[0].removeprefix("#")),
                 Where(tags[1]),
                 Dimension(tags[2].removeprefix("#")),
-                *values  # type: ignore[arg-type]
+                *values,  # type: ignore[arg-type]
             )
         )
 
@@ -111,9 +111,11 @@ class DimensionResponse(DimensionWriting, BaseMessage):
 
     Syntax: `*#who*where*dimension*value1*value2*...*valueN##`
     """
+
     _type: MessageType = MessageType.DIMENSION_RESPONSE
     _regex: Pattern[str] = re.compile(
-        r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*(?:\*[0-9]*(?:#[0-9]*)*)*##$")
+        r"^\*#[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*(?:\*[0-9]*(?:#[0-9]*)*)*##$"
+    )
 
     @property
     def message(self) -> str:

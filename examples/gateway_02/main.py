@@ -4,7 +4,7 @@ import logging
 from black import datetime
 
 from pyown.client import Client, SessionType
-from pyown.items import Gateway,  WhatGateway
+from pyown.items import Gateway, WhatGateway
 
 
 async def on_time_change(gateway: Gateway, time: datetime.time):
@@ -13,16 +13,10 @@ async def on_time_change(gateway: Gateway, time: datetime.time):
 
 async def run(host: str, port: int, password: str):
     client = Client(
-        host=host,
-        port=port,
-        password=password,
-        session_type=SessionType.EventSession
+        host=host, port=port, password=password, session_type=SessionType.EventSession
     )
 
-    Gateway.register_callback(
-        WhatGateway.TIME,
-        on_time_change
-    )
+    Gateway.register_callback(WhatGateway.TIME, on_time_change)
 
     await client.start()
     await client.loop()
@@ -44,9 +38,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
-    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
-    parser.add_argument("--password", type=str, help="The password to authenticate with", default="12345")
+    parser.add_argument(
+        "--host", type=str, help="The host to connect to", default="192.168.1.35"
+    )
+    parser.add_argument(
+        "--port", type=int, help="The port to connect to", default=20000
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        help="The password to authenticate with",
+        default="12345",
+    )
 
     args = parser.parse_args()
 

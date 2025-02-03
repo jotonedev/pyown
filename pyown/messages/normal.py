@@ -15,10 +15,13 @@ class NormalMessage(BaseMessage):
 
     Syntax: `*who*what*where##`
     """
+
     _type: MessageType = MessageType.NORMAL
     _tags: tuple[Who, What, Where]
 
-    _regex: Pattern[str] = re.compile(r"^\*[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*##$")
+    _regex: Pattern[str] = re.compile(
+        r"^\*[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*##$"
+    )
 
     def __init__(self, tags: tuple[Who, What, Where]):
         self._tags = tags
@@ -43,10 +46,4 @@ class NormalMessage(BaseMessage):
     def parse(cls, tags: list[str]) -> Self:
         """Parses the tags of a message from the OpenWebNet bus."""
 
-        return cls(
-            tags=(
-                Who(tags[0]),
-                What(tags[1]),
-                Where(tags[2])
-            )
-        )
+        return cls(tags=(Who(tags[0]), What(tags[1]), Where(tags[2])))

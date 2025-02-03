@@ -25,6 +25,7 @@ class AutomationEvents(Enum):
         DOWN: The event for when the automation goes down.
         ALL: The event for all events.
     """
+
     STOP = auto()
     UP = auto()
     DOWN = auto()
@@ -40,6 +41,7 @@ class WhatAutomation(What, StrEnum):
         UP: The command to go up.
         DOWN: The command to go down.
     """
+
     STOP = "0"
     UP = "1"
     DOWN = "2"
@@ -49,6 +51,7 @@ class Automation(BaseItem):
     """
     Automation items are usually used to control blinds, shutters, etc...
     """
+
     _who = Who.AUTOMATION
 
     _event_callbacks: dict[AutomationEvents, list[CoroutineCallback]] = {}
@@ -79,7 +82,9 @@ class Automation(BaseItem):
             yield message.where, WhatAutomation(str(message.what))
 
     @classmethod
-    def on_status_change(cls, callback: Callable[[Self, WhatAutomation], Coroutine[None, None, None]]):
+    def on_status_change(
+        cls, callback: Callable[[Self, WhatAutomation], Coroutine[None, None, None]]
+    ):
         """
         Registers a callback to be called when the status of the automation changes.
 
@@ -100,7 +105,7 @@ class Automation(BaseItem):
             tasks += cls._create_tasks(
                 cls._event_callbacks.get(AutomationEvents.ALL, []),
                 item,
-                WhatAutomation(str(message.what))
+                WhatAutomation(str(message.what)),
             )
         else:
             raise InvalidMessage(str(message))

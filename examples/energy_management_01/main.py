@@ -2,7 +2,6 @@ import asyncio
 import logging
 
 from pyown.client import Client
-from pyown.items import Gateway
 from pyown.items.energy import EnergyManagement
 
 
@@ -42,9 +41,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
-    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
-    parser.add_argument("--password", type=str, help="The password to authenticate with", default="12345")
+    parser.add_argument(
+        "--host", type=str, help="The host to connect to", default="192.168.1.35"
+    )
+    parser.add_argument(
+        "--port", type=int, help="The port to connect to", default=20000
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        help="The password to authenticate with",
+        default="12345",
+    )
 
     args = parser.parse_args()
 

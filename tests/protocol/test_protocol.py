@@ -1,6 +1,5 @@
 import asyncio
 import unittest
-from unittest.mock import MagicMock
 
 from pyown.exceptions import ParseError
 from pyown.messages import ACK
@@ -8,15 +7,11 @@ from pyown.protocol.protocol import OWNProtocol
 
 
 class OWNProtocolTests(unittest.IsolatedAsyncioTestCase):
-
     async def asyncSetUp(self):
         self.on_connection_start = asyncio.Future()
         self.on_connection_end = asyncio.Future()
 
-        self.protocol = OWNProtocol(
-            self.on_connection_start,
-            self.on_connection_end
-        )
+        self.protocol = OWNProtocol(self.on_connection_start, self.on_connection_end)
 
     async def test_connection_made(self):
         transport = unittest.mock.MagicMock()

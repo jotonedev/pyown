@@ -26,6 +26,7 @@ class LightEvents(Enum):
         HSV_CHANGE: The light color has changed.
         WHITE_TEMP_CHANGE: The white temperature has changed.
     """
+
     STATUS_CHANGE = auto()
     LUMINOSITY_CHANGE = auto()
     LIGHT_TEMPORIZATION = auto()
@@ -72,6 +73,7 @@ class WhatLight(What, StrEnum):
         DOWN_1_PERCENT: Decreases the light luminosity by 1
         COMMAND_TRANSLATION: Not clear what this does.
     """
+
     OFF = "0"
     ON = "1"
 
@@ -115,6 +117,7 @@ class WhatLight(What, StrEnum):
 
 class BaseLight(BaseItem, ABC):
     """Base class for all light items."""
+
     _who: Who = Who.LIGHTING
 
     _event_callbacks: dict[LightEvents, list[CoroutineCallback]] = {}
@@ -178,7 +181,9 @@ class BaseLight(BaseItem, ABC):
         if hour >= 24 or minute >= 60 or second >= 60:
             raise ValueError("Invalid time")
 
-        await self.send_dimension_writing("2", Value(hour), Value(minute), Value(second))
+        await self.send_dimension_writing(
+            "2", Value(hour), Value(minute), Value(second)
+        )
 
     async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
@@ -205,7 +210,9 @@ class BaseLight(BaseItem, ABC):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
 
     @classmethod
-    def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
+    def on_status_change(
+        cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]
+    ):
         """
         Registers a callback function to be called when the light status changes.
 
@@ -216,7 +223,9 @@ class BaseLight(BaseItem, ABC):
         cls._event_callbacks.setdefault(LightEvents.STATUS_CHANGE, []).append(callback)
 
     @classmethod
-    def on_temporization_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
+    def on_temporization_change(
+        cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]
+    ):
         """
         Registers a callback function to be called when the temporization changes.
 
@@ -224,7 +233,9 @@ class BaseLight(BaseItem, ABC):
             callback (Callable[[Self, int, int, int]): The callback function to call.
                 It will receive as arguments the item, the hour, the minute, and the second.
         """
-        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
+        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(
+            callback
+        )
 
     @classmethod
     async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
@@ -237,14 +248,14 @@ class BaseLight(BaseItem, ABC):
                     item,
                     int(message.values[0].tag),  # type: ignore[arg-type]
                     int(message.values[1].tag),  # type: ignore[arg-type]
-                    int(message.values[2].tag)  # type: ignore[arg-type]
+                    int(message.values[2].tag),  # type: ignore[arg-type]
                 )
             elif message.dimension.tag == "8":
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.LUMINOSITY_CHANGE, []),
                     item,
                     int(message.values[0].tag),  # type: ignore[arg-type]
-                    int(message.values[1].tag)  # type: ignore[arg-type]
+                    int(message.values[1].tag),  # type: ignore[arg-type]
                 )
             elif message.dimension.tag == "12":
                 tasks += cls._create_tasks(
@@ -252,19 +263,19 @@ class BaseLight(BaseItem, ABC):
                     item,
                     int(message.values[0].tag),  # type: ignore[arg-type]
                     int(message.values[1].tag),  # type: ignore[arg-type]
-                    int(message.values[2].tag)  # type: ignore[arg-type]
+                    int(message.values[2].tag),  # type: ignore[arg-type]
                 )
             elif message.dimension.tag == "13":
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.WHITE_TEMP_CHANGE, []),
                     item,
-                    int(message.values[0].tag)  # type: ignore[arg-type]
+                    int(message.values[0].tag),  # type: ignore[arg-type]
                 )
         elif isinstance(message, NormalMessage):
             tasks += cls._create_tasks(
                 cls._event_callbacks.get(LightEvents.STATUS_CHANGE, []),
                 item,
-                message.what == WhatLight.ON
+                message.what == WhatLight.ON,
             )
         else:
             raise InvalidMessage(str(message))

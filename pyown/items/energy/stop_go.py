@@ -18,7 +18,9 @@ class StopGo(EnergyManagement):
     Used to manage the Stop&Go items.
     """
 
-    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
+    def __init__(
+        self, client: BaseClient, where: Where | str, *, who: Who | str | None = None
+    ):
         """
         Initializes the item and check if the where tag is valid.
 
@@ -47,10 +49,10 @@ class StopGo(EnergyManagement):
         await self.send_normal_message(WhatEnergy.AUTO_RESET_OFF)
 
     async def request_status(
-            self,
-            *,
-            messages: AsyncIterator[DimensionResponse] | None = None,
-            dim_req: DimensionEnergy = DimensionEnergy.STATUS_STOP_GO_GENERAL
+        self,
+        *,
+        messages: AsyncIterator[DimensionResponse] | None = None,
+        dim_req: DimensionEnergy = DimensionEnergy.STATUS_STOP_GO_GENERAL,
     ) -> StopGoStatus:
         """
         Request the status of the Stop&Go device.

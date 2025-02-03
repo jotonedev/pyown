@@ -42,6 +42,7 @@ class Who(Tag, StrEnum):
         ENERGY_DIAGNOSTICS: used to read and set low level values to energy management devices .
             (only used by the official MyHome software)
     """
+
     SCENE = "0"
     LIGHTING = "1"
     AUTOMATION = "2"

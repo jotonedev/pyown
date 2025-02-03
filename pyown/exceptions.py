@@ -19,6 +19,7 @@ class OWNException(Exception):
     This exception should not be raised directly.
     It is useful for catching all exceptions in the package.
     """
+
     pass
 
 
@@ -28,6 +29,7 @@ class ParseError(OWNException):
 
     It is a generic exception and should not be raised directly.
     """
+
     pass
 
 
@@ -39,6 +41,7 @@ class InvalidData(ParseError):
     Args:
         data: The data that caused the error.
     """
+
     data: bytes
 
     def __init__(self, data: bytes):
@@ -54,6 +57,7 @@ class InvalidMessage(ParseError):
     Args:
         message: The message or tags that caused the error.
     """
+
     message: str
 
     def __init__(self, message: str | list[str]) -> None:
@@ -72,6 +76,7 @@ class InvalidTag(ParseError):
     Args:
         tag: The tag that caused the error.
     """
+
     tag: str
 
     def __init__(self, tag: Any) -> None:
@@ -83,6 +88,7 @@ class InvalidSession(OWNException):
     """
     Raised when a command is sent using an event session or when event methods are called using a command session.
     """
+
     pass
 
 
@@ -90,6 +96,7 @@ class InvalidAuthentication(OWNException):
     """
     Raised when the authentication fails or an unsupported authentication method is used.
     """
+
     pass
 
 
@@ -97,4 +104,5 @@ class ResponseError(OWNException):
     """
     Raised when an error the server responds with a NACK or responds with an unexpected message.
     """
+
     pass

@@ -7,23 +7,13 @@ from pyown.tags import Who, Where, Dimension
 
 
 async def run(host: str, port: int, password: str):
-    client = Client(
-        host=host,
-        port=port,
-        password=password
-    )
+    client = Client(host=host, port=port, password=password)
 
     await client.start()
 
     # Request the 7 october energy management data
     await client.send_message(
-        DimensionRequest(
-            (
-                Who.ENERGY_MANAGEMENT,
-                Where("52"),
-                Dimension("511#10#7")
-            )
-        )
+        DimensionRequest((Who.ENERGY_MANAGEMENT, Where("52"), Dimension("511#10#7")))
     )
 
     while True:
@@ -45,7 +35,9 @@ async def run(host: str, port: int, password: str):
             day = resp.dimension.parameters[1]
             tag = resp.values[0]
             value = resp.values[1]
-            logging.info(f"Month: {month}, Day: {day}, Number of the measure: {tag}, Value: {value}")
+            logging.info(
+                f"Month: {month}, Day: {day}, Number of the measure: {tag}, Value: {value}"
+            )
 
     await client.close()
 
@@ -66,9 +58,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
-    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
-    parser.add_argument("--password", type=str, help="The password to authenticate with", default="12345")
+    parser.add_argument(
+        "--host", type=str, help="The host to connect to", default="192.168.1.35"
+    )
+    parser.add_argument(
+        "--port", type=int, help="The port to connect to", default=20000
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        help="The password to authenticate with",
+        default="12345",
+    )
 
     args = parser.parse_args()
 

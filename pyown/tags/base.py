@@ -119,4 +119,5 @@ class Value(Tag):
     """
     Represents a value tag in a dimension response message.
     """
+
     pass

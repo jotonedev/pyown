@@ -18,9 +18,9 @@ class OWNProtocol(Protocol):
     _lock: Lock
 
     def __init__(
-            self,
-            on_connection_start: Future[Transport],
-            on_connection_end: Future[Exception | None],
+        self,
+        on_connection_start: Future[Transport],
+        on_connection_end: Future[Exception | None],
     ):
         """
         Creates the TCP connection with the gateway, parses the incoming data, and sends the outgoing messages.

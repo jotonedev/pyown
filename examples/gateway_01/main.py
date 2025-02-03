@@ -14,9 +14,7 @@ async def run(host: str, port: int, password: str):
 
     await client.start()
 
-    gateway = Gateway(
-        client=client
-    )
+    gateway = Gateway(client=client)
 
     # get ip address of the gateway
     ip = await gateway.get_ip()
@@ -53,9 +51,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
-    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
-    parser.add_argument("--password", type=str, help="The password to authenticate with", default="12345")
+    parser.add_argument(
+        "--host", type=str, help="The host to connect to", default="192.168.1.35"
+    )
+    parser.add_argument(
+        "--port", type=int, help="The port to connect to", default=20000
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        help="The password to authenticate with",
+        default="12345",
+    )
 
     args = parser.parse_args()
 

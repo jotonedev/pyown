@@ -15,4 +15,5 @@ class Dimension(TagWithParameters):
     But in many cases it's used to request information about the status of a device,
     making it similar to the WHAT tag.
     """
+
     pass

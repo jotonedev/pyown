@@ -4,9 +4,7 @@ from typing import Self, Pattern
 from .base import BaseMessage, MessageType
 from ..tags import Who, Where
 
-__all__ = [
-    "StatusRequest"
-]
+__all__ = ["StatusRequest"]
 
 
 class StatusRequest(BaseMessage):
@@ -15,6 +13,7 @@ class StatusRequest(BaseMessage):
 
     Syntax: `*#who*where##`
     """
+
     _type: MessageType = MessageType.STATUS_REQUEST
     _tags: tuple[Who, Where]
 
@@ -39,9 +38,4 @@ class StatusRequest(BaseMessage):
     def parse(cls, tags: list[str]) -> Self:
         """Parses the tags of a message from the OpenWebNet bus."""
 
-        return cls(
-            tags=(
-                Who(tags[0].removeprefix("#")),
-                Where(tags[1])
-            )
-        )
+        return cls(tags=(Who(tags[0].removeprefix("#")), Where(tags[1])))

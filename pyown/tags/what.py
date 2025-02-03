@@ -12,4 +12,5 @@ class What(TagWithParameters):
     The tag WHAT, identifies the action to make (ON lights, OFF lights, dimmer at 20%,
     shutters UP, shutters DOWN, etc...)
     """
+
     pass

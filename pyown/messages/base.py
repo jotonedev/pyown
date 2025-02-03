@@ -40,6 +40,7 @@ class BaseMessage(abc.ABC):
         suffix (str): Suffix of the message
         separator (str): Separator of the tags
     """
+
     _type: MessageType = MessageType.GENERIC  # Type of the message
     _tags: Any  # Contains the tags of the message
 
@@ -47,7 +48,9 @@ class BaseMessage(abc.ABC):
     suffix: Final[str] = "##"  # Suffix of the message
     separator: Final[str] = "*"  # Separator of the tags
 
-    _regex: Pattern[str] = re.compile(r"^\*(?:([0-9]*)(?:#[0-9]*)*\*?)+##$")  # Regex pattern used to match the message
+    _regex: Pattern[str] = re.compile(
+        r"^\*(?:([0-9]*)(?:#[0-9]*)*\*?)+##$"
+    )  # Regex pattern used to match the message
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs) -> None:
@@ -57,7 +60,9 @@ class BaseMessage(abc.ABC):
         return self.message
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}: {','.join([str(tag) for tag in self._tags])}>"
+        return (
+            f"<{self.__class__.__name__}: {','.join([str(tag) for tag in self._tags])}>"
+        )
 
     def __hash__(self) -> int:
         return hash((self._type, self._tags))
@@ -204,7 +209,11 @@ def parse_message(message: str) -> BaseMessage:
 
     message = message.strip()
 
-    tags = message.removeprefix(BaseMessage.prefix).removesuffix(BaseMessage.suffix).split(BaseMessage.separator)
+    tags = (
+        message.removeprefix(BaseMessage.prefix)
+        .removesuffix(BaseMessage.suffix)
+        .split(BaseMessage.separator)
+    )
 
     # First, check if the message is valid
     if GenericMessage.pattern().match(message) is None:

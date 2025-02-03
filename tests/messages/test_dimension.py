@@ -1,4 +1,10 @@
-from pyown.messages import DimensionRequest, DimensionWriting, DimensionResponse, MessageType, parse_message
+from pyown.messages import (
+    DimensionRequest,
+    DimensionWriting,
+    DimensionResponse,
+    MessageType,
+    parse_message,
+)
 
 
 def test_dimension_request():

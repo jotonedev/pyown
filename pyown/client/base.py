@@ -6,7 +6,13 @@ from typing import Optional, Any
 
 from .session import SessionType
 from ..auth import AuthAlgorithm
-from ..auth.hmac import server_hmac, client_hmac, hex_to_digits, compare_hmac, create_key
+from ..auth.hmac import (
+    server_hmac,
+    client_hmac,
+    hex_to_digits,
+    compare_hmac,
+    create_key,
+)
 from ..auth.open import own_calc_pass
 from ..exceptions import InvalidAuthentication, InvalidSession
 from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
@@ -21,13 +27,13 @@ log = logging.getLogger("pyown.client")
 
 class BaseClient(ABC):
     def __init__(
-            self,
-            host: str,
-            port: int,
-            password: str,
-            session_type: SessionType = SessionType.CommandSession,
-            *,
-            loop: Optional[AbstractEventLoop] = None
+        self,
+        host: str,
+        port: int,
+        password: str,
+        session_type: SessionType = SessionType.CommandSession,
+        *,
+        loop: Optional[AbstractEventLoop] = None,
     ):
         """
         BaseClient constructor
@@ -61,7 +67,10 @@ class BaseClient(ABC):
         Returns:
             bool: True if the session is a command session, False otherwise
         """
-        return self._session_type == SessionType.CommandSession or self._session_type == SessionType.OldCommandSession
+        return (
+            self._session_type == SessionType.CommandSession
+            or self._session_type == SessionType.OldCommandSession
+        )
 
     async def start(self) -> None:
         """
@@ -77,7 +86,7 @@ class BaseClient(ABC):
                 on_connection_end=self._on_connection_end,
             ),
             self._host,
-            self._port
+            self._port,
         )
 
         # Wait for the connection to start
@@ -165,19 +174,21 @@ class BaseClient(ABC):
             server_key=server_key,
             client_key=client_key,
             password=self._password,
-            hash_algorithm=hash_algorithm
+            hash_algorithm=hash_algorithm,
         )
         server_auth = server_hmac(
             server_key=server_key,
             client_key=client_key,
             password=self._password,
-            hash_algorithm=hash_algorithm
+            hash_algorithm=hash_algorithm,
         )
 
         # Send the client authentication string
         await self.send_message(
-            GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())]),
-            force=True
+            GenericMessage(
+                [hex_to_digits(client_key), hex_to_digits(client_auth.hex())]
+            ),
+            force=True,
         )
         resp = await self.read_message()
 
@@ -185,10 +196,7 @@ class BaseClient(ABC):
             raise InvalidAuthentication("Invalid password")
 
         # Check the server authentication string with the one generated
-        if not compare_hmac(
-                server_auth,
-                bytes.fromhex(hex_to_digits(resp.tags[0]))
-        ):
+        if not compare_hmac(server_auth, bytes.fromhex(hex_to_digits(resp.tags[0]))):
             raise InvalidAuthentication("Invalid password")
         else:
             await self.send_message(ACK(), force=True)

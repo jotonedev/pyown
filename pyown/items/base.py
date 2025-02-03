@@ -5,15 +5,18 @@ from typing import Self, Callable, Coroutine, Any, AsyncIterator
 
 from ..client import BaseClient
 from ..exceptions import ResponseError, InvalidMessage
-from ..messages import NormalMessage, StatusRequest, DimensionWriting, DimensionRequest, BaseMessage, MessageType, \
-    DimensionResponse
+from ..messages import (
+    NormalMessage,
+    StatusRequest,
+    DimensionWriting,
+    DimensionRequest,
+    BaseMessage,
+    MessageType,
+    DimensionResponse,
+)
 from ..tags import Where, Who, What, Dimension, Value
 
-__all__ = [
-    "BaseItem",
-    "CoroutineCallback",
-    "EventMessage"
-]
+__all__ = ["BaseItem", "CoroutineCallback", "EventMessage"]
 
 CoroutineCallback = Callable[..., Coroutine[None, None, None]]
 """Type alias for a coroutine function that does not return anything."""
@@ -29,9 +32,12 @@ class BaseItem(ABC):
     The base class for all items.
     This class provides the basic functionality to communicate with the server using the client.
     """
+
     _who = Who.LIGHTING
 
-    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
+    def __init__(
+        self, client: BaseClient, where: Where | str, *, who: Who | str | None = None
+    ):
         """
         Initializes the item.
         Args:
@@ -155,13 +161,7 @@ class BaseItem(ABC):
         if isinstance(what, str):
             what = What(what)
 
-        return NormalMessage(
-            (
-                self._who,
-                what,
-                self._where
-            )
-        )
+        return NormalMessage((self._who, what, self._where))
 
     def create_status_message(self) -> StatusRequest:
         """
@@ -170,14 +170,11 @@ class BaseItem(ABC):
         Returns:
             A status message.
         """
-        return StatusRequest(
-            (
-                self._who,
-                self._where
-            )
-        )
+        return StatusRequest((self._who, self._where))
 
-    def create_dimension_writing_message(self, dimension: Dimension, *args: Value) -> DimensionWriting:
+    def create_dimension_writing_message(
+        self, dimension: Dimension, *args: Value
+    ) -> DimensionWriting:
         """
         Creates a dimension message for the item.
         Args:
@@ -193,11 +190,13 @@ class BaseItem(ABC):
                 self._who,
                 self._where,
                 dimension,
-                *args  # type: ignore[arg-type]
+                *args,  # type: ignore[arg-type]
             )
         )
 
-    def create_dimension_request_message(self, dimension: Dimension) -> DimensionRequest:
+    def create_dimension_request_message(
+        self, dimension: Dimension
+    ) -> DimensionRequest:
         """
         Creates a dimension request message for the item.
         Args:
@@ -206,13 +205,7 @@ class BaseItem(ABC):
         Returns:
 
         """
-        return DimensionRequest(
-            (
-                self._who,
-                self._where,
-                dimension
-            )
-        )
+        return DimensionRequest((self._who, self._where, dimension))
 
     async def send_normal_message(self, what: What | str) -> None:
         """
@@ -256,7 +249,9 @@ class BaseItem(ABC):
 
             yield resp
 
-    async def send_dimension_request(self, dimension: Dimension | str) -> AsyncIterator[DimensionResponse]:
+    async def send_dimension_request(
+        self, dimension: Dimension | str
+    ) -> AsyncIterator[DimensionResponse]:
         """
         Sends a dimension request and receive multiple responses from the server.
 
@@ -281,11 +276,15 @@ class BaseItem(ABC):
                 break
 
             if not isinstance(resp, DimensionResponse):
-                raise ResponseError(f"Received {resp} instead of a dimension response message")
+                raise ResponseError(
+                    f"Received {resp} instead of a dimension response message"
+                )
 
             yield resp
 
-    async def send_dimension_writing(self, dimension: Dimension | str, *args: Value) -> None:
+    async def send_dimension_writing(
+        self, dimension: Dimension | str, *args: Value
+    ) -> None:
         """
         Sends a dimension writing message to the server and check the response.
 

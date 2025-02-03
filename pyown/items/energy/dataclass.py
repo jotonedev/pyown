@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 
-__all__ = [
-    "ActuatorStatus",
-    "StopGoStatus"
-]
+__all__ = ["ActuatorStatus", "StopGoStatus"]
 
 
 @dataclass
@@ -19,6 +16,7 @@ class ActuatorStatus:
         phase: The local phase is disabled.
         advanced: It's set in advanced mode, otherwise it is basic
     """
+
     disabled: bool
     forcing: bool
     threshold: bool
@@ -46,6 +44,7 @@ class StopGoStatus:
         power_fail_down: set if the circuit is open due to a power failure downstream
         power_fail_up: set if the circuit is open due to a power failure upstream
     """
+
     open: bool | None = None
     failure: bool | None = None
     block: bool | None = None

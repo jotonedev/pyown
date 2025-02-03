@@ -22,13 +22,13 @@ class Client(BaseClient):
     _items: dict[tuple[Who, Where], BaseItem]
 
     def __init__(
-            self,
-            host: str,
-            port: int,
-            password: str,
-            session_type: SessionType = SessionType.CommandSession,
-            *,
-            loop: Optional[AbstractEventLoop] = None
+        self,
+        host: str,
+        port: int,
+        password: str,
+        session_type: SessionType = SessionType.CommandSession,
+        *,
+        loop: Optional[AbstractEventLoop] = None,
     ):
         """
         Represents a client connection that connects to an OpenWebNet gateway.

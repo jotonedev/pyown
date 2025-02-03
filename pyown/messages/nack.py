@@ -16,6 +16,7 @@ class NACK(BaseMessage):
 
     Syntax: `*#*0##` (constant string)
     """
+
     _type: MessageType = MessageType.NACK
     _tags: tuple[str, str] = ("#", "0")
 

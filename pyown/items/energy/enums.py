@@ -2,11 +2,7 @@ from enum import StrEnum, Enum, auto
 
 from ...tags import Dimension, What
 
-__all__ = [
-    "DimensionEnergy",
-    "WhatEnergy",
-    "TypeEnergy"
-]
+__all__ = ["DimensionEnergy", "WhatEnergy", "TypeEnergy"]
 
 
 class DimensionEnergy(Dimension, StrEnum):
@@ -45,6 +41,7 @@ class DimensionEnergy(Dimension, StrEnum):
         MONTHLY_TOTALIZERS_LAST_YEAR_32BIT: Monthly totalizers on a daily basis last year compared to
             32-bit graphics TouchX Previous Year
     """
+
     ACTIVE_POWER = "113"
     END_AUTOMATIC_UPDATE_SIZE = "1200"
     ENERGY_UNIT_TOTALIZER = "51"
@@ -96,6 +93,7 @@ class WhatEnergy(What, StrEnum):
         FORCE_ACTUATOR_OFF: End the forced actuator.
         RESET_REPORT: Command to reset the measurements.
     """
+
     AUTO_RESET_ON = "26"
     AUTO_RESET_OFF = "27"
     SEND_DAILY_REPORT = "57"
@@ -122,6 +120,7 @@ class TypeEnergy(Enum):
         ACTUATOR: Actuator.
         STOP_GO: Stop&Go device.
     """
+
     POWER_METER = auto()
     ACTUATOR = auto()
     STOP_GO = auto()

@@ -16,6 +16,7 @@ class ACK(BaseMessage):
 
     Syntax: `*#*1##` (constant string)
     """
+
     _type: MessageType = MessageType.ACK
     _tags: tuple[str, str] = ("#", "1")
 

@@ -3,7 +3,7 @@ from enum import StrEnum
 from ..messages import GenericMessage
 
 __all__ = [
-    'SessionType',
+    "SessionType",
 ]
 
 
@@ -17,6 +17,7 @@ class SessionType(StrEnum):
         EventSession: Event session value. Used to create a session for receiving events,
             sending commands is not allowed.
     """
+
     OldCommandSession = "0"
     CommandSession = "9"
     EventSession = "1"

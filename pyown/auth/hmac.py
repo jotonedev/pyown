@@ -15,12 +15,12 @@ __all__ = [
 
 
 def client_hmac(
-        server_key: str,
-        client_key: str,
-        password: str,
-        client_identity: str = "736F70653E",
-        server_identity: str = "636F70653E",
-        hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
+    server_key: str,
+    client_key: str,
+    password: str,
+    client_identity: str = "736F70653E",
+    server_identity: str = "636F70653E",
+    hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
 ) -> bytes:
     """
     Generates the HMAC authentication for the client.
@@ -56,10 +56,10 @@ def client_hmac(
 
 
 def server_hmac(
-        server_key: str,
-        client_key: str,
-        password: str,
-        hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
+    server_key: str,
+    client_key: str,
+    password: str,
+    hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
 ) -> bytes:
     """
     Generates the HMAC authentication for the server.
@@ -93,8 +93,8 @@ def server_hmac(
 
 
 def compare_hmac(
-        hmac1: bytes,
-        hmac2: bytes,
+    hmac1: bytes,
+    hmac2: bytes,
 ) -> bool:
     """
     Compares two hmacs in constant time.
@@ -110,7 +110,7 @@ def compare_hmac(
 
 
 def create_key(
-        hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
+    hash_algorithm: AuthAlgorithm = AuthAlgorithm.SHA256,
 ) -> str:
     """
     Creates a random key for the hmac.
@@ -132,7 +132,7 @@ def create_key(
 
 
 def hex_to_digits(
-        hex_string: str,
+    hex_string: str,
 ) -> str:
     """
     Converts a hex string to digits.
@@ -151,7 +151,7 @@ def hex_to_digits(
 
 
 def digits_to_hex(
-        digits_string: str,
+    digits_string: str,
 ) -> str:
     """
     Converts a digit string to hex.

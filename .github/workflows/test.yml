@@ -30,16 +30,16 @@ jobs:
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-version: "2.0.0"
-          install-args: --with test
+          poetry-version: "2.0.1"
+          install-args: --with dev
 
-      - name: Lint with flake8
+      - name: Lint with ruff
         if: matrix.python-version == '3.12'
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 ./pyown --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 ./pyown --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        run: poetry run ruff check -v
+
+      - name: Check formatting with ruff
+        if: matrix.python-version == '3.12'
+        run: poetry run ruff format --check
 
       - name: Test code
         if: matrix.python-version != '3.12'

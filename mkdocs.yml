@@ -49,7 +49,7 @@ theme:
     - toc.follow
 
 copyright: >
-  Copyright &copy; 2024 John Toniutti
+  Copyright &copy; 2024-2025 John Toniutti
 
 watch:
   - pyown

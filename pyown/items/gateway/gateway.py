@@ -33,6 +33,7 @@ class GatewayModel(StrEnum):
         MHServer2:
         H4684:
     """
+
     MHServer = "2"
     MH200 = "4"
     F452 = "6"
@@ -59,6 +60,7 @@ class WhatGateway(What, StrEnum):
         KERNEL_VERSION: get the linux kernel version of the gateway.
         DISTRIBUTION_VERSION: get the linux distribution version of the gateway.
     """
+
     TIME = "0"
     DATE = "1"
     IP_ADDRESS = "10"
@@ -95,7 +97,9 @@ class Gateway(BaseItem):
         hours = int(t.string[1:3])
 
         return datetime.timezone(
-            datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
+            datetime.timedelta(hours=hours)
+            if sign == "0"
+            else -datetime.timedelta(hours=hours)
         )
 
     @staticmethod
@@ -136,12 +140,7 @@ class Gateway(BaseItem):
         s = int(s_v.string)
 
         # parse the time with the timezone
-        bus_time = datetime.time(
-            h,
-            m,
-            s,
-            tzinfo=self._parse_own_timezone(t_v)
-        )
+        bus_time = datetime.time(h, m, s, tzinfo=self._parse_own_timezone(t_v))
 
         return bus_time
 
@@ -225,7 +224,9 @@ class Gateway(BaseItem):
 
         oct1, oct2, oct3, oct4 = resp.values
 
-        ip = ipaddress.IPv4Address(f"{int(oct1.string)}.{int(oct2.string)}.{int(oct3.string)}.{int(oct4.string)}")
+        ip = ipaddress.IPv4Address(
+            f"{int(oct1.string)}.{int(oct2.string)}.{int(oct3.string)}.{int(oct4.string)}"
+        )
         return ip
 
     async def get_netmask(self, *, message: EventMessage = None) -> str:
@@ -372,8 +373,7 @@ class Gateway(BaseItem):
 
         # parse the time with the timezone
         bus_time = datetime.datetime(
-            y, mo, d, h, m, s,
-            tzinfo=self._parse_own_timezone(t)
+            y, mo, d, h, m, s, tzinfo=self._parse_own_timezone(t)
         )
 
         return bus_time
@@ -468,12 +468,7 @@ class Gateway(BaseItem):
             # convert the DimensionWriting message to a DimensionResponse message
             # noinspection PyTypeChecker
             message = DimensionResponse(
-                (
-                    message.who,
-                    message.where,
-                    message.dimension,
-                    *message.values
-                )  # type: ignore[arg-type]
+                (message.who, message.where, message.dimension, *message.values)  # type: ignore[arg-type]
             )
 
         if isinstance(message, DimensionResponse):
@@ -508,11 +503,7 @@ class Gateway(BaseItem):
                 case _:
                     return []
 
-            tasks += cls._create_tasks(
-                callbacks,
-                item,
-                *args
-            )
+            tasks += cls._create_tasks(callbacks, item, *args)
         else:
             raise InvalidMessage("The message is not a DimensionResponse message.")
 

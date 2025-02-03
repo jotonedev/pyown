@@ -15,6 +15,7 @@ class AuthAlgorithm(IntEnum):
         SHA1: The SHA1 hashing algorithm.
         SHA256: The SHA256 hashing algorithm
     """
+
     SHA1 = 1
     SHA256 = 2
 
