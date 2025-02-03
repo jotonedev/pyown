@@ -1,6 +1,9 @@
 import asyncio
 import unittest
 
+# ruff: noqa: F401
+from unittest.mock import MagicMock
+
 from pyown.exceptions import ParseError
 from pyown.messages import ACK
 from pyown.protocol.protocol import OWNProtocol
