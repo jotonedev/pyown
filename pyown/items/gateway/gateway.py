@@ -2,7 +2,7 @@ import datetime
 import ipaddress
 from asyncio import Task
 from enum import StrEnum
-from typing import Self, Any
+from typing import Self, Any, Sequence
 
 from ..base import BaseItem, CoroutineCallback, EventMessage
 from ...client import BaseClient
@@ -503,7 +503,10 @@ class Gateway(BaseItem):
                 case _:
                     return []
 
-            tasks += cls._create_tasks(callbacks, item, *args)
+            if isinstance(args, Sequence):
+                tasks += cls._create_tasks(callbacks, item, *args)
+            else:
+                tasks += cls._create_tasks(callbacks, item, args)
         else:
             raise InvalidMessage("The message is not a DimensionResponse message.")
 
