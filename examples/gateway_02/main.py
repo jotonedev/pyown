@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from black import datetime
+import datetime
 
 from pyown.client import Client, SessionType
 from pyown.items import Gateway, WhatGateway
