@@ -1,5 +1,6 @@
 import datetime
 import ipaddress
+import logging
 from asyncio import Task
 from enum import StrEnum
 from typing import Self, Any, Sequence
@@ -17,6 +18,9 @@ __all__ = [
 ]
 
 
+log = logging.getLogger("pyown.items.gateway")
+
+
 class GatewayModel(StrEnum):
     """
     This enum is used to define the various models of gateways that are supported by the library.
@@ -32,8 +36,10 @@ class GatewayModel(StrEnum):
         F452V:
         MHServer2:
         H4684:
+        MH202:
     """
 
+    GENERIC = "0"
     MHServer = "2"
     MH200 = "4"
     F452 = "6"
@@ -41,6 +47,19 @@ class GatewayModel(StrEnum):
     MHServer2 = "11"
     H4684 = "12"
     HL4684 = "23"
+    MH202 = "200"
+
+    @classmethod
+    def _missing_(cls, value):
+        """
+        This method is called when a value is not found in the enum.
+        It returns the generic value if the value is not found.
+        """
+        log.warning("The gateway model %s was not found in the known models.", value)
+        log.warning(
+            "Please, open an issue on GitHub, attach the logs and the model name."
+        )
+        return GatewayModel.GENERIC
 
 
 class WhatGateway(What, StrEnum):
