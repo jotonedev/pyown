@@ -1,6 +1,6 @@
 [project]
 name = "pyown"
-version = "0.3.3"
+version = "0.3.5"
 requires-python = ">=3.11"
 description = "Python wrapper for OpenWebNet protocol"
 authors = [
