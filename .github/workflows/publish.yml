@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [ published ]
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       upload:
@@ -32,7 +33,10 @@ jobs:
         uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
         with:
           python-version: "3.13"
-          poetry-version: "2.0.1"
+          poetry-version: "2.1.2"
+
+      - name: Test code
+        run: poetry run pytest
 
       - name: Package project
         run: poetry build
@@ -41,6 +45,14 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: "dist/*"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          draft: true
+          files: |
+              dist/*
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
