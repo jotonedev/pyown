@@ -80,14 +80,17 @@ class BaseClient(ABC):
             TimeoutError: if the server does not respond
             InvalidSession: if the server requires an unknown authentication algorithm
         """
-        self._transport, self._protocol = await self._loop.create_connection(
-            lambda: OWNProtocol(
-                on_connection_start=self._on_connection_start,
-                on_connection_end=self._on_connection_end,
-            ),
-            self._host,
-            self._port,
-        )
+        try:
+            self._transport, self._protocol = await self._loop.create_connection(
+                lambda: OWNProtocol(
+                    on_connection_start=self._on_connection_start,
+                    on_connection_end=self._on_connection_end,
+                ),
+                self._host,
+                self._port,
+            )
+        except OSError:
+            raise TimeoutError("Could not connect to the server")
 
         # Wait for the connection to start
         await self._on_connection_start

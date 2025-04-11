@@ -151,6 +151,14 @@ class Client(BaseClient):
                     tasks = await item_obj.call_callbacks(item, message)
                 except InvalidMessage as e:
                     log.warning(f"Message not supported {e.message}")
+                except InvalidTag as e:
+                    log.warning(f"Tag not supported {e.tag}")
+                except Exception as e:
+                    log.error(
+                        f"There was an error in the callback: {e}",
+                        exc_info=e,
+                        stack_info=True,
+                    )
                 else:
                     self._loop.create_task(self._check_task_result(tasks))
                     break
@@ -162,5 +170,4 @@ class Client(BaseClient):
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for i, r in enumerate(results):
             if isinstance(r, Exception):
-                log.error(f"Error in callback {r}")
-                tasks[i].print_stack()
+                log.error(f"Error in callback {r}", exc_info=r, stack_info=True)
