@@ -1,3 +1,3 @@
-# light_01
+# automation_01
 
-This example demonstrates how to create a simple light source and control it.
+This example demonstrates how to manage a blind/shutter using the `Automation` class.

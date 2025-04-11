@@ -25,7 +25,7 @@ async def run(host: str, port: int, password: str):
 def main(host: str, port: int, password: str):
     # Set the logging level to DEBUG
     logging.basicConfig(
-        level=logging.WARN,
+        level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )

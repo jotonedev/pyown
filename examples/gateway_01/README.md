@@ -1,3 +1,3 @@
-# light_01
+# gateway_01
 
-This example demonstrates how to create a simple light source and control it.
+This example shows how to read information from a MyHome® gateway using the `Gateway` class.

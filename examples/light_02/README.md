@@ -1,3 +1,3 @@
-# light_01
+# light_02
 
-This example demonstrates how to read light events from an event client.
+This example demonstrates how to listen for light events from an event client.
