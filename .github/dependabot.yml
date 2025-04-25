@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: "weekly" # How often to check for updates
     commit-message:
-      prefix: "[poetry] "
+      prefix: "[python] "
 
   - package-ecosystem: "github-actions"
     directory: "/"
