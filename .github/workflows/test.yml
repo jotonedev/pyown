@@ -32,6 +32,9 @@ jobs:
           version: "latest"
           python-version: ${{ matrix.python-version }}
 
+      - name: Install the project
+        run: uv sync --all-extras --group dev --no-group docs
+
       - name: Lint with ruff
         id: lint
         if: matrix.python-version == '3.13'

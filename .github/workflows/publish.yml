@@ -29,19 +29,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup and Cache Python Poetry
-        uses: packetcoders/action-setup-cache-python-poetry@v1.2.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.13"
-          poetry-version: "2.1.2"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+          version: "latest"
+
+      - name: Install the project
+        run: uv sync --no-group docs --no-group dev
 
       - name: Test code
-        run: poetry run pytest
+        id: test
+        run: uv run pytest
 
       - name: Package project
-        run: poetry build
+        id: build
+        run: uv build -o dist/
 
       - name: Sign build artifacts
+        id: sign
+        if: ${{ (github.event.inputs.upload || github.ref_type == 'tag') }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: "dist/*"
@@ -55,6 +63,7 @@ jobs:
               dist/*
 
       - name: Upload build artifacts
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
@@ -66,19 +75,24 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: release-build
+    if: ${{ (github.event.inputs.upload || github.ref_type == 'tag') }}
 
     permissions:
-      contents: read
       id-token: write
+
+    environment:
+      name: pypi
 
     steps:
       - name: Retrieve release distributions
+        id: download
         uses: actions/download-artifact@v4
         with:
           name: release-dists
           path: dist/
 
       - name: Publish package distributions to PyPI
+        id: publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: true
