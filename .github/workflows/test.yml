@@ -6,6 +6,8 @@ name: Test code
 on:
   workflow_dispatch:
   push:
+    branches-ignore:
+      - dependabot/**
   pull_request:
 
 jobs:
