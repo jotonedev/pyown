@@ -198,5 +198,8 @@ fabric.properties
 .history/
 
 # MkDocs
-
 site/
+
+# Junie
+.junie/
+.aiignore
