@@ -1,9 +1,9 @@
 [project]
 name = "pyown"
-version = "0.3.6"
+version = "0.3.7"
 description = "Python wrapper for OpenWebNet protocol"
 authors = [{ name = "John Toniutti", email = "john.toniutti@gmail.com" }]
-requires-python = ">=3.11"
+requires-python = ">=3.11.4"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 keywords = [
