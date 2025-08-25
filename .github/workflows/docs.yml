@@ -46,7 +46,7 @@ jobs:
       - name: Upload docs
         if: ${{ (github.event.inputs.upload || github.ref_type == 'tag') }}
         id: deployment
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site/
 
