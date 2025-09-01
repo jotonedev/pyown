@@ -1,4 +1,7 @@
-# WHO 4 - Temperature Control
+---
+title: WHO 4 - Temperature Control
+summary: Open Web Net messages for temperature control and thermoregulation systems.
+---
 
 [Original Document](pdf/WHO_4.pdf)
 

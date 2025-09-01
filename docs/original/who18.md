@@ -1,4 +1,7 @@
-# Energy Management Functions (WHO=18)
+---
+title: Energy Management Functions (WHO=18)
+summary: Open Web Net messages for energy management and supervision devices.
+---
 
 [Original Document](pdf/WHO_18.pdf)
 

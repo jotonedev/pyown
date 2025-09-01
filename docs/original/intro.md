@@ -1,4 +1,7 @@
-# Open Web Net Language
+---
+title: Open Web Net protocol introduction
+summary: Introduction to the Open Web Net protocol for home automation systems.
+---
 
 [Original Document](pdf/OWN_Intro_ENG.pdf)
 

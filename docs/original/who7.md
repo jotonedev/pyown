@@ -1,4 +1,7 @@
-# WHO 7 - Multimedia System
+---
+title: WHO 7 - Multimedia System
+summary: Open Web Net messages for multimedia system control and monitoring.
+---
 
 [Original Document](pdf/WHO_7.pdf)
 

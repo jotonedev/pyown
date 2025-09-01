@@ -1,4 +1,7 @@
-# Dry Contact and IR State Functions
+---
+title: Dry Contact and IR State Functions
+summary: Open Web Net messages for dry contact interfaces and IR state management.
+---
 
 [Original Document](pdf/WHO_25.pdf)
 

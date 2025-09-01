@@ -1,4 +1,7 @@
-# HMAC Authentication
+---
+title: HMAC Authentication
+summary: Describes the HMAC authentication algorithm that replaces the OPEN authentication algorithm.
+---
 
 [Original Document](pdf/Hmac.pdf)
 

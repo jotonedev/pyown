@@ -1,4 +1,7 @@
-# WHO 17 - SCENES
+---
+title: WHO 17 - SCENES
+summary: Open Web Net messages for scene control and management.
+---
 
 [Original Document](pdf/WHO_17.pdf)
 

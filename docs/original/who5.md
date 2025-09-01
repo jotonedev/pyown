@@ -1,4 +1,7 @@
-# WHO 5 - Burglar Alarm
+---
+title: WHO 5 - Burglar Alarm
+summary: Open Web Net messages for burglar alarm system control and monitoring.
+---
 
 [Original Document](pdf/WHO_5.pdf)
 

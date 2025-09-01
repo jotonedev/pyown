@@ -1,4 +1,7 @@
-# Lighting Management Functions (WHO=24)
+---
+title: Lighting Management Functions (WHO=24)
+summary: Open Web Net frames for advanced lighting management in My Home systems.
+---
 
 [Original Document](pdf/WHO_24.pdf)
 

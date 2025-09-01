@@ -1,4 +1,7 @@
-# Sound Diffusion Functions (WHO=22)
+---
+title: Sound Diffusion Functions (WHO=22)
+summary: Open Web Net messages for audio distribution and sound control systems.
+---
 
 [Original Document](pdf/WHO_22.pdf)
 

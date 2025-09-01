@@ -1,4 +1,7 @@
-# About These Documents
+---
+title: About These Documents
+summary: Disclaimer and information about the converted documentation files.
+---
 
 **Disclaimer:**
 
