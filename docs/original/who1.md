@@ -1,5 +1,7 @@
 # WHO 1 - LIGHTING
 
+[Original Document](pdf/WHO_1.pdf)
+
 ## Introduction
 
 This document describes the Open Web Net Message for WHO = 1 - LIGHTING. It contains abbreviations, WHAT/DIMENSION/WHERE tables, and allowed OPEN messages for command and event sessions, status requests, dimension writing and requests.

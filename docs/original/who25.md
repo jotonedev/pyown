@@ -1,5 +1,7 @@
 # Dry Contact and IR State Functions
 
+[Original Document](pdf/WHO_25.pdf)
+
 ## Description
 
 Dry Contact Interfaces and some IR Interfaces are able to provide the state of their contacts / IR. The last version of My Home gateways are able to translate the state of these devices in Open Web Net messages.

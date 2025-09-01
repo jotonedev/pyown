@@ -1,5 +1,7 @@
 # WHO 17 - SCENES
 
+[Original Document](pdf/WHO_17.pdf)
+
 This document describes the Open Web Net Message for WHO = 17 - SCENES, containing command, event session and status request messages.
 
 ## WHAT Table

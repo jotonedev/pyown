@@ -1,5 +1,7 @@
 # HMAC Authentication
 
+[Original Document](pdf/Hmac.pdf)
+
 In this document is described the algorithm that is going to replace OPEN authentication algorithm: HMAC
 
 The idea is to implement the HMAC protocol (Hashed Message Authentication Code).

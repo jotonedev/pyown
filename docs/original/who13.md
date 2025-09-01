@@ -1,5 +1,7 @@
 # WHO 13 - External Interface Device
 
+[Original Document](pdf/WHO_13.pdf)
+
 OpenWebNet frames for external interface device status (WHO = 13).
 
 ## WHAT/DIMENSION Table

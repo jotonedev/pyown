@@ -1,5 +1,7 @@
 # WHO 2 - AUTOMATION
 
+[Original Document](pdf/WHO_2.pdf)
+
 ## Introduction
 
 This document describes the Open Web Net Message for WHO = 2 - AUTOMATION. It contains abbreviations, WHAT/DIMENSION/WHERE tables, and allowed OPEN messages for command and event sessions, status requests, dimension writing and requests.
