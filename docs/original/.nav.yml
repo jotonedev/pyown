@@ -1,0 +1,20 @@
+title: OpenWebNet Protocol
+
+nav:
+  - About: README.md
+  - Protocol Introduction: intro.md
+  - Authentication: hmac.md
+  - Protocol Functions:
+    - Scenarios (WHO 0): who0.md
+    - Lighting (WHO 1): who1.md
+    - Automation (WHO 2): who2.md
+    - Temperature Control (WHO 4): who4.md
+    - Burglar Alarm (WHO 5): who5.md
+    - Multimedia System (WHO 7): who7.md
+    - External Interface Device (WHO 13): who13.md
+    - CEN Commands (WHO 15-25): who15-25.md
+    - Scenes (WHO 17): who17.md
+    - Energy Management (WHO 18): who18.md
+    - Sound Diffusion (WHO 22): who22.md
+    - Lighting Management (WHO 24): who24.md
+    - Dry Contact & IR State (WHO 25): who25.md
