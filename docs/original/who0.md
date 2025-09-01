@@ -1,9 +1,9 @@
 ---
-title: WHO = 0 Scenarios
+title: WHO 0 - Scenarios
 summary: Open frames implementation for Scenario scheduling through Scenarios modules.
 ---
 
-[Original Document](pdf/WHO_0.pdf)
+[Original Document](/assets/pdf/WHO_0.pdf)
 
 ## Introduction
 

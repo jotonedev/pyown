@@ -1,9 +1,9 @@
 ---
-title: Open Web Net protocol introduction
+title: Introduction to the Open Web Net protocol
 summary: Introduction to the Open Web Net protocol for home automation systems.
 ---
 
-[Original Document](pdf/OWN_Intro_ENG.pdf)
+[Original Document](/assets/pdf/OWN_Intro_ENG.pdf)
 
 ## Introduction
 

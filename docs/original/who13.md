@@ -3,7 +3,7 @@ title: WHO 13 - External Interface Device
 summary: OpenWebNet frames for external interface device status and gateway management.
 ---
 
-[Original Document](pdf/WHO_13.pdf)
+[Original Document](/assets/pdf/WHO_13.pdf)
 
 OpenWebNet frames for external interface device status (WHO = 13).
 

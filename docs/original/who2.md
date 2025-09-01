@@ -3,7 +3,7 @@ title: WHO 2 - AUTOMATION
 summary: Open Web Net messages for automation system control (shutters, blinds, etc.).
 ---
 
-[Original Document](pdf/WHO_2.pdf)
+[Original Document](/assets/pdf/WHO_2.pdf)
 
 ## Introduction
 

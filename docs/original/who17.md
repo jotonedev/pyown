@@ -3,7 +3,7 @@ title: WHO 17 - SCENES
 summary: Open Web Net messages for scene control and management.
 ---
 
-[Original Document](pdf/WHO_17.pdf)
+[Original Document](/assets/pdf/WHO_17.pdf)
 
 This document describes the Open Web Net Message for WHO = 17 - SCENES, containing command, event session and status request messages.
 

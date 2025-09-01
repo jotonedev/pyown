@@ -3,7 +3,7 @@ title: WHO 1 - LIGHTING
 summary: Open Web Net messages for lighting system control and monitoring.
 ---
 
-[Original Document](pdf/WHO_1.pdf)
+[Original Document](/assets/pdf/WHO_1.pdf)
 
 ## Introduction
 

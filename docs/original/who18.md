@@ -1,9 +1,9 @@
 ---
-title: Energy Management Functions (WHO=18)
+title: WHO 18 - Energy Management Functions
 summary: Open Web Net messages for energy management and supervision devices.
 ---
 
-[Original Document](pdf/WHO_18.pdf)
+[Original Document](/assets/pdf/WHO_18.pdf)
 
 The Energy Management Functions system (WHO=18) is composed of various devices for supervision and energy control in Open Web Net protocol networks.
 
