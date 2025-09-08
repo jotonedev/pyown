@@ -50,7 +50,7 @@ jobs:
       - name: Sign build artifacts
         id: sign
         if: ${{ (github.event.inputs.upload || github.ref_type == 'tag') }}
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: "dist/*"
 
