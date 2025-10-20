@@ -128,6 +128,22 @@ class Camera(BaseItem):
         """
         await self.send_normal_message(WhatCamera.RECEIVE_VIDEO)
 
+    async def _send_command_without_where(self, what: WhatCamera):
+        """
+        Helper method to send commands without WHERE parameter.
+        
+        Many camera commands (zoom, adjustments, etc.) do not use WHERE
+        and follow the format *7*WHAT## instead of *7*WHAT*WHERE##.
+        
+        Args:
+            what: The WHAT command to send.
+        """
+        from ...messages import GenericMessage
+        msg = GenericMessage([str(self._who), str(what)])
+        await self._send_message(msg)
+        resp = await self._read_message()
+        self._check_ack(resp)
+
     async def free_resources(self):
         """
         Frees audio and video resources.
@@ -135,70 +151,63 @@ class Camera(BaseItem):
         This command releases the video channel and audio/video resources.
         Note: This command does not use a WHERE parameter.
         """
-        # For free_resources, we need to send without WHERE
-        # Create a special message with WHERE = "#"
-        from ...messages import NormalMessage
-        from ...tags import Where
-        msg = NormalMessage((self._who, WhatCamera.FREE_RESOURCES, Where("#")))
-        await self._send_message(msg)
-        resp = await self._read_message()
-        self._check_ack(resp)
+        await self._send_command_without_where(WhatCamera.FREE_RESOURCES)
 
     async def zoom_in(self):
         """Zooms in the camera view."""
-        await self.send_normal_message(WhatCamera.ZOOM_IN)
+        await self._send_command_without_where(WhatCamera.ZOOM_IN)
 
     async def zoom_out(self):
         """Zooms out the camera view."""
-        await self.send_normal_message(WhatCamera.ZOOM_OUT)
+        await self._send_command_without_where(WhatCamera.ZOOM_OUT)
 
     async def increase_x_coordinate(self):
         """Increases X coordinate of the central part of the image to be zoomed."""
-        await self.send_normal_message(WhatCamera.INCREASE_X)
+        await self._send_command_without_where(WhatCamera.INCREASE_X)
 
     async def decrease_x_coordinate(self):
         """Decreases X coordinate of the central part of the image to be zoomed."""
-        await self.send_normal_message(WhatCamera.DECREASE_X)
+        await self._send_command_without_where(WhatCamera.DECREASE_X)
 
     async def increase_y_coordinate(self):
         """Increases Y coordinate of the central part of the image to be zoomed."""
-        await self.send_normal_message(WhatCamera.INCREASE_Y)
+        await self._send_command_without_where(WhatCamera.INCREASE_Y)
 
     async def decrease_y_coordinate(self):
         """Decreases Y coordinate of the central part of the image to be zoomed."""
-        await self.send_normal_message(WhatCamera.DECREASE_Y)
+        await self._send_command_without_where(WhatCamera.DECREASE_Y)
 
     async def increase_luminosity(self):
         """Increases the luminosity of the camera image."""
-        await self.send_normal_message(WhatCamera.INCREASE_LUMINOSITY)
+        await self._send_command_without_where(WhatCamera.INCREASE_LUMINOSITY)
 
     async def decrease_luminosity(self):
         """Decreases the luminosity of the camera image."""
-        await self.send_normal_message(WhatCamera.DECREASE_LUMINOSITY)
+        await self._send_command_without_where(WhatCamera.DECREASE_LUMINOSITY)
 
     async def increase_contrast(self):
         """Increases the contrast of the camera image."""
-        await self.send_normal_message(WhatCamera.INCREASE_CONTRAST)
+        await self._send_command_without_where(WhatCamera.INCREASE_CONTRAST)
 
     async def decrease_contrast(self):
         """Decreases the contrast of the camera image."""
-        await self.send_normal_message(WhatCamera.DECREASE_CONTRAST)
+        await self._send_command_without_where(WhatCamera.DECREASE_CONTRAST)
 
     async def increase_color(self):
         """Increases the color saturation of the camera image."""
-        await self.send_normal_message(WhatCamera.INCREASE_COLOR)
+        await self._send_command_without_where(WhatCamera.INCREASE_COLOR)
 
     async def decrease_color(self):
         """Decreases the color saturation of the camera image."""
-        await self.send_normal_message(WhatCamera.DECREASE_COLOR)
+        await self._send_command_without_where(WhatCamera.DECREASE_COLOR)
 
     async def increase_quality(self):
         """Increases the quality of the camera image."""
-        await self.send_normal_message(WhatCamera.INCREASE_QUALITY)
+        await self._send_command_without_where(WhatCamera.INCREASE_QUALITY)
 
     async def decrease_quality(self):
         """Decreases the quality of the camera image."""
-        await self.send_normal_message(WhatCamera.DECREASE_QUALITY)
+        await self._send_command_without_where(WhatCamera.DECREASE_QUALITY)
 
     async def display_dial(self, x: int, y: int):
         """
@@ -233,7 +242,7 @@ class Camera(BaseItem):
             (4, 4): WhatCamera.DISPLAY_DIAL_44,
         }
         
-        await self.send_normal_message(dial_map[(x, y)])
+        await self._send_command_without_where(dial_map[(x, y)])
 
     @classmethod
     def on_status_change(
