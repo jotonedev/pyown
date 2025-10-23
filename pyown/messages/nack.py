@@ -1,8 +1,8 @@
 import re
-from typing import Self, Pattern
+from typing import Pattern, Self
 
-from .base import BaseMessage, MessageType
 from ..exceptions import InvalidMessage
+from .base import BaseMessage, MessageType
 
 __all__ = [
     "NACK",

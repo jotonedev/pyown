@@ -1,12 +1,12 @@
 from asyncio import Task
-from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator
+from enum import Enum, StrEnum, auto
+from typing import AsyncIterator, Callable, Coroutine, Self
 
-from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
 from ...messages import BaseMessage, NormalMessage
-from ...tags import Who, What
+from ...tags import What, Who
 from ...tags.where import Where
+from ..base import BaseItem, CoroutineCallback
 
 __all__ = [
     "Automation",

@@ -1,7 +1,7 @@
 from pyown.messages import (
     DimensionRequest,
-    DimensionWriting,
     DimensionResponse,
+    DimensionWriting,
     MessageType,
     parse_message,
 )

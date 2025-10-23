@@ -1,7 +1,7 @@
 import pytest
 
 from pyown.exceptions import InvalidTag
-from pyown.tags.base import TagWithParameters, Tag
+from pyown.tags.base import Tag, TagWithParameters
 
 
 def test_tag_with_params() -> None:

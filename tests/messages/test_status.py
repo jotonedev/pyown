@@ -1,4 +1,4 @@
-from pyown.messages import StatusRequest, MessageType, parse_message
+from pyown.messages import MessageType, StatusRequest, parse_message
 
 
 def test_status_request():

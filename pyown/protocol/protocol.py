@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from asyncio import Protocol, Transport, Future, Queue
+from asyncio import Future, Protocol, Queue, Transport
 from threading import Lock
 
 from ..exceptions import ParseError

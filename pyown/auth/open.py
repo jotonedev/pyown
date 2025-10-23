@@ -47,11 +47,7 @@ def own_calc_pass(password: str | int, nonce: str | int) -> str:  # noqa: C901
             num1 = num2 << 12
             num2 = num2 >> 20
         elif c == "7":
-            num1 = (
-                num2 & 0x0000FF00
-                | ((num2 & 0x000000FF) << 24)
-                | ((num2 & 0x00FF0000) >> 16)
-            )
+            num1 = num2 & 0x0000FF00 | ((num2 & 0x000000FF) << 24) | ((num2 & 0x00FF0000) >> 16)
             num2 = (num2 & 0xFF000000) >> 8
         elif c == "8":
             num1 = (num2 & 0x0000FFFF) << 16 | (num2 >> 24)

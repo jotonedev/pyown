@@ -2,8 +2,8 @@ import asyncio
 import logging
 
 from pyown.client import Client
-from pyown.messages import DimensionRequest, ACK, NACK
-from pyown.tags import Who, Where, Dimension
+from pyown.messages import ACK, NACK, DimensionRequest
+from pyown.tags import Dimension, Where, Who
 
 
 async def run(host: str, port: int, password: str):
@@ -53,12 +53,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--host", type=str, help="The host to connect to", default="192.168.1.35"
-    )
-    parser.add_argument(
-        "--port", type=int, help="The port to connect to", default=20000
-    )
+    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
+    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
     parser.add_argument(
         "--password",
         type=str,

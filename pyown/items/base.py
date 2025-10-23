@@ -1,20 +1,20 @@
 import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
-from typing import Self, Callable, Coroutine, Any, AsyncIterator
+from typing import Any, AsyncIterator, Callable, Coroutine, Self
 
 from ..client import BaseClient
-from ..exceptions import ResponseError, InvalidMessage
+from ..exceptions import InvalidMessage, ResponseError
 from ..messages import (
+    BaseMessage,
+    DimensionRequest,
+    DimensionResponse,
+    DimensionWriting,
+    MessageType,
     NormalMessage,
     StatusRequest,
-    DimensionWriting,
-    DimensionRequest,
-    BaseMessage,
-    MessageType,
-    DimensionResponse,
 )
-from ..tags import Where, Who, What, Dimension, Value
+from ..tags import Dimension, Value, What, Where, Who
 
 __all__ = ["BaseItem", "CoroutineCallback", "EventMessage"]
 
@@ -35,9 +35,7 @@ class BaseItem(ABC):
 
     _who = Who.LIGHTING
 
-    def __init__(
-        self, client: BaseClient, where: Where | str, *, who: Who | str | None = None
-    ):
+    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """
         Initializes the item.
         Args:
@@ -194,9 +192,7 @@ class BaseItem(ABC):
             )
         )
 
-    def create_dimension_request_message(
-        self, dimension: Dimension
-    ) -> DimensionRequest:
+    def create_dimension_request_message(self, dimension: Dimension) -> DimensionRequest:
         """
         Creates a dimension request message for the item.
         Args:
@@ -276,15 +272,11 @@ class BaseItem(ABC):
                 break
 
             if not isinstance(resp, DimensionResponse):
-                raise ResponseError(
-                    f"Received {resp} instead of a dimension response message"
-                )
+                raise ResponseError(f"Received {resp} instead of a dimension response message")
 
             yield resp
 
-    async def send_dimension_writing(
-        self, dimension: Dimension | str, *args: Value
-    ) -> None:
+    async def send_dimension_writing(self, dimension: Dimension | str, *args: Value) -> None:
         """
         Sends a dimension writing message to the server and check the response.
 

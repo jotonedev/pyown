@@ -1,8 +1,8 @@
 import re
-from typing import Self, Pattern
+from typing import Pattern, Self
 
+from ..tags import Where, Who
 from .base import BaseMessage, MessageType
-from ..tags import Who, Where
 
 __all__ = ["StatusRequest"]
 

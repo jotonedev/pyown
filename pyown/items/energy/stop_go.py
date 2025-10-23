@@ -1,12 +1,12 @@
 from typing import AsyncIterator
 
-from .dataclass import StopGoStatus
-from .energy import EnergyManagement
-from .enums import TypeEnergy, DimensionEnergy, WhatEnergy
 from ...client import BaseClient
-from ...exceptions import InvalidTag, InvalidMessage
+from ...exceptions import InvalidMessage, InvalidTag
 from ...messages import DimensionResponse
 from ...tags import Where, Who
+from .dataclass import StopGoStatus
+from .energy import EnergyManagement
+from .enums import DimensionEnergy, TypeEnergy, WhatEnergy
 
 __all__ = [
     "StopGo",
@@ -18,9 +18,7 @@ class StopGo(EnergyManagement):
     Used to manage the Stop&Go items.
     """
 
-    def __init__(
-        self, client: BaseClient, where: Where | str, *, who: Who | str | None = None
-    ):
+    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """
         Initializes the item and check if the where tag is valid.
 

@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 
-from .base import BaseLight, WhatLight
 from ...tags import Where
+from .base import BaseLight, WhatLight
 
 __all__ = [
     "Light",

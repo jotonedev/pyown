@@ -52,9 +52,7 @@ class Where(TagWithParameters):
             return WhereType.LIGHT_POINT
         elif self.string.startswith(("1", "2", "3", "4", "5", "6", "7", "8", "9")):
             return WhereType.LIGHT_POINT
-        elif self.string.startswith(
-            ("01", "02", "03", "04", "05", "06", "07", "08", "09")
-        ):
+        elif self.string.startswith(("01", "02", "03", "04", "05", "06", "07", "08", "09")):
             return WhereType.LIGHT_POINT
         elif self.tag == "" and len(self.parameters) == 1:
             return WhereType.GROUP

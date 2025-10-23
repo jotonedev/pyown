@@ -1,8 +1,8 @@
 import re
-from typing import Self, Pattern
+from typing import Pattern, Self
 
+from ..tags import Dimension, Value, Where, Who
 from .base import BaseMessage, MessageType
-from ..tags import Who, Where, Dimension, Value
 
 __all__ = [
     "DimensionRequest",
@@ -46,9 +46,7 @@ class DimensionRequest(BaseMessage):
     def parse(cls, tags: list[str]) -> Self:
         """Parses the tags of a message from the OpenWebNet bus."""
 
-        return cls(
-            tags=(Who(tags[0].removeprefix("#")), Where(tags[1]), Dimension(tags[2]))
-        )
+        return cls(tags=(Who(tags[0].removeprefix("#")), Where(tags[1]), Dimension(tags[2])))
 
 
 class DimensionWriting(BaseMessage):

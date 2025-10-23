@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from asyncio import Task
-from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator
+from enum import Enum, StrEnum, auto
+from typing import AsyncIterator, Callable, Coroutine, Self
 
-from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
-from ...messages import DimensionResponse, BaseMessage, NormalMessage
-from ...tags import Who, What, Value, Where
+from ...messages import BaseMessage, DimensionResponse, NormalMessage
+from ...tags import Value, What, Where, Who
+from ..base import BaseItem, CoroutineCallback
 
 __all__ = [
     "BaseLight",
@@ -181,9 +181,7 @@ class BaseLight(BaseItem, ABC):
         if hour >= 24 or minute >= 60 or second >= 60:
             raise ValueError("Invalid time")
 
-        await self.send_dimension_writing(
-            "2", Value(hour), Value(minute), Value(second)
-        )
+        await self.send_dimension_writing("2", Value(hour), Value(minute), Value(second))
 
     async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
         """
@@ -210,9 +208,7 @@ class BaseLight(BaseItem, ABC):
             yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
 
     @classmethod
-    def on_status_change(
-        cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]
-    ):
+    def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
         """
         Registers a callback function to be called when the light status changes.
 
@@ -233,9 +229,7 @@ class BaseLight(BaseItem, ABC):
             callback (Callable[[Self, int, int, int]): The callback function to call.
                 It will receive as arguments the item, the hour, the minute, and the second.
         """
-        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(
-            callback
-        )
+        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
 
     @classmethod
     async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:

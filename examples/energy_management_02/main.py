@@ -11,9 +11,7 @@ async def on_power_change(item: EnergyManagement, value: float):
 
 # noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
-    client = Client(
-        host=host, port=port, password=password, session_type=SessionType.EventSession
-    )
+    client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     # Register the callback for the power consumption change
     EnergyManagement.on_instant_power(on_power_change)
@@ -37,12 +35,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--host", type=str, help="The host to connect to", default="192.168.1.35"
-    )
-    parser.add_argument(
-        "--port", type=int, help="The port to connect to", default=20000
-    )
+    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
+    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
     parser.add_argument(
         "--password",
         type=str,

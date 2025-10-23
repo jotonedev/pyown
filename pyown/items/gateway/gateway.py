@@ -3,13 +3,13 @@ import ipaddress
 import logging
 from asyncio import Task
 from enum import StrEnum
-from typing import Self, Any, Sequence
+from typing import Any, Self, Sequence
 
-from ..base import BaseItem, CoroutineCallback, EventMessage
 from ...client import BaseClient
 from ...exceptions import InvalidMessage
-from ...messages import DimensionResponse, BaseMessage, DimensionWriting
-from ...tags import Who, What, Value, Where
+from ...messages import BaseMessage, DimensionResponse, DimensionWriting
+from ...tags import Value, What, Where, Who
+from ..base import BaseItem, CoroutineCallback, EventMessage
 
 __all__ = [
     "Gateway",
@@ -56,9 +56,7 @@ class GatewayModel(StrEnum):
         It returns the generic value if the value is not found.
         """
         log.warning("The gateway model %s was not found in the known models.", value)
-        log.warning(
-            "Please, open an issue on GitHub, attach the logs and the model name."
-        )
+        log.warning("Please, open an issue on GitHub, attach the logs and the model name.")
         return GatewayModel.GENERIC
 
 
@@ -116,9 +114,7 @@ class Gateway(BaseItem):
         hours = int(t.string[1:3])
 
         return datetime.timezone(
-            datetime.timedelta(hours=hours)
-            if sign == "0"
-            else -datetime.timedelta(hours=hours)
+            datetime.timedelta(hours=hours) if sign == "0" else -datetime.timedelta(hours=hours)
         )
 
     @staticmethod
@@ -391,9 +387,7 @@ class Gateway(BaseItem):
         y = int(resp.values[7].string)
 
         # parse the time with the timezone
-        bus_time = datetime.datetime(
-            y, mo, d, h, m, s, tzinfo=self._parse_own_timezone(t)
-        )
+        bus_time = datetime.datetime(y, mo, d, h, m, s, tzinfo=self._parse_own_timezone(t))
 
         return bus_time
 

@@ -1,4 +1,4 @@
-from pyown.messages import NormalMessage, MessageType, parse_message
+from pyown.messages import MessageType, NormalMessage, parse_message
 
 
 def test_normal():
