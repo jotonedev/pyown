@@ -1,6 +1,6 @@
 from asyncio import Task
 from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator
+from typing import Callable, Self, Coroutine, AsyncIterator, Final
 
 from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
@@ -100,6 +100,27 @@ class WhatCamera(What, StrEnum):
     DISPLAY_DIAL_42 = "342"
     DISPLAY_DIAL_43 = "343"
     DISPLAY_DIAL_44 = "344"
+
+
+dial_map: Final[dict[tuple[int, int], WhatCamera]] = {
+    (1, 1): WhatCamera.DISPLAY_DIAL_11,
+    (1, 2): WhatCamera.DISPLAY_DIAL_12,
+    (1, 3): WhatCamera.DISPLAY_DIAL_13,
+    (1, 4): WhatCamera.DISPLAY_DIAL_14,
+    (2, 1): WhatCamera.DISPLAY_DIAL_21,
+    (2, 2): WhatCamera.DISPLAY_DIAL_22,
+    (2, 3): WhatCamera.DISPLAY_DIAL_23,
+    (2, 4): WhatCamera.DISPLAY_DIAL_24,
+    (3, 1): WhatCamera.DISPLAY_DIAL_31,
+    (3, 2): WhatCamera.DISPLAY_DIAL_32,
+    (3, 3): WhatCamera.DISPLAY_DIAL_33,
+    (3, 4): WhatCamera.DISPLAY_DIAL_34,
+    (4, 1): WhatCamera.DISPLAY_DIAL_41,
+    (4, 2): WhatCamera.DISPLAY_DIAL_42,
+    (4, 3): WhatCamera.DISPLAY_DIAL_43,
+    (4, 4): WhatCamera.DISPLAY_DIAL_44,
+}
+
 
 
 class Camera(BaseItem):
@@ -223,37 +244,20 @@ class Camera(BaseItem):
         if x not in range(1, 5) or y not in range(1, 5):
             raise ValueError("Dial coordinates must be in range 1-4")
         
-        dial_map = {
-            (1, 1): WhatCamera.DISPLAY_DIAL_11,
-            (1, 2): WhatCamera.DISPLAY_DIAL_12,
-            (1, 3): WhatCamera.DISPLAY_DIAL_13,
-            (1, 4): WhatCamera.DISPLAY_DIAL_14,
-            (2, 1): WhatCamera.DISPLAY_DIAL_21,
-            (2, 2): WhatCamera.DISPLAY_DIAL_22,
-            (2, 3): WhatCamera.DISPLAY_DIAL_23,
-            (2, 4): WhatCamera.DISPLAY_DIAL_24,
-            (3, 1): WhatCamera.DISPLAY_DIAL_31,
-            (3, 2): WhatCamera.DISPLAY_DIAL_32,
-            (3, 3): WhatCamera.DISPLAY_DIAL_33,
-            (3, 4): WhatCamera.DISPLAY_DIAL_34,
-            (4, 1): WhatCamera.DISPLAY_DIAL_41,
-            (4, 2): WhatCamera.DISPLAY_DIAL_42,
-            (4, 3): WhatCamera.DISPLAY_DIAL_43,
-            (4, 4): WhatCamera.DISPLAY_DIAL_44,
-        }
+
         
         await self._send_command_without_where(dial_map[(x, y)])
 
     @classmethod
     def on_status_change(
-        cls, callback: Callable[[Self, WhatCamera], Coroutine[None, None, None]]
+        cls, callback: Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]
     ):
         """
         Registers a callback to be called when the status of the camera changes.
 
         Args:
-            callback (Callable[[Self, WhatCamera], Coroutine[None, None, None]]): The callback to call.
-                It will receive as arguments the item and the status.
+            callback (Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]): The callback to call.
+                It will receive as arguments the item, the WhatCamera value, and the message.
         """
         cls._event_callbacks.setdefault(CameraEvents.ALL, []).append(callback)
 
@@ -266,6 +270,7 @@ class Camera(BaseItem):
                 cls._event_callbacks.get(CameraEvents.ALL, []),
                 item,
                 WhatCamera(str(message.what)),
+                message,
             )
         else:
             raise InvalidMessage(str(message))
