@@ -4,10 +4,10 @@ import abc
 import copy
 import re
 from enum import StrEnum
-from typing import Final, Pattern, Self, Any
+from typing import Any, Final, Pattern, Self
 
 from ..exceptions import InvalidMessage, InvalidTag
-from ..tags import Who, Where
+from ..tags import Where, Who
 from ..tags.base import is_valid_tag
 
 __all__ = [
@@ -60,9 +60,7 @@ class BaseMessage(abc.ABC):
         return self.message
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__}: {','.join([str(tag) for tag in self._tags])}>"
-        )
+        return f"<{self.__class__.__name__}: {','.join([str(tag) for tag in self._tags])}>"
 
     def __hash__(self) -> int:
         return hash((self._type, self._tags))

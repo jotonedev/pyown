@@ -1,8 +1,8 @@
 import re
-from typing import Self, Pattern
+from typing import Pattern, Self
 
+from ..tags import What, Where, Who
 from .base import BaseMessage, MessageType
-from ..tags import Who, What, Where
 
 __all__ = [
     "NormalMessage",
@@ -19,9 +19,7 @@ class NormalMessage(BaseMessage):
     _type: MessageType = MessageType.NORMAL
     _tags: tuple[Who, What, Where]
 
-    _regex: Pattern[str] = re.compile(
-        r"^\*[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*##$"
-    )
+    _regex: Pattern[str] = re.compile(r"^\*[0-9#]+\*[0-9]*(?:#[0-9]*)*\*[0-9]*(?:#[0-9]*)*##$")
 
     def __init__(self, tags: tuple[Who, What, Where]):
         self._tags = tags

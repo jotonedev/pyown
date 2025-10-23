@@ -1,11 +1,11 @@
-from typing import Type, Final
+from typing import Final, Type
 
+from ..tags import Who
 from .automation import Automation
 from .base import BaseItem
 from .energy.energy import EnergyManagement
 from .gateway import Gateway
 from .lighting import Light
-from ..tags import Who
 
 __all__ = ["ITEM_TYPES"]
 

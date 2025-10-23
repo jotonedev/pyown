@@ -1,8 +1,7 @@
-from typing import Callable, Self, Coroutine, AsyncIterator
+from typing import AsyncIterator, Callable, Coroutine, Self
 
-from .base import BaseLight, WhatLight, LightEvents
-from ...tags import Value, Dimension
-from ...tags import Where
+from ...tags import Dimension, Value, Where
+from .base import BaseLight, LightEvents, WhatLight
 
 __all__ = [
     "Dimmer",
@@ -142,9 +141,7 @@ class Dimmer(BaseLight):
             brightness: the brightness to set
             speed: the speed to set the brightness
         """
-        await self.send_dimension_writing(
-            Dimension("1"), Value(brightness), Value(speed)
-        )
+        await self.send_dimension_writing(Dimension("1"), Value(brightness), Value(speed))
 
     async def set_hsv(self, hue: int, saturation: int, value: int):
         """
@@ -164,9 +161,7 @@ class Dimmer(BaseLight):
         if value < 0 or value > 100:
             raise ValueError("Invalid value")
 
-        await self.send_dimension_writing(
-            "12", Value(hue), Value(saturation), Value(value)
-        )
+        await self.send_dimension_writing("12", Value(hue), Value(saturation), Value(value))
 
     async def set_white_temperature(self, temperature: int):
         """
@@ -236,14 +231,10 @@ class Dimmer(BaseLight):
             callback: The callback function to call.
                 It will receive as arguments the item, dimmer level and speed
         """
-        cls._event_callbacks.setdefault(LightEvents.LUMINOSITY_CHANGE, []).append(
-            callback
-        )
+        cls._event_callbacks.setdefault(LightEvents.LUMINOSITY_CHANGE, []).append(callback)
 
     @classmethod
-    def on_hsv_change(
-        cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]
-    ):
+    def on_hsv_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
         """
         Registers a callback function to be called when the HSV changes.
 
@@ -254,9 +245,7 @@ class Dimmer(BaseLight):
         cls._event_callbacks.setdefault(LightEvents.HSV_CHANGE, []).append(callback)
 
     @classmethod
-    def on_white_temp_change(
-        cls, callback: Callable[[Self, int], Coroutine[None, None, None]]
-    ):
+    def on_white_temp_change(cls, callback: Callable[[Self, int], Coroutine[None, None, None]]):
         """
         Registers a callback function to be called when the white temperature changes.
 
@@ -264,6 +253,4 @@ class Dimmer(BaseLight):
             callback: The callback function to call.
                 It will receive as arguments the item and the temperature.
         """
-        cls._event_callbacks.setdefault(LightEvents.WHITE_TEMP_CHANGE, []).append(
-            callback
-        )
+        cls._event_callbacks.setdefault(LightEvents.WHITE_TEMP_CHANGE, []).append(callback)

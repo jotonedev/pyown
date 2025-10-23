@@ -1,7 +1,6 @@
 import asyncio
-import logging
-
 import datetime
+import logging
 
 from pyown.client import Client, SessionType
 from pyown.items import Gateway, WhatGateway
@@ -12,9 +11,7 @@ async def on_time_change(gateway: Gateway, time: datetime.time):
 
 
 async def run(host: str, port: int, password: str):
-    client = Client(
-        host=host, port=port, password=password, session_type=SessionType.EventSession
-    )
+    client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     Gateway.register_callback(WhatGateway.TIME, on_time_change)
 
@@ -38,12 +35,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--host", type=str, help="The host to connect to", default="192.168.1.35"
-    )
-    parser.add_argument(
-        "--port", type=int, help="The port to connect to", default=20000
-    )
+    parser.add_argument("--host", type=str, help="The host to connect to", default="192.168.1.35")
+    parser.add_argument("--port", type=int, help="The port to connect to", default=20000)
     parser.add_argument(
         "--password",
         type=str,
