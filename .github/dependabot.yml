@@ -2,8 +2,6 @@ version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/" # Location of package manifests
-    reviewers:
-      - "jotonedev"
     groups:
       dependencies:
         patterns:
@@ -15,8 +13,6 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    reviewers:
-      - "jotonedev"
     groups:
       dependencies:
         patterns:
