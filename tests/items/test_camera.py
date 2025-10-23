@@ -1,9 +1,10 @@
 """
 Tests for the Camera item module.
 """
-from pyown.items.camera import Camera, WhatCamera, CameraEvents
+
+from pyown.items.camera import Camera, CameraEvents, WhatCamera
 from pyown.messages import GenericMessage, NormalMessage
-from pyown.tags import Who, Where
+from pyown.tags import Where, Who
 
 
 def test_what_camera_commands():
@@ -63,6 +64,7 @@ def test_camera_dial_commands():
 
 def test_camera_instantiation():
     """Test that Camera can be instantiated with correct WHO."""
+
     class MockClient:
         pass
 
@@ -74,15 +76,26 @@ def test_camera_instantiation():
 def test_camera_has_required_methods():
     """Test that Camera has all required methods."""
     required_methods = [
-        'receive_video', 'free_resources', 'zoom_in', 'zoom_out',
-        'increase_x_coordinate', 'decrease_x_coordinate',
-        'increase_y_coordinate', 'decrease_y_coordinate',
-        'increase_luminosity', 'decrease_luminosity',
-        'increase_contrast', 'decrease_contrast',
-        'increase_color', 'decrease_color',
-        'increase_quality', 'decrease_quality',
-        'display_dial', 'on_status_change', 'call_callbacks'
+        "receive_video",
+        "free_resources",
+        "zoom_in",
+        "zoom_out",
+        "increase_x_coordinate",
+        "decrease_x_coordinate",
+        "increase_y_coordinate",
+        "decrease_y_coordinate",
+        "increase_luminosity",
+        "decrease_luminosity",
+        "increase_contrast",
+        "decrease_contrast",
+        "increase_color",
+        "decrease_color",
+        "increase_quality",
+        "decrease_quality",
+        "display_dial",
+        "on_status_change",
+        "call_callbacks",
     ]
-    
+
     for method in required_methods:
         assert hasattr(Camera, method), f"Camera should have method: {method}"

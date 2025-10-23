@@ -1,11 +1,11 @@
 from asyncio import Task
-from enum import StrEnum, Enum, auto
-from typing import Callable, Self, Coroutine, AsyncIterator, Final
+from enum import Enum, StrEnum, auto
+from typing import Callable, Coroutine, Final, Self
 
-from ..base import BaseItem, CoroutineCallback
 from ...exceptions import InvalidMessage
 from ...messages import BaseMessage, NormalMessage
-from ...tags import Who, What, Where
+from ...tags import What, Who
+from ..base import BaseItem, CoroutineCallback
 
 __all__ = [
     "Camera",
@@ -122,14 +122,13 @@ dial_map: Final[dict[tuple[int, int], WhatCamera]] = {
 }
 
 
-
 class Camera(BaseItem):
     """
     Camera items are used to control video door entry systems and cameras.
-    
+
     The camera system uses WHO = 7 (VIDEO_DOOR_ENTRY) and supports various
     commands for video control, zoom, and image adjustments.
-    
+
     Note: The actual video streaming is handled via HTTP/HTTPS protocol
     and is not part of this OpenWebNet implementation. After activating
     a camera with receive_video(), the image can be retrieved via:
@@ -143,7 +142,7 @@ class Camera(BaseItem):
     async def receive_video(self):
         """
         Activates the camera to receive video.
-        
+
         After this command, the video stream can be accessed via HTTP/HTTPS
         at the gateway's telecamera.php endpoint.
         """
@@ -152,14 +151,15 @@ class Camera(BaseItem):
     async def _send_command_without_where(self, what: WhatCamera):
         """
         Helper method to send commands without WHERE parameter.
-        
+
         Many camera commands (zoom, adjustments, etc.) do not use WHERE
         and follow the format *7*WHAT## instead of *7*WHAT*WHERE##.
-        
+
         Args:
             what: The WHAT command to send.
         """
         from ...messages import GenericMessage
+
         msg = GenericMessage([str(self._who), str(what)])
         await self._send_message(msg)
         resp = await self._read_message()
@@ -168,7 +168,7 @@ class Camera(BaseItem):
     async def free_resources(self):
         """
         Frees audio and video resources.
-        
+
         This command releases the video channel and audio/video resources.
         Note: This command does not use a WHERE parameter.
         """
@@ -233,19 +233,17 @@ class Camera(BaseItem):
     async def display_dial(self, x: int, y: int):
         """
         Displays a specific dial position.
-        
+
         Args:
             x: The X dial number (1-4).
             y: The Y dial number (1-4).
-            
+
         Raises:
             ValueError: If x or y are not in the range 1-4.
         """
         if x not in range(1, 5) or y not in range(1, 5):
             raise ValueError("Dial coordinates must be in range 1-4")
-        
 
-        
         await self._send_command_without_where(dial_map[(x, y)])
 
     @classmethod
