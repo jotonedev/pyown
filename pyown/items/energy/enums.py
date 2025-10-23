@@ -1,4 +1,4 @@
-from enum import StrEnum, Enum, auto
+from enum import Enum, StrEnum, auto
 
 from ...tags import Dimension, What
 

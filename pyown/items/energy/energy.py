@@ -1,14 +1,14 @@
 from asyncio import Task
 from datetime import datetime
-from typing import Self, Callable, Coroutine, Any
+from typing import Any, Callable, Coroutine, Self
 
-from .dataclass import ActuatorStatus, StopGoStatus
-from .enums import DimensionEnergy, WhatEnergy, TypeEnergy
-from ..base import BaseItem, CoroutineCallback, EventMessage
 from ...client import BaseClient
-from ...exceptions import InvalidTag, InvalidMessage
+from ...exceptions import InvalidMessage, InvalidTag
 from ...messages import BaseMessage, DimensionResponse
-from ...tags import Who, Where, Value
+from ...tags import Value, Where, Who
+from ..base import BaseItem, CoroutineCallback, EventMessage
+from .dataclass import ActuatorStatus, StopGoStatus
+from .enums import DimensionEnergy, TypeEnergy, WhatEnergy
 
 __all__ = [
     "EnergyManagement",
@@ -31,9 +31,7 @@ class EnergyManagement(BaseItem):
 
     _event_callbacks: dict[DimensionEnergy, list[CoroutineCallback]] = {}
 
-    def __init__(
-        self, client: BaseClient, where: Where | str, *, who: Who | str | None = None
-    ):
+    def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """
         Initializes the item and check if the where tag is valid.
 
@@ -71,9 +69,7 @@ class EnergyManagement(BaseItem):
         else:
             raise InvalidTag(self.where)
 
-    async def start_sending_daily_totalizers_hourly(
-        self, day: int | None, month: int | None
-    ):
+    async def start_sending_daily_totalizers_hourly(self, day: int | None, month: int | None):
         """
         Start sending daily totalizers on an hourly basis on an event session.
         !!! note
@@ -107,9 +103,7 @@ class EnergyManagement(BaseItem):
         if month is None:
             month = datetime.now().month
 
-        await self.send_normal_message(
-            WhatEnergy.SEND_MONTHLY_REPORT.with_parameter(month)
-        )
+        await self.send_normal_message(WhatEnergy.SEND_MONTHLY_REPORT.with_parameter(month))
 
     async def start_sending_monthly_totalizers_current_year(self, month: int | None):
         """
@@ -125,9 +119,7 @@ class EnergyManagement(BaseItem):
         if month is None:
             month = datetime.now().month
 
-        await self.send_normal_message(
-            WhatEnergy.SEND_YEARLY_REPORT.with_parameter(month)
-        )
+        await self.send_normal_message(WhatEnergy.SEND_YEARLY_REPORT.with_parameter(month))
 
     async def start_sending_monthly_totalizers_last_year(self, month: int | None):
         """
@@ -143,9 +135,7 @@ class EnergyManagement(BaseItem):
         if month is None:
             month = datetime.now().month
 
-        await self.send_normal_message(
-            WhatEnergy.SEND_LAST_YEAR_REPORT.with_parameter(month)
-        )
+        await self.send_normal_message(WhatEnergy.SEND_LAST_YEAR_REPORT.with_parameter(month))
 
     async def enable_actuator(self):
         """
@@ -169,9 +159,7 @@ class EnergyManagement(BaseItem):
         if time is None:
             await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_ON)
         else:
-            await self.send_normal_message(
-                WhatEnergy.FORCE_ACTUATOR_ON.with_parameter(time)
-            )
+            await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_ON.with_parameter(time))
 
     async def force_actuator_off(self):
         """
@@ -282,9 +270,7 @@ class EnergyManagement(BaseItem):
             year = datetime.now().year % 100
 
         message = await self._single_dim_req(
-            DimensionEnergy.ENERGY_UNIT_PER_MONTH.with_parameter(year).with_parameter(
-                month
-            )
+            DimensionEnergy.ENERGY_UNIT_PER_MONTH.with_parameter(year).with_parameter(month)
         )
 
         return float(message.values[0].string)
@@ -300,9 +286,7 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        resp = await self._single_dim_req(
-            DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH
-        )
+        resp = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH)
 
         return float(resp.values[0].string)
 
@@ -316,15 +300,11 @@ class EnergyManagement(BaseItem):
         Raises:
             ResponseError: When the gateway does not respond with the requested data
         """
-        message = await self._single_dim_req(
-            DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY
-        )
+        message = await self._single_dim_req(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY)
 
         return float(message.values[0].string)
 
-    async def get_actuators_info(
-        self, *, message: EventMessage = None
-    ) -> ActuatorStatus:
+    async def get_actuators_info(self, *, message: EventMessage = None) -> ActuatorStatus:
         """
         Get the actuator info.
 
@@ -368,9 +348,7 @@ class EnergyManagement(BaseItem):
             ResponseError: When the gateway does not respond with the requested data
         """
         if message is None:
-            message = await self._single_dim_req(
-                DimensionEnergy.TOTALIZERS.with_parameter(tot_n)
-            )
+            message = await self._single_dim_req(DimensionEnergy.TOTALIZERS.with_parameter(tot_n))
 
         energy = float(message.values[0].string)
         d = message.values[1].string
@@ -415,9 +393,9 @@ class EnergyManagement(BaseItem):
                 It will receive the item, the day, the month, the hour, and the energy measured in Wh.
                 If the hour is 25, it means that the energy is the total for the day.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.DAILY_TOTALIZERS_HOURLY_16BIT, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.DAILY_TOTALIZERS_HOURLY_16BIT, []).append(
+            callback
+        )
 
     @classmethod
     def on_monthly_average_hourly(
@@ -432,9 +410,9 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the hour, and the energy measured in Wh.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.MONTHLY_AVERAGE_HOURLY_16BIT, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.MONTHLY_AVERAGE_HOURLY_16BIT, []).append(
+            callback
+        )
 
     @classmethod
     def on_monthly_totalizers_current_year(
@@ -483,14 +461,10 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the status of the stop&go device.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.STATUS_STOP_GO_GENERAL, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.STATUS_STOP_GO_GENERAL, []).append(callback)
 
     @classmethod
-    def on_instant_power(
-        cls, callback: Callable[[Self, float], Coroutine[None, None, None]]
-    ):
+    def on_instant_power(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
         """
         Register a callback for the instant power consumption event.
 
@@ -498,9 +472,7 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the power measured in Watts.
         """
-        cls._event_callbacks.setdefault(DimensionEnergy.ACTIVE_POWER, []).append(
-            callback
-        )
+        cls._event_callbacks.setdefault(DimensionEnergy.ACTIVE_POWER, []).append(callback)
 
     @classmethod
     def on_energy_unit_totalizer(
@@ -513,9 +485,7 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.ENERGY_UNIT_TOTALIZER, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_TOTALIZER, []).append(callback)
 
     @classmethod
     def on_energy_unit_per_month(
@@ -528,9 +498,7 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item, the month, the year, and the energy measured in Wh.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.ENERGY_UNIT_PER_MONTH, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.ENERGY_UNIT_PER_MONTH, []).append(callback)
 
     @classmethod
     def on_partial_totalizer_current_month(
@@ -543,9 +511,9 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_MONTH, []).append(
+            callback
+        )
 
     @classmethod
     def on_partial_totalizer_current_day(
@@ -558,9 +526,9 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the energy measured in Wh.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.PARTIAL_TOTALIZER_CURRENT_DAY, []).append(
+            callback
+        )
 
     @classmethod
     def on_actuators_info(
@@ -573,9 +541,7 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the status of the actuator.
         """
-        cls._event_callbacks.setdefault(DimensionEnergy.ACTUATORS_INFO, []).append(
-            callback
-        )
+        cls._event_callbacks.setdefault(DimensionEnergy.ACTUATORS_INFO, []).append(callback)
 
     @classmethod
     def on_totalizer_since_reset(
@@ -603,9 +569,9 @@ class EnergyManagement(BaseItem):
             callback: The callback to call when the event is received.
                 It will receive the item and the differential current level.
         """
-        cls._event_callbacks.setdefault(
-            DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL, []
-        ).append(callback)
+        cls._event_callbacks.setdefault(DimensionEnergy.DIFFERENTIAL_CURRENT_LEVEL, []).append(
+            callback
+        )
 
     @classmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:

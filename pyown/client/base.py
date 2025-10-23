@@ -1,22 +1,22 @@
 import asyncio
 import logging
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, Transport, Future
-from typing import Optional, Any
+from asyncio import AbstractEventLoop, Future, Transport
+from typing import Any, Optional
 
-from .session import SessionType
 from ..auth import AuthAlgorithm
 from ..auth.hmac import (
-    server_hmac,
     client_hmac,
-    hex_to_digits,
     compare_hmac,
     create_key,
+    hex_to_digits,
+    server_hmac,
 )
 from ..auth.open import own_calc_pass
 from ..exceptions import InvalidAuthentication, InvalidSession
-from ..messages import BaseMessage, MessageType, GenericMessage, NACK, ACK
+from ..messages import ACK, NACK, BaseMessage, GenericMessage, MessageType
 from ..protocol import OWNProtocol
+from .session import SessionType
 
 __all__ = [
     "BaseClient",
@@ -188,9 +188,7 @@ class BaseClient(ABC):
 
         # Send the client authentication string
         await self.send_message(
-            GenericMessage(
-                [hex_to_digits(client_key), hex_to_digits(client_auth.hex())]
-            ),
+            GenericMessage([hex_to_digits(client_key), hex_to_digits(client_auth.hex())]),
             force=True,
         )
         resp = await self.read_message()

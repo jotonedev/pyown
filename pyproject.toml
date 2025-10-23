@@ -56,6 +56,14 @@ default-groups = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+target-version = "py311"
 
 [tool.ruff]
 exclude = ["__init__.py"]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.format]
+quote-style = "double"
