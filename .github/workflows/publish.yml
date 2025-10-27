@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload build artifacts
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release-dists
           retention-days: 1
@@ -86,7 +86,7 @@ jobs:
     steps:
       - name: Retrieve release distributions
         id: download
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: release-dists
           path: dist/
