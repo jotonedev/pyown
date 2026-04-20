@@ -46,7 +46,7 @@ jobs:
       - name: Upload docs
         if: ${{ (github.event.inputs.upload || github.ref_type == 'tag') }}
         id: deployment
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site/
 
@@ -68,4 +68,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
