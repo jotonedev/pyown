@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload coverage for pull requests
         if: matrix.python-version == '3.13' && github.event_name == 'pull_request'
-        uses: orgoro/coverage@v3.2
+        uses: orgoro/coverage@v3.3
         with:
           coverageFile: ./coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
