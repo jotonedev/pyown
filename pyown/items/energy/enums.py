@@ -6,8 +6,8 @@ __all__ = ["DimensionEnergy", "WhatEnergy", "TypeEnergy"]
 
 
 class DimensionEnergy(Dimension, StrEnum):
-    """
-    Dimension tags for energy management items.
+    """Dimension tags for energy management items.
+
     It is used only internally to send the correct command and parse the event messages.
 
     Attributes:
@@ -71,14 +71,14 @@ class DimensionEnergy(Dimension, StrEnum):
     MONTHLY_TOTALIZERS_LAST_YEAR_32BIT = "514"
 
     # TODO: Refactor this
-    def with_parameter(self, parameter: str | int) -> Dimension:  # type: ignore[override]
-        """Returns the tag with the specified parameter"""
+    def with_parameter(self, parameter: str | int) -> Dimension:
+        """Returns the tag with the specified parameter."""
         return Dimension(f"{self}#{parameter}")
 
 
 class WhatEnergy(What, StrEnum):
-    """
-    What tags for energy management items.
+    """What tags for energy management items.
+
     It is used only internally to send the correct command to the gateway.
 
     Attributes:
@@ -106,14 +106,13 @@ class WhatEnergy(What, StrEnum):
     RESET_REPORT = "75"
 
     # TODO: Refactor this
-    def with_parameter(self, parameter: str | int) -> What:  # type: ignore[override]
-        """Returns the tag with the specified parameter"""
+    def with_parameter(self, parameter: str | int) -> What:
+        """Returns the tag with the specified parameter."""
         return What(f"{self}#{parameter}")
 
 
 class TypeEnergy(Enum):
-    """
-    Type of energy management items.
+    """Type of energy management items.
 
     Attributes:
         POWER_METER: Power meter.

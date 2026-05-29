@@ -9,13 +9,10 @@ __all__ = [
 
 
 class Dimmer(BaseLight):
-    """
-    Dimmer items are items that can have their brightness level changed or colors changed.
-    """
+    """Dimmer items are items that can have their brightness level changed or colors changed."""
 
     async def turn_on(self, speed: int | None = None):
-        """
-        Turns the light on.
+        """Turns the light on.
 
         Args:
             speed: turn on the light with a specific speed [0-255]
@@ -31,8 +28,7 @@ class Dimmer(BaseLight):
         await self.send_normal_message(what)
 
     async def turn_off(self, speed: int | None = None):
-        """
-        Turns the light off.
+        """Turns the light off.
 
         Args:
             speed: turn off the light with a specific speed [0-255]
@@ -83,8 +79,7 @@ class Dimmer(BaseLight):
         await self.send_normal_message(WhatLight.ON_100_PERCENT)
 
     async def up_percent(self, value: int | None = None, speed: int | None = None):
-        """
-        Increases the light percentage.
+        """Increases the light percentage.
 
         Args:
             value: the percentage to increase, by default, 1
@@ -103,8 +98,7 @@ class Dimmer(BaseLight):
         await self.send_normal_message(what)
 
     async def down_percent(self, value: int | None = None, speed: int | None = None):
-        """
-        Decreases the light percentage.
+        """Decreases the light percentage.
 
         Args:
             value: the percentage to decrease, by default 1
@@ -123,19 +117,17 @@ class Dimmer(BaseLight):
         await self.send_normal_message(what)
 
     async def get_status(self) -> AsyncIterator[tuple[Where, int]]:
-        """
-        Gets the status of the light.
+        """Gets the status of the light.
 
         Yields:
             tuple[Where, int]: the first element is the location of the light,
             the second is the brightness level [0-100]
         """
         async for message in self.send_status_request():
-            yield message.where, int(message.what.tag) * 10  # type: ignore[arg-type]
+            yield message.where, int(message.what.tag) * 10
 
     async def set_brightness_with_speed(self, brightness: int | str, speed: int | str):
-        """
-        Sets the brightness of the light with a specific speed.
+        """Sets the brightness of the light with a specific speed.
 
         Args:
             brightness: the brightness to set
@@ -144,8 +136,7 @@ class Dimmer(BaseLight):
         await self.send_dimension_writing(Dimension("1"), Value(brightness), Value(speed))
 
     async def set_hsv(self, hue: int, saturation: int, value: int):
-        """
-        Sets the color of the light in HSV format.
+        """Sets the color of the light in HSV format.
 
         Args:
             hue: the hue value to set [0-359]
@@ -164,8 +155,7 @@ class Dimmer(BaseLight):
         await self.send_dimension_writing("12", Value(hue), Value(saturation), Value(value))
 
     async def set_white_temperature(self, temperature: int):
-        """
-        Sets the white temperature of the light.
+        """Sets the white temperature of the light.
 
         Args:
             temperature: the temperature to set [1-65534] using the Mired scale.
@@ -178,8 +168,7 @@ class Dimmer(BaseLight):
     async def request_current_brightness_speed(
         self,
     ) -> AsyncIterator[tuple[Where, int, int]]:
-        """
-        Requests the current brightness and speed of the light.
+        """Requests the current brightness and speed of the light.
 
         Yields:
             A tuple with the where of the item, its brightness level, and its current speed.
@@ -187,13 +176,12 @@ class Dimmer(BaseLight):
             The brightness is in the range [100-200].
         """
         async for message in self.send_dimension_request("1"):
-            brightness = int(message.values[0].tag)  # type: ignore[arg-type]
-            speed = int(message.values[1].tag)  # type: ignore[arg-type]
+            brightness = int(message.values[0].tag)
+            speed = int(message.values[1].tag)
             yield message.where, brightness, speed
 
     async def request_current_hsv(self) -> AsyncIterator[tuple[Where, int, int, int]]:
-        """
-        Requests the current HSV of the light, valid only for RGB lights.
+        """Requests the current HSV of the light, valid only for RGB lights.
 
         Yields:
             A tuple with the where of the item, the hue, the saturation, and the value.
@@ -202,30 +190,28 @@ class Dimmer(BaseLight):
                 The value is in the range [0-100].
         """
         async for message in self.send_dimension_request("12"):
-            hue = int(message.values[0].tag)  # type: ignore[arg-type]
-            saturation = int(message.values[1].tag)  # type: ignore[arg-type]
-            value = int(message.values[2].tag)  # type: ignore[arg-type]
+            hue = int(message.values[0].tag)
+            saturation = int(message.values[1].tag)
+            value = int(message.values[2].tag)
             yield message.where, hue, saturation, value
 
     async def request_current_white_temperature(
         self,
     ) -> AsyncIterator[tuple[Where, int]]:
-        """
-        Requests the current white temperature of the light.
+        """Requests the current white temperature of the light.
 
         Yields:
             The where of the item and the temperature.
                 The temperature is in the range [1-65534] using the Mired scale.
         """
         async for message in self.send_dimension_request("14"):
-            yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
+            yield message.where, int(message.values[0].tag)
 
     @classmethod
     def on_luminosity_change(
         cls, callback: Callable[[Self, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Registers a callback function to be called when the luminosity changes.
+        """Registers a callback function to be called when the luminosity changes.
 
         Args:
             callback: The callback function to call.
@@ -235,8 +221,7 @@ class Dimmer(BaseLight):
 
     @classmethod
     def on_hsv_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
-        """
-        Registers a callback function to be called when the HSV changes.
+        """Registers a callback function to be called when the HSV changes.
 
         Args:
             callback: The callback function to call.
@@ -246,8 +231,7 @@ class Dimmer(BaseLight):
 
     @classmethod
     def on_white_temp_change(cls, callback: Callable[[Self, int], Coroutine[None, None, None]]):
-        """
-        Registers a callback function to be called when the white temperature changes.
+        """Registers a callback function to be called when the white temperature changes.
 
         Args:
             callback: The callback function to call.

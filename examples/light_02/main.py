@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 
 
 async def on_light_state_change(light: Light, state: bool):
+    """Log whether a light turned on or off when its state changes."""
     if state:
         log.info(f"Light at {light.where} is now on")
     else:
@@ -17,6 +18,7 @@ async def on_light_state_change(light: Light, state: bool):
 
 # noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
+    """Connect with an event session and listen for light state changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     Light.on_status_change(on_light_state_change)
@@ -27,6 +29,7 @@ async def run(host: str, port: int, password: str):
 
 # noinspection DuplicatedCode
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

@@ -8,8 +8,7 @@ __all__ = [
 
 
 class SessionType(StrEnum):
-    """
-    Represents the all allowed values for session types in the OpenWebNet protocol.
+    """Represents the all allowed values for session types in the OpenWebNet protocol.
 
     Attributes:
         OldCommandSession: Legacy command session value not present in the official OpenWebNet documentation.
@@ -23,8 +22,7 @@ class SessionType(StrEnum):
     EventSession = "1"
 
     def to_message(self) -> GenericMessage:
-        """
-        Convert the session type to the session message to send to the gateway.
+        """Convert the session type to the session message to send to the gateway.
 
         Returns:
             GenericMessage: The message to send to the gateway.

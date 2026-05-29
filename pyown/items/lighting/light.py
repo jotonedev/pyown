@@ -9,9 +9,7 @@ __all__ = [
 
 
 class Light(BaseLight):
-    """
-    Light items are item with only two states: on and off.
-    """
+    """Light items are item with only two states: on and off."""
 
     async def turn_on(self):
         """Turns the light on."""
@@ -62,8 +60,7 @@ class Light(BaseLight):
         await self.send_normal_message(WhatLight.BLINKING_5_0_SEC)
 
     async def get_status(self) -> AsyncIterator[tuple[Where, bool]]:
-        """
-        Gets the status of the light.
+        """Gets the status of the light.
 
         Yields:
             tuple[Where, bool]: The where and the status of the light.

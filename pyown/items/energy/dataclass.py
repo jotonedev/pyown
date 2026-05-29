@@ -5,8 +5,7 @@ __all__ = ["ActuatorStatus", "StopGoStatus"]
 
 @dataclass
 class ActuatorStatus:
-    """
-    Represents the status of an actuator.
+    """Represents the status of an actuator.
 
     Attributes:
         disabled: The actuator is disabled.
@@ -27,8 +26,7 @@ class ActuatorStatus:
 
 @dataclass
 class StopGoStatus:
-    """
-    Status of a Stop&Go device.
+    """Status of a Stop&Go device.
 
     Attributes:
         open: set if the circuit is open

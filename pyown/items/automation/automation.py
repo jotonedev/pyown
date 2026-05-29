@@ -16,8 +16,7 @@ __all__ = [
 
 
 class AutomationEvents(Enum):
-    """
-    This enum is used internally to register the callbacks to the correct event.
+    """This enum is used internally to register the callbacks to the correct event.
 
     Attributes:
         STOP: The event for when the automation stops.
@@ -33,8 +32,7 @@ class AutomationEvents(Enum):
 
 
 class WhatAutomation(What, StrEnum):
-    """
-    This enum contains the possible commands and states for an automation.
+    """This enum contains the possible commands and states for an automation.
 
     Attributes:
         STOP: The command to stop the automation.
@@ -48,9 +46,7 @@ class WhatAutomation(What, StrEnum):
 
 
 class Automation(BaseItem):
-    """
-    Automation items are usually used to control blinds, shutters, etc...
-    """
+    """Automation items are usually used to control blinds, shutters, etc..."""
 
     _who = Who.AUTOMATION
 
@@ -69,8 +65,7 @@ class Automation(BaseItem):
         await self.send_normal_message(WhatAutomation.DOWN)
 
     async def get_status(self) -> AsyncIterator[tuple[Where, WhatAutomation]]:
-        """
-        Requests the status of the automation.
+        """Requests the status of the automation.
 
         Raises:
             AttributeError: If the automation is not a light point.
@@ -85,8 +80,7 @@ class Automation(BaseItem):
     def on_status_change(
         cls, callback: Callable[[Self, WhatAutomation], Coroutine[None, None, None]]
     ):
-        """
-        Registers a callback to be called when the status of the automation changes.
+        """Registers a callback to be called when the status of the automation changes.
 
         If the shutter is already down and a command is sent to go down, the gateway will sometimes return
         the stop event and before the down event. So, make sure to handle this case in your code.
@@ -98,7 +92,8 @@ class Automation(BaseItem):
         cls._event_callbacks.setdefault(AutomationEvents.ALL, []).append(callback)
 
     @classmethod
-    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+        """Dispatches the message to the registered automation callbacks."""
         tasks: list[Task] = []
 
         if isinstance(message, NormalMessage):

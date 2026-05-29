@@ -7,10 +7,12 @@ from pyown.items import Gateway, WhatGateway
 
 
 async def on_time_change(gateway: Gateway, time: datetime.time):
+    """Print the gateway's time when it changes."""
     print(f"Time of the gateway is now {time}")
 
 
 async def run(host: str, port: int, password: str):
+    """Connect with an event session and listen for gateway time changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     Gateway.register_callback(WhatGateway.TIME, on_time_change)
@@ -20,6 +22,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

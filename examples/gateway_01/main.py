@@ -6,6 +6,7 @@ from pyown.items import Gateway
 
 
 async def run(host: str, port: int, password: str):
+    """Connect to the gateway and print its IP, model, datetime and kernel version."""
     client = Client(
         host=host,
         port=port,
@@ -36,6 +37,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

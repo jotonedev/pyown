@@ -16,8 +16,7 @@ __all__ = [
 
 
 class LightEvents(Enum):
-    """
-    This enum is used internally to register the callbacks to the correct event.
+    """This enum is used internally to register the callbacks to the correct event.
 
     Attributes:
         STATUS_CHANGE: The light status has changed.
@@ -35,8 +34,8 @@ class LightEvents(Enum):
 
 
 class WhatLight(What, StrEnum):
-    """
-    This enum contains the possible commands for the lights.
+    """This enum contains the possible commands for the lights.
+
     It is used only internally to send the correct command to the gateway.
 
     Attributes:
@@ -163,13 +162,12 @@ class BaseLight(BaseItem, ABC):
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
 
     @abstractmethod
-    async def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
-        """Gets the status of the light"""
-        yield None  # type: ignore[misc]
+    def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
+        """Gets the status of the light."""
+        raise NotImplementedError
 
     async def temporization_command(self, hour: int, minute: int, second: int):
-        """
-        Sends a temporization command
+        """Sends a temporization command.
 
         It will turn the light immediately on and then off after the specified time passed.
 
@@ -184,33 +182,30 @@ class BaseLight(BaseItem, ABC):
         await self.send_dimension_writing("2", Value(hour), Value(minute), Value(second))
 
     async def temporization_request(self) -> AsyncIterator[tuple[Where, int, int, int]]:
-        """
-        Requests the gateway the current temporization settings of the actuator.
+        """Requests the gateway the current temporization settings of the actuator.
 
         Yields:
             A tuple with the hour, minute, and second of the temporization.
         """
         async for message in self.send_dimension_request("2"):
-            hour = int(message.values[0].tag)  # type: ignore[arg-type]
-            minute = int(message.values[1].tag)  # type: ignore[arg-type]
-            second = int(message.values[2].tag)  # type: ignore[arg-type]
+            hour = int(message.values[0].tag)
+            minute = int(message.values[1].tag)
+            second = int(message.values[2].tag)
             yield message.where, hour, minute, second
 
     async def request_working_time_lamp(self) -> AsyncIterator[tuple[Where, int]]:
-        """
-        Requests the gateway for how long the light has been on.
+        """Requests the gateway for how long the light has been on.
 
         Yields:
             The time in hours the light has been on.
                 The value is in the range [1-100000].
         """
         async for message in self.send_dimension_request("3"):
-            yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]
+            yield message.where, int(message.values[0].tag)
 
     @classmethod
     def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
-        """
-        Registers a callback function to be called when the light status changes.
+        """Registers a callback function to be called when the light status changes.
 
         Args:
             callback (Callable[[Self, bool]): The callback function to call.
@@ -222,8 +217,7 @@ class BaseLight(BaseItem, ABC):
     def on_temporization_change(
         cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Registers a callback function to be called when the temporization changes.
+        """Registers a callback function to be called when the temporization changes.
 
         Args:
             callback (Callable[[Self, int, int, int]): The callback function to call.
@@ -233,6 +227,7 @@ class BaseLight(BaseItem, ABC):
 
     @classmethod
     async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+        """Dispatches the message to the registered light callbacks."""
         tasks: list[Task] = []
 
         if isinstance(message, DimensionResponse):
@@ -240,30 +235,30 @@ class BaseLight(BaseItem, ABC):
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.LIGHT_TEMPORIZATION, []),
                     item,
-                    int(message.values[0].tag),  # type: ignore[arg-type]
-                    int(message.values[1].tag),  # type: ignore[arg-type]
-                    int(message.values[2].tag),  # type: ignore[arg-type]
+                    int(message.values[0].tag),
+                    int(message.values[1].tag),
+                    int(message.values[2].tag),
                 )
             elif message.dimension.tag == "8":
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.LUMINOSITY_CHANGE, []),
                     item,
-                    int(message.values[0].tag),  # type: ignore[arg-type]
-                    int(message.values[1].tag),  # type: ignore[arg-type]
+                    int(message.values[0].tag),
+                    int(message.values[1].tag),
                 )
             elif message.dimension.tag == "12":
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.HSV_CHANGE, []),
                     item,
-                    int(message.values[0].tag),  # type: ignore[arg-type]
-                    int(message.values[1].tag),  # type: ignore[arg-type]
-                    int(message.values[2].tag),  # type: ignore[arg-type]
+                    int(message.values[0].tag),
+                    int(message.values[1].tag),
+                    int(message.values[2].tag),
                 )
             elif message.dimension.tag == "13":
                 tasks += cls._create_tasks(
                     cls._event_callbacks.get(LightEvents.WHITE_TEMP_CHANGE, []),
                     item,
-                    int(message.values[0].tag),  # type: ignore[arg-type]
+                    int(message.values[0].tag),
                 )
         elif isinstance(message, NormalMessage):
             tasks += cls._create_tasks(
