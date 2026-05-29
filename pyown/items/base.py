@@ -1,7 +1,5 @@
-import asyncio
 from abc import ABC
-from asyncio import Task
-from typing import Any, AsyncIterator, Callable, Coroutine, Self
+from typing import AsyncIterator, ClassVar
 
 from ..client import BaseClient
 from ..exceptions import InvalidMessage, ResponseError
@@ -16,24 +14,24 @@ from ..messages import (
 )
 from ..tags import Dimension, Value, What, Where, Who
 
-__all__ = ["BaseItem", "CoroutineCallback", "EventMessage"]
-
-CoroutineCallback = Callable[..., Coroutine[None, None, None]]
-"""Type alias for a coroutine function that does not return anything."""
+__all__ = ["BaseItem", "EventMessage"]
 
 
 EventMessage = DimensionResponse | DimensionWriting | None
-"""Type alias for the event messages that can be received by the item."""
+"""Type alias for the optional message argument accepted by an item's internal
+decode helpers, so the same helper can decode an event message or fetch fresh
+data from the gateway.
+"""
 
 
-# TODO: Refactor this class
 class BaseItem(ABC):
     """The base class for all items.
 
-    This class provides the basic functionality to communicate with the server using the client.
+    Provides the basic functionality to communicate with the gateway. The WHO
+    tag is set by the `@item(Who.X)` decorator at class-definition time.
     """
 
-    _who = Who.LIGHTING
+    _who: ClassVar[Who]
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
         """Initializes the item.
@@ -79,26 +77,6 @@ class BaseItem(ABC):
     @client.setter
     def client(self, client: BaseClient):
         self._client = client
-
-    @staticmethod
-    def _create_tasks(funcs: list[CoroutineCallback], *args: Any) -> list[Task]:
-        return [asyncio.create_task(func(*args)) for func in funcs]
-
-    @classmethod
-    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
-        """Calls the registered callbacks for the event.
-
-        Used internally by the client to dispatch the events to the correct callbacks.
-        Subclasses override this; the base implementation only signals it is missing.
-
-        Args:
-            item (BaseItem): The item that triggered the event.
-            message (BaseMessage): The message that triggered the event.
-
-        Returns:
-            list[Task]: A list of tasks scheduled to run the callbacks.
-        """
-        raise NotImplementedError
 
     async def _send_message(self, message: BaseMessage) -> None:
         """Sends a message to the server.

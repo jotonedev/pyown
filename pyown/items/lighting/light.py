@@ -1,6 +1,7 @@
 from typing import AsyncIterator
 
-from ...tags import Where
+from ...events import item
+from ...tags import Where, Who
 from .base import BaseLight, WhatLight
 
 __all__ = [
@@ -8,8 +9,9 @@ __all__ = [
 ]
 
 
+@item(Who.LIGHTING)
 class Light(BaseLight):
-    """Light items are item with only two states: on and off."""
+    """Light items are items with only two states: on and off."""
 
     async def turn_on(self):
         """Turns the light on."""

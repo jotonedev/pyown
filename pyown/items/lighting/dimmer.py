@@ -1,7 +1,7 @@
-from typing import AsyncIterator, Callable, Coroutine, Self
+from typing import AsyncIterator
 
 from ...tags import Dimension, Value, Where
-from .base import BaseLight, LightEvents, WhatLight
+from .base import BaseLight, WhatLight
 
 __all__ = [
     "Dimmer",
@@ -21,8 +21,6 @@ class Dimmer(BaseLight):
             raise ValueError("Invalid speed value")
 
         what = WhatLight.ON
-        # I do not own a dimmer, so I cannot test this.
-        # Also, the documentation is not clear on what is the range of the speed parameter
         if speed is not None:
             what = what.with_parameter(speed)
         await self.send_normal_message(what)
@@ -206,35 +204,3 @@ class Dimmer(BaseLight):
         """
         async for message in self.send_dimension_request("14"):
             yield message.where, int(message.values[0].tag)
-
-    @classmethod
-    def on_luminosity_change(
-        cls, callback: Callable[[Self, int, int], Coroutine[None, None, None]]
-    ):
-        """Registers a callback function to be called when the luminosity changes.
-
-        Args:
-            callback: The callback function to call.
-                It will receive as arguments the item, dimmer level and speed
-        """
-        cls._event_callbacks.setdefault(LightEvents.LUMINOSITY_CHANGE, []).append(callback)
-
-    @classmethod
-    def on_hsv_change(cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]):
-        """Registers a callback function to be called when the HSV changes.
-
-        Args:
-            callback: The callback function to call.
-                It will receive as arguments the item, the hue, the saturation, and the value.
-        """
-        cls._event_callbacks.setdefault(LightEvents.HSV_CHANGE, []).append(callback)
-
-    @classmethod
-    def on_white_temp_change(cls, callback: Callable[[Self, int], Coroutine[None, None, None]]):
-        """Registers a callback function to be called when the white temperature changes.
-
-        Args:
-            callback: The callback function to call.
-                It will receive as arguments the item and the temperature.
-        """
-        cls._event_callbacks.setdefault(LightEvents.WHITE_TEMP_CHANGE, []).append(callback)

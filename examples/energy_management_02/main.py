@@ -2,12 +2,12 @@ import asyncio
 import logging
 
 from pyown.client import Client, SessionType
-from pyown.items import EnergyManagement
+from pyown.items.energy import EnergyActivePowerEvent
 
 
-async def on_power_change(item: EnergyManagement, value: float):
+async def on_power_change(event: EnergyActivePowerEvent):
     """Print the new instant power consumption when it changes."""
-    print(f"Power consumption changed to {value} W for {item.where}")
+    print(f"Power consumption changed to {event.power} W for {event.where}")
 
 
 # noinspection DuplicatedCode
@@ -15,8 +15,7 @@ async def run(host: str, port: int, password: str):
     """Connect with an event session and listen for power consumption changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
-    # Register the callback for the power consumption change
-    EnergyManagement.on_instant_power(on_power_change)
+    client.events.subscribe(EnergyActivePowerEvent, on_power_change)
 
     await client.start()
     await client.loop()
@@ -30,7 +29,6 @@ def main(host: str, port: int, password: str):
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Run the asyncio event loop
     asyncio.run(run(host, port, password))
 
 

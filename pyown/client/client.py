@@ -1,12 +1,11 @@
-import asyncio
 import logging
-from asyncio import AbstractEventLoop, Task
+from asyncio import AbstractEventLoop
 from typing import Optional
 
+from ..events import EventBus, bootstrap, get_item_type, get_parser
 from ..exceptions import InvalidMessage, InvalidSession, InvalidTag, ParseError
 from ..items.base import BaseItem
-from ..items.utils import ITEM_TYPES
-from ..messages import BaseMessage, MessageType
+from ..messages import MessageType
 from ..tags import Where, Who
 from .base import BaseClient
 from .session import SessionType
@@ -19,10 +18,17 @@ log = logging.getLogger("pyown.client")
 
 
 class Client(BaseClient):
-    """Client connection to an OpenWebNet gateway.
+    """High-level OpenWebNet client.
 
-    Used to send commands and receive events from the gateway, and to instantiate
-    and cache the items exposed by it.
+    Exposes a typed `events` bus. Subscribe to event dataclasses to react to
+    bus traffic when the client is run as an EventSession:
+
+    ```python
+    client = Client(host, port, password, SessionType.EventSession)
+    client.events.subscribe(LightStatusEvent, on_light_change)
+    await client.start()
+    await client.loop()
+    ```
     """
 
     _items: dict[tuple[Who, Where], BaseItem]
@@ -36,71 +42,55 @@ class Client(BaseClient):
         *,
         loop: Optional[AbstractEventLoop] = None,
     ):
-        """Represents a client connection that connects to an OpenWebNet gateway.
-
-        This class can be used to send commands and receive events from the gateway.
+        """Initialise the client.
 
         Args:
-            host (str): The host to connect to (ip address)
-            port (int): The port to connect to
-            password (str): The password to authenticate with
-            session_type (SessionType): The session type to use, can be a command session or an event session.
-                Default is CommandSession
-            loop (Optional[AbstractEventLoop]): The event loop to use
+            host: The host to connect to (IP address).
+            port: The port to connect to.
+            password: The password to authenticate with.
+            session_type: The session type to use. Default is CommandSession.
+            loop: The event loop to use.
         """
         super().__init__(host, port, password, session_type, loop=loop)
 
         self._items = {}
+        bootstrap()
+        self.events: EventBus = EventBus()
 
     def get_item(self, who: Who, where: Where, *, client: BaseClient) -> BaseItem:
-        """Instantiates an item if it is not already cached in the client and returns it.
+        """Instantiate an item (or return the cached instance) for a given WHO/WHERE.
 
         Args:
             who: The type of the item.
             where: The location of the item.
             client: The client to assign to the item if it's not already defined.
 
-        Returns:
-            The item requested.
-
         Raises:
             KeyError: if the item WHO is not supported.
         """
         if (who, where) in self._items:
             return self._items[(who, where)]
-        else:
-            factory = ITEM_TYPES.get(who)
-            if factory is not None:
-                item = self._items[(who, where)] = factory(client, where)
-                return item
-            else:
-                raise KeyError(f"Item factory not found: {who}, {where}")
+        factory = get_item_type(who)
+        if factory is None:
+            raise KeyError(f"Item factory not found: {who}, {where}")
+        item = self._items[(who, where)] = factory(client, where)
+        return item
 
     async def loop(self, *, client: BaseClient | None = None):
-        """Runs the client loop.
+        """Run the client event loop.
 
-        This is a loop that runs the entire event system for the client, it will read messages from the gateway and
-        dispatch them to the correct callbacks.
-
-        Typical usage:
-        ```python
-        client = Client(host, port, password, SessionType.EventSession)
-        client.add_callback(lambda item, event: print(item, event))
-        await client.connect()
-        own_loop = asyncio.create_task(client.loop())
-
-        # Do something else
-
-        await client.close()
-        ```
+        Reads messages from the gateway, instantiates the matching item, runs
+        the registered parser to produce typed events, and dispatches them on
+        `self.events`.
 
         Args:
-            client: The client to use to declare the items for the callbacks. Default is self.
-                This is useful when you want the items to have a command client to allow sending commands with them.
+            client: The client to use to instantiate items for callbacks. Default
+                is self. Useful when items should have a command client so user
+                handlers can send commands.
 
         Raises:
-            InvalidSession: if called when the client is set as a command client and not as an event client or
-                if the client is not connected
+            InvalidSession: if called on a command session or if the client is
+                not connected.
         """
         if self.is_cmd_session():
             raise InvalidSession("Cannot run loop on a command session")
@@ -111,16 +101,13 @@ class Client(BaseClient):
         if client is None:
             client = self
 
-        # loop until the connection is dropped or closed
         while not self._transport.is_closing():
             try:
-                # by putting timeout as None, it will wait indefinitely for a message
                 message = await self.read_message(timeout=None)
             except (ParseError, InvalidMessage, InvalidTag) as e:
                 log.warning("Error reading message: %s", e)
                 continue
 
-            # ignore status messages
             if message.type == MessageType.ACK or message.type == MessageType.NACK:
                 continue
             elif message.type == MessageType.GENERIC:
@@ -134,45 +121,24 @@ class Client(BaseClient):
                 continue
 
             try:
-                # get the item if already declared, otherwise instantiate it
                 item = self.get_item(who, where, client=client)
             except KeyError:
-                log.info(f"Item type not supported, WHO={who}, WHERE={where}")
+                log.info("Item type not supported, WHO=%s WHERE=%s", who, where)
                 continue
 
-            await self._dispatch_callbacks(item, message)
+            parser_fn = get_parser(who)
+            if parser_fn is None:
+                log.info("No parser registered for WHO=%s", who)
+                continue
 
-    async def _dispatch_callbacks(self, item: BaseItem, message: BaseMessage):
-        """Dispatches the message to the correct callbacks for the item.
+            try:
+                events = list(parser_fn(item, message))
+            except (InvalidMessage, InvalidTag) as e:
+                log.warning("Parser rejected message %s: %s", message, e)
+                continue
+            except Exception as e:
+                log.error("Parser raised: %s", e, exc_info=e)
+                continue
 
-        Args:
-            item: The item that triggered the event.
-            message: The message that triggered the event.
-        """
-        # because callbacks are defined inside items, we need to loop through all items to find the correct one
-        for item_obj in BaseItem.__subclasses__():
-            if message.who == item_obj.who:
-                try:
-                    tasks = await item_obj.call_callbacks(item, message)
-                except InvalidMessage as e:
-                    log.warning(f"Message not supported {e.message}")
-                except InvalidTag as e:
-                    log.warning(f"Tag not supported {e.tag}")
-                except Exception as e:
-                    log.error(
-                        f"There was an error in the callback: {e}",
-                        exc_info=e,
-                        stack_info=True,
-                    )
-                else:
-                    self._loop.create_task(self._check_task_result(tasks))
-                    break
-        else:
-            log.warning(f"Item not found for message {message}")
-
-    @staticmethod
-    async def _check_task_result(tasks: list[Task]):
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        for r in results:
-            if isinstance(r, Exception):
-                log.error(f"Error in callback {r}", exc_info=r, stack_info=True)
+            for event in events:
+                self._loop.create_task(self.events.dispatch(event))

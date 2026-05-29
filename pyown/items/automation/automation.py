@@ -1,38 +1,19 @@
-from asyncio import Task
-from enum import Enum, StrEnum, auto
-from typing import AsyncIterator, Callable, Coroutine, Self
+from enum import StrEnum
+from typing import AsyncIterator
 
-from ...exceptions import InvalidMessage
-from ...messages import BaseMessage, NormalMessage
+from ...events import item
 from ...tags import What, Who
 from ...tags.where import Where
-from ..base import BaseItem, CoroutineCallback
+from ..base import BaseItem
 
 __all__ = [
     "Automation",
     "WhatAutomation",
-    "AutomationEvents",
 ]
 
 
-class AutomationEvents(Enum):
-    """This enum is used internally to register the callbacks to the correct event.
-
-    Attributes:
-        STOP: The event for when the automation stops.
-        UP: The event for when the automation goes up.
-        DOWN: The event for when the automation goes down.
-        ALL: The event for all events.
-    """
-
-    STOP = auto()
-    UP = auto()
-    DOWN = auto()
-    ALL = auto()  # For all events
-
-
 class WhatAutomation(What, StrEnum):
-    """This enum contains the possible commands and states for an automation.
+    """The possible WHAT values for automation commands and states.
 
     Attributes:
         STOP: The command to stop the automation.
@@ -45,12 +26,9 @@ class WhatAutomation(What, StrEnum):
     DOWN = "2"
 
 
+@item(Who.AUTOMATION)
 class Automation(BaseItem):
-    """Automation items are usually used to control blinds, shutters, etc..."""
-
-    _who = Who.AUTOMATION
-
-    _event_callbacks: dict[AutomationEvents, list[CoroutineCallback]] = {}
+    """Automation items are usually used to control blinds, shutters, etc."""
 
     async def stop(self):
         """Sends a stop command to the automation."""
@@ -75,34 +53,3 @@ class Automation(BaseItem):
         """
         async for message in self.send_status_request():
             yield message.where, WhatAutomation(str(message.what))
-
-    @classmethod
-    def on_status_change(
-        cls, callback: Callable[[Self, WhatAutomation], Coroutine[None, None, None]]
-    ):
-        """Registers a callback to be called when the status of the automation changes.
-
-        If the shutter is already down and a command is sent to go down, the gateway will sometimes return
-        the stop event and before the down event. So, make sure to handle this case in your code.
-
-        Args:
-            callback (Callable[[Self, WhatAutomation], Coroutine[None, None, None]]): The callback to call.
-                It will receive as arguments the item and the status.
-        """
-        cls._event_callbacks.setdefault(AutomationEvents.ALL, []).append(callback)
-
-    @classmethod
-    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
-        """Dispatches the message to the registered automation callbacks."""
-        tasks: list[Task] = []
-
-        if isinstance(message, NormalMessage):
-            tasks += cls._create_tasks(
-                cls._event_callbacks.get(AutomationEvents.ALL, []),
-                item,
-                WhatAutomation(str(message.what)),
-            )
-        else:
-            raise InvalidMessage(str(message))
-
-        return tasks

@@ -1,42 +1,18 @@
 from abc import ABC, abstractmethod
-from asyncio import Task
-from enum import Enum, StrEnum, auto
-from typing import AsyncIterator, Callable, Coroutine, Self
+from enum import StrEnum
+from typing import AsyncIterator
 
-from ...exceptions import InvalidMessage
-from ...messages import BaseMessage, DimensionResponse, NormalMessage
-from ...tags import Value, What, Where, Who
-from ..base import BaseItem, CoroutineCallback
+from ...tags import Value, What, Where
+from ..base import BaseItem
 
 __all__ = [
     "BaseLight",
     "WhatLight",
-    "LightEvents",
 ]
 
 
-class LightEvents(Enum):
-    """This enum is used internally to register the callbacks to the correct event.
-
-    Attributes:
-        STATUS_CHANGE: The light status has changed.
-        LUMINOSITY_CHANGE: The light luminosity has changed.
-        LIGHT_TEMPORIZATION: The light temporization has changed.
-        HSV_CHANGE: The light color has changed.
-        WHITE_TEMP_CHANGE: The white temperature has changed.
-    """
-
-    STATUS_CHANGE = auto()
-    LUMINOSITY_CHANGE = auto()
-    LIGHT_TEMPORIZATION = auto()
-    HSV_CHANGE = auto()
-    WHITE_TEMP_CHANGE = auto()
-
-
 class WhatLight(What, StrEnum):
-    """This enum contains the possible commands for the lights.
-
-    It is used only internally to send the correct command to the gateway.
+    """The possible WHAT values for lighting commands and states.
 
     Attributes:
         OFF: Turns the light off.
@@ -68,15 +44,14 @@ class WhatLight(What, StrEnum):
         BLINKING_4_0_SEC: Blinks the light every 4.0 seconds.
         BLINKING_4_5_SEC: Blinks the light every 4.5 seconds.
         BLINKING_5_0_SEC: Blinks the light every 5.0 seconds.
-        UP_1_PERCENT: Increases the light luminosity by 1
-        DOWN_1_PERCENT: Decreases the light luminosity by 1
+        UP_1_PERCENT: Increases the light luminosity by 1.
+        DOWN_1_PERCENT: Decreases the light luminosity by 1.
         COMMAND_TRANSLATION: Not clear what this does.
     """
 
     OFF = "0"
     ON = "1"
 
-    # Dimmer only
     ON_20_PERCENT = "2"
     ON_30_PERCENT = "3"
     ON_40_PERCENT = "4"
@@ -107,19 +82,19 @@ class WhatLight(What, StrEnum):
     BLINKING_4_5_SEC = "28"
     BLINKING_5_0_SEC = "29"
 
-    # Dimmer only
-    UP_1_PERCENT = "30"  # Support parameter to change the percentage
-    DOWN_1_PERCENT = "31"  # Support parameter to change the percentage
+    UP_1_PERCENT = "30"
+    DOWN_1_PERCENT = "31"
 
     COMMAND_TRANSLATION = "1000"
 
 
 class BaseLight(BaseItem, ABC):
-    """Base class for all light items."""
+    """Base class for all light items.
 
-    _who: Who = Who.LIGHTING
-
-    _event_callbacks: dict[LightEvents, list[CoroutineCallback]] = {}
+    The concrete subclasses (`Light`, `Dimmer`) share commands here; the
+    `@item(Who.LIGHTING)` decorator on `Light` is what binds this WHO to the
+    dispatch system.
+    """
 
     async def turn_on(self):
         """Turns the light on."""
@@ -162,9 +137,9 @@ class BaseLight(BaseItem, ABC):
         await self.send_normal_message(WhatLight.ON_0_5_SEC)
 
     @abstractmethod
-    def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
+    async def get_status(self) -> AsyncIterator[tuple[Where, bool | int]]:
         """Gets the status of the light."""
-        raise NotImplementedError
+        yield None  # type: ignore[misc]
 
     async def temporization_command(self, hour: int, minute: int, second: int):
         """Sends a temporization command.
@@ -188,9 +163,9 @@ class BaseLight(BaseItem, ABC):
             A tuple with the hour, minute, and second of the temporization.
         """
         async for message in self.send_dimension_request("2"):
-            hour = int(message.values[0].tag)
-            minute = int(message.values[1].tag)
-            second = int(message.values[2].tag)
+            hour = int(message.values[0].tag)  # type: ignore[arg-type]
+            minute = int(message.values[1].tag)  # type: ignore[arg-type]
+            second = int(message.values[2].tag)  # type: ignore[arg-type]
             yield message.where, hour, minute, second
 
     async def request_working_time_lamp(self) -> AsyncIterator[tuple[Where, int]]:
@@ -201,72 +176,4 @@ class BaseLight(BaseItem, ABC):
                 The value is in the range [1-100000].
         """
         async for message in self.send_dimension_request("3"):
-            yield message.where, int(message.values[0].tag)
-
-    @classmethod
-    def on_status_change(cls, callback: Callable[[Self, bool], Coroutine[None, None, None]]):
-        """Registers a callback function to be called when the light status changes.
-
-        Args:
-            callback (Callable[[Self, bool]): The callback function to call.
-                It will receive as arguments the item and the status.
-        """
-        cls._event_callbacks.setdefault(LightEvents.STATUS_CHANGE, []).append(callback)
-
-    @classmethod
-    def on_temporization_change(
-        cls, callback: Callable[[Self, int, int, int], Coroutine[None, None, None]]
-    ):
-        """Registers a callback function to be called when the temporization changes.
-
-        Args:
-            callback (Callable[[Self, int, int, int]): The callback function to call.
-                It will receive as arguments the item, the hour, the minute, and the second.
-        """
-        cls._event_callbacks.setdefault(LightEvents.LIGHT_TEMPORIZATION, []).append(callback)
-
-    @classmethod
-    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
-        """Dispatches the message to the registered light callbacks."""
-        tasks: list[Task] = []
-
-        if isinstance(message, DimensionResponse):
-            if message.dimension.tag == "1":
-                tasks += cls._create_tasks(
-                    cls._event_callbacks.get(LightEvents.LIGHT_TEMPORIZATION, []),
-                    item,
-                    int(message.values[0].tag),
-                    int(message.values[1].tag),
-                    int(message.values[2].tag),
-                )
-            elif message.dimension.tag == "8":
-                tasks += cls._create_tasks(
-                    cls._event_callbacks.get(LightEvents.LUMINOSITY_CHANGE, []),
-                    item,
-                    int(message.values[0].tag),
-                    int(message.values[1].tag),
-                )
-            elif message.dimension.tag == "12":
-                tasks += cls._create_tasks(
-                    cls._event_callbacks.get(LightEvents.HSV_CHANGE, []),
-                    item,
-                    int(message.values[0].tag),
-                    int(message.values[1].tag),
-                    int(message.values[2].tag),
-                )
-            elif message.dimension.tag == "13":
-                tasks += cls._create_tasks(
-                    cls._event_callbacks.get(LightEvents.WHITE_TEMP_CHANGE, []),
-                    item,
-                    int(message.values[0].tag),
-                )
-        elif isinstance(message, NormalMessage):
-            tasks += cls._create_tasks(
-                cls._event_callbacks.get(LightEvents.STATUS_CHANGE, []),
-                item,
-                message.what == WhatLight.ON,
-            )
-        else:
-            raise InvalidMessage(str(message))
-
-        return tasks
+            yield message.where, int(message.values[0].tag)  # type: ignore[arg-type]

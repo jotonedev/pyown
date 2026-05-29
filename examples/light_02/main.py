@@ -3,25 +3,24 @@ import logging
 
 from pyown import Client
 from pyown.client import SessionType
-from pyown.items import Light
+from pyown.items.lighting import LightStatusEvent
 
 log = logging.getLogger(__name__)
 
 
-async def on_light_state_change(light: Light, state: bool):
-    """Log whether a light turned on or off when its state changes."""
-    if state:
-        log.info(f"Light at {light.where} is now on")
+async def on_light_state_change(event: LightStatusEvent):
+    """Log the new state of a light when it changes."""
+    if event.on:
+        log.info(f"Light at {event.where} is now on")
     else:
-        log.info(f"Light at {light.where} is now off")
+        log.info(f"Light at {event.where} is now off")
 
 
 # noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
-    """Connect with an event session and listen for light state changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
-    Light.on_status_change(on_light_state_change)
+    client.events.subscribe(LightStatusEvent, on_light_state_change)
 
     await client.start()
     await client.loop()
@@ -29,15 +28,12 @@ async def run(host: str, port: int, password: str):
 
 # noinspection DuplicatedCode
 def main(host: str, port: int, password: str):
-    """Configure logging and run the async example."""
-    # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Run the asyncio event loop
     asyncio.run(run(host, port, password))
 
 

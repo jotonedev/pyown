@@ -1,35 +1,18 @@
-from asyncio import Task
-from enum import Enum, StrEnum, auto
-from typing import Callable, Coroutine, Final, Self
+from enum import StrEnum
+from typing import Final
 
-from ...exceptions import InvalidMessage
-from ...messages import BaseMessage, GenericMessage, NormalMessage
+from ...events import item
 from ...tags import What, Who
-from ..base import BaseItem, CoroutineCallback
+from ..base import BaseItem
 
 __all__ = [
     "Camera",
     "WhatCamera",
-    "CameraEvents",
 ]
 
 
-class CameraEvents(Enum):
-    """This enum is used internally to register the callbacks to the correct event.
-
-    Attributes:
-        RECEIVE_VIDEO: The event for when receiving video.
-        FREE_RESOURCES: The event for when audio/video resources are freed.
-        ALL: The event for all events.
-    """
-
-    RECEIVE_VIDEO = auto()
-    FREE_RESOURCES = auto()
-    ALL = auto()  # For all events
-
-
 class WhatCamera(What, StrEnum):
-    """This enum contains the possible commands and states for a camera.
+    """The possible commands and states for a camera.
 
     Attributes:
         RECEIVE_VIDEO: Receive video from camera.
@@ -120,6 +103,7 @@ dial_map: Final[dict[tuple[int, int], WhatCamera]] = {
 }
 
 
+@item(Who.VIDEO_DOOR_ENTRY)
 class Camera(BaseItem):
     """Camera items are used to control video door entry systems and cameras.
 
@@ -132,10 +116,6 @@ class Camera(BaseItem):
     http://gateway-ip/telecamera.php?CAM_PASSWD=password
     """
 
-    _who = Who.VIDEO_DOOR_ENTRY
-
-    _event_callbacks: dict[CameraEvents, list[CoroutineCallback]] = {}
-
     async def receive_video(self):
         """Activates the camera to receive video.
 
@@ -145,14 +125,13 @@ class Camera(BaseItem):
         await self.send_normal_message(WhatCamera.RECEIVE_VIDEO)
 
     async def _send_command_without_where(self, what: WhatCamera):
-        """Helper method to send commands without WHERE parameter.
+        """Helper to send commands without WHERE parameter.
 
-        Many camera commands (zoom, adjustments, etc.) do not use WHERE
-        and follow the format *7*WHAT## instead of *7*WHAT*WHERE##.
-
-        Args:
-            what: The WHAT command to send.
+        Many camera commands (zoom, adjustments) follow `*7*WHAT##` not
+        `*7*WHAT*WHERE##`.
         """
+        from ...messages import GenericMessage
+
         msg = GenericMessage([str(self._who), str(what)])
         await self._send_message(msg)
         resp = await self._read_message()
@@ -236,32 +215,3 @@ class Camera(BaseItem):
             raise ValueError("Dial coordinates must be in range 1-4")
 
         await self._send_command_without_where(dial_map[(x, y)])
-
-    @classmethod
-    def on_status_change(
-        cls, callback: Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]
-    ):
-        """Registers a callback to be called when the status of the camera changes.
-
-        Args:
-            callback (Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]): The callback to call.
-                It will receive as arguments the item, the WhatCamera value, and the message.
-        """
-        cls._event_callbacks.setdefault(CameraEvents.ALL, []).append(callback)
-
-    @classmethod
-    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
-        """Dispatches the message to the registered camera callbacks."""
-        tasks: list[Task] = []
-
-        if isinstance(message, NormalMessage):
-            tasks += cls._create_tasks(
-                cls._event_callbacks.get(CameraEvents.ALL, []),
-                item,
-                WhatCamera(str(message.what)),
-                message,
-            )
-        else:
-            raise InvalidMessage(str(message))
-
-        return tasks
