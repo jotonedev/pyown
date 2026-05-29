@@ -3,7 +3,7 @@ from enum import Enum, StrEnum, auto
 from typing import Callable, Coroutine, Final, Self
 
 from ...exceptions import InvalidMessage
-from ...messages import BaseMessage, NormalMessage
+from ...messages import BaseMessage, GenericMessage, NormalMessage
 from ...tags import What, Who
 from ..base import BaseItem, CoroutineCallback
 
@@ -15,8 +15,7 @@ __all__ = [
 
 
 class CameraEvents(Enum):
-    """
-    This enum is used internally to register the callbacks to the correct event.
+    """This enum is used internally to register the callbacks to the correct event.
 
     Attributes:
         RECEIVE_VIDEO: The event for when receiving video.
@@ -30,8 +29,7 @@ class CameraEvents(Enum):
 
 
 class WhatCamera(What, StrEnum):
-    """
-    This enum contains the possible commands and states for a camera.
+    """This enum contains the possible commands and states for a camera.
 
     Attributes:
         RECEIVE_VIDEO: Receive video from camera.
@@ -123,8 +121,7 @@ dial_map: Final[dict[tuple[int, int], WhatCamera]] = {
 
 
 class Camera(BaseItem):
-    """
-    Camera items are used to control video door entry systems and cameras.
+    """Camera items are used to control video door entry systems and cameras.
 
     The camera system uses WHO = 7 (VIDEO_DOOR_ENTRY) and supports various
     commands for video control, zoom, and image adjustments.
@@ -140,8 +137,7 @@ class Camera(BaseItem):
     _event_callbacks: dict[CameraEvents, list[CoroutineCallback]] = {}
 
     async def receive_video(self):
-        """
-        Activates the camera to receive video.
+        """Activates the camera to receive video.
 
         After this command, the video stream can be accessed via HTTP/HTTPS
         at the gateway's telecamera.php endpoint.
@@ -149,8 +145,7 @@ class Camera(BaseItem):
         await self.send_normal_message(WhatCamera.RECEIVE_VIDEO)
 
     async def _send_command_without_where(self, what: WhatCamera):
-        """
-        Helper method to send commands without WHERE parameter.
+        """Helper method to send commands without WHERE parameter.
 
         Many camera commands (zoom, adjustments, etc.) do not use WHERE
         and follow the format *7*WHAT## instead of *7*WHAT*WHERE##.
@@ -158,16 +153,13 @@ class Camera(BaseItem):
         Args:
             what: The WHAT command to send.
         """
-        from ...messages import GenericMessage
-
         msg = GenericMessage([str(self._who), str(what)])
         await self._send_message(msg)
         resp = await self._read_message()
         self._check_ack(resp)
 
     async def free_resources(self):
-        """
-        Frees audio and video resources.
+        """Frees audio and video resources.
 
         This command releases the video channel and audio/video resources.
         Note: This command does not use a WHERE parameter.
@@ -231,8 +223,7 @@ class Camera(BaseItem):
         await self._send_command_without_where(WhatCamera.DECREASE_QUALITY)
 
     async def display_dial(self, x: int, y: int):
-        """
-        Displays a specific dial position.
+        """Displays a specific dial position.
 
         Args:
             x: The X dial number (1-4).
@@ -250,8 +241,7 @@ class Camera(BaseItem):
     def on_status_change(
         cls, callback: Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]
     ):
-        """
-        Registers a callback to be called when the status of the camera changes.
+        """Registers a callback to be called when the status of the camera changes.
 
         Args:
             callback (Callable[[Self, WhatCamera, BaseMessage], Coroutine[None, None, None]]): The callback to call.
@@ -260,7 +250,8 @@ class Camera(BaseItem):
         cls._event_callbacks.setdefault(CameraEvents.ALL, []).append(callback)
 
     @classmethod
-    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+        """Dispatches the message to the registered camera callbacks."""
         tasks: list[Task] = []
 
         if isinstance(message, NormalMessage):

@@ -1,5 +1,6 @@
 import asyncio
 import unittest
+import unittest.mock
 
 # ruff: noqa: F401
 from unittest.mock import MagicMock
@@ -17,7 +18,7 @@ class OWNProtocolTests(unittest.IsolatedAsyncioTestCase):
         self.protocol = OWNProtocol(self.on_connection_start, self.on_connection_end)
 
     async def test_connection_made(self):
-        transport = unittest.mock.MagicMock()
+        transport = unittest.mock.MagicMock(spec=asyncio.Transport)
         self.protocol.connection_made(transport)
         self.assertEqual(self.on_connection_start.result(), transport)
 

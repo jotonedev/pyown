@@ -7,6 +7,7 @@ from pyown.tags import Dimension, Where, Who
 
 
 async def run(host: str, port: int, password: str):
+    """Send a custom dimension request to read the gateway's IP address."""
     client = Client(host=host, port=port, password=password)
 
     await client.start()
@@ -27,7 +28,7 @@ async def run(host: str, port: int, password: str):
     except asyncio.TimeoutError:
         logging.error("Timeout while waiting for response")
 
-    if status == ACK():
+    if status == ACK() and resp is not None:
         logging.info("The server acknowledged the message")
         ip = resp.tags[-4:]
         print(f"The ip address of the server is {ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}")
@@ -38,6 +39,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

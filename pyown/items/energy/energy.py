@@ -16,8 +16,7 @@ __all__ = [
 
 
 class EnergyManagement(BaseItem):
-    """
-    Used to control energy management items, like actuators with current sensors, etc...
+    """Used to control energy management items, like actuators with current sensors, etc...
 
     Allowed where tags:
     - 1N (N=[1-127]): Stop&Go devices,
@@ -32,8 +31,7 @@ class EnergyManagement(BaseItem):
     _event_callbacks: dict[DimensionEnergy, list[CoroutineCallback]] = {}
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
-        """
-        Initializes the item and check if the where tag is valid.
+        """Initializes the item and check if the where tag is valid.
 
         Args:
             client: The client to use to communicate with the server.
@@ -47,8 +45,7 @@ class EnergyManagement(BaseItem):
         self.get_type()
 
     def get_type(self) -> TypeEnergy:
-        """
-        The type of the item.
+        """The type of the item.
 
         Returns:
             The type of the item.
@@ -70,12 +67,10 @@ class EnergyManagement(BaseItem):
             raise InvalidTag(self.where)
 
     async def start_sending_daily_totalizers_hourly(self, day: int | None, month: int | None):
-        """
-        Start sending daily totalizers on an hourly basis on an event session.
+        """Start sending daily totalizers on an hourly basis on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
-
-        Args:
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -90,12 +85,10 @@ class EnergyManagement(BaseItem):
         )
 
     async def start_sending_monthly_average_hourly(self, month: int | None):
-        """
-        Start sending monthly average on an hourly basis on an event session.
+        """Start sending monthly average on an hourly basis on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
-
-        Args:
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -106,12 +99,10 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.SEND_MONTHLY_REPORT.with_parameter(month))
 
     async def start_sending_monthly_totalizers_current_year(self, month: int | None):
-        """
-        Start sending monthly totalizers current year on a daily basis on an event session.
+        """Start sending monthly totalizers current year on a daily basis on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
-
-        Args:
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -122,12 +113,10 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.SEND_YEARLY_REPORT.with_parameter(month))
 
     async def start_sending_monthly_totalizers_last_year(self, month: int | None):
-        """
-        Start sending monthly totalizers last year on a daily basis on an event session.
+        """Start sending monthly totalizers last year on a daily basis on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
-
-        Args:
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -138,8 +127,7 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.SEND_LAST_YEAR_REPORT.with_parameter(month))
 
     async def enable_actuator(self):
-        """
-        Enable the actuator.
+        """Enable the actuator.
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -147,8 +135,7 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.ENABLE_ACTUATOR)
 
     async def force_actuator_on(self, time: int | None = None):
-        """
-        Force the actuator on for a specific time.
+        """Force the actuator on for a specific time.
 
         Args:
             time: The time in tens of minutes [1-254]. Use default time if None.
@@ -162,8 +149,7 @@ class EnergyManagement(BaseItem):
             await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_ON.with_parameter(time))
 
     async def force_actuator_off(self):
-        """
-        End the forced actuator.
+        """End the forced actuator.
 
         Raises:
             ResponseError: When the gateway does not acknowledge the command
@@ -171,8 +157,7 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.FORCE_ACTUATOR_OFF)
 
     async def reset_totalizers(self, tot_n: int):
-        """
-        Reset the totalizers.
+        """Reset the totalizers.
 
         Args:
             tot_n: The totalizer number to reset [1-2]
@@ -183,8 +168,8 @@ class EnergyManagement(BaseItem):
         await self.send_normal_message(WhatEnergy.RESET_REPORT.with_parameter(tot_n))
 
     async def start_sending_instant_power(self, time: int, power_type: int = 1):
-        """
-        Start sending the instant power consumption on an event session.
+        """Start sending the instant power consumption on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
 
@@ -201,8 +186,8 @@ class EnergyManagement(BaseItem):
         )
 
     async def stop_sending_instant_power(self, power_type: int = 1):
-        """
-        Stop sending the instant power consumption on an event session.
+        """Stop sending the instant power consumption on an event session.
+
         !!! note
             Even if the data is sent to the event session, this command must be sent on a command session.
 
@@ -218,8 +203,7 @@ class EnergyManagement(BaseItem):
         )
 
     async def get_active_power(self) -> float:
-        """
-        Get the active power.
+        """Get the active power.
 
         Returns:
             The active power in W.
@@ -232,8 +216,7 @@ class EnergyManagement(BaseItem):
         return float(message.values[0].string)
 
     async def get_energy_unit_totalizer(self) -> float:
-        """
-        Get the energy/unit totalizer.
+        """Get the energy/unit totalizer.
 
         Returns:
             The energy/unit totalizer in kWh.
@@ -250,8 +233,7 @@ class EnergyManagement(BaseItem):
         month: int | None = None,
         year: int | None = None,
     ) -> float:
-        """
-        Get the energy/unit per month.
+        """Get the energy/unit per month.
 
         Args:
             month: The month to get the energy from [1-12]. Use the current month if None.
@@ -276,8 +258,8 @@ class EnergyManagement(BaseItem):
         return float(message.values[0].string)
 
     async def get_partial_totalizer_current_month(self) -> float:
-        """
-        Get the partial totalizer for the current month.
+        """Get the partial totalizer for the current month.
+
         This is equivalent to get_energy_unit_per_month() without any args.
 
         Returns:
@@ -291,8 +273,7 @@ class EnergyManagement(BaseItem):
         return float(resp.values[0].string)
 
     async def get_partial_totalizer_current_day(self) -> float:
-        """
-        Get the partial totalizer for the current day.
+        """Get the partial totalizer for the current day.
 
         Returns:
             The partial totalizer for the current day in kWh.
@@ -305,8 +286,7 @@ class EnergyManagement(BaseItem):
         return float(message.values[0].string)
 
     async def get_actuators_info(self, *, message: EventMessage = None) -> ActuatorStatus:
-        """
-        Get the actuator info.
+        """Get the actuator info.
 
         Args:
             message: The message to parse the status from.
@@ -333,8 +313,7 @@ class EnergyManagement(BaseItem):
     async def get_totalizers(
         self, tot_n: int, *, message: EventMessage = None
     ) -> tuple[datetime, float]:
-        """
-        Get the energy measured from the last reset.
+        """Get the energy measured from the last reset.
 
         Args:
             tot_n: The totalizer number to get [1-2]
@@ -360,8 +339,7 @@ class EnergyManagement(BaseItem):
         return datetime(int(y), int(m), int(d), int(h), int(mi)), energy
 
     async def get_differential_current_level(self) -> int:
-        """
-        Get the differential current level.
+        """Get the differential current level.
 
         Returns:
             The differential level [1-3].
@@ -383,8 +361,8 @@ class EnergyManagement(BaseItem):
     def on_daily_totalizers_hourly(
         cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the daily totalizers on an hourly basis event.
+        """Register a callback for the daily totalizers on an hourly basis event.
+
         !!! note
             To start receiving the event, use the start_sending_daily_totalizers_hourly() with a command session.
 
@@ -401,8 +379,8 @@ class EnergyManagement(BaseItem):
     def on_monthly_average_hourly(
         cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the monthly average on an hourly basis event.
+        """Register a callback for the monthly average on an hourly basis event.
+
         !!! note
             To start receiving the event, use the start_sending_monthly_average_hourly() with a command session.
 
@@ -418,8 +396,8 @@ class EnergyManagement(BaseItem):
     def on_monthly_totalizers_current_year(
         cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the monthly totalizers current year on a daily basis event.
+        """Register a callback for the monthly totalizers current year on a daily basis event.
+
         !!! note
             To start receiving the event,
             use the start_sending_monthly_totalizers_current_year() with a command session.
@@ -436,8 +414,8 @@ class EnergyManagement(BaseItem):
     def on_monthly_totalizers_last_year(
         cls, callback: Callable[[Self, int, int, int, int], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the monthly totalizers last year on a daily basis event.
+        """Register a callback for the monthly totalizers last year on a daily basis event.
+
         !!! note
             To start receiving the event,
             use the start_sending_monthly_totalizers_last_year() with a command session.
@@ -454,8 +432,7 @@ class EnergyManagement(BaseItem):
     def on_stop_go_status(
         cls, callback: Callable[[Self, StopGoStatus], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the stop&go status change event.
+        """Register a callback for the stop&go status change event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -465,8 +442,7 @@ class EnergyManagement(BaseItem):
 
     @classmethod
     def on_instant_power(cls, callback: Callable[[Self, float], Coroutine[None, None, None]]):
-        """
-        Register a callback for the instant power consumption event.
+        """Register a callback for the instant power consumption event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -478,8 +454,7 @@ class EnergyManagement(BaseItem):
     def on_energy_unit_totalizer(
         cls, callback: Callable[[Self, float], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the energy/unit totalizer event.
+        """Register a callback for the energy/unit totalizer event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -491,8 +466,7 @@ class EnergyManagement(BaseItem):
     def on_energy_unit_per_month(
         cls, callback: Callable[[Self, int, int, float], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the energy/unit per month event.
+        """Register a callback for the energy/unit per month event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -504,8 +478,7 @@ class EnergyManagement(BaseItem):
     def on_partial_totalizer_current_month(
         cls, callback: Callable[[Self, float], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the partial totalizer current month event.
+        """Register a callback for the partial totalizer current month event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -519,8 +492,7 @@ class EnergyManagement(BaseItem):
     def on_partial_totalizer_current_day(
         cls, callback: Callable[[Self, float], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the partial totalizer current day event.
+        """Register a callback for the partial totalizer current day event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -534,8 +506,7 @@ class EnergyManagement(BaseItem):
     def on_actuators_info(
         cls, callback: Callable[[Self, ActuatorStatus], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the actuator info event.
+        """Register a callback for the actuator info event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -548,8 +519,7 @@ class EnergyManagement(BaseItem):
         cls,
         callback: Callable[[Self, int, datetime, float], Coroutine[None, None, None]],
     ):
-        """
-        Register a callback for the totalizer since reset event.
+        """Register a callback for the totalizer since reset event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -562,8 +532,7 @@ class EnergyManagement(BaseItem):
     def on_differential_current_level(
         cls, callback: Callable[[Self, int], Coroutine[None, None, None]]
     ):
-        """
-        Register a callback for the differential current level event.
+        """Register a callback for the differential current level event.
 
         Args:
             callback: The callback to call when the event is received.
@@ -574,9 +543,14 @@ class EnergyManagement(BaseItem):
         )
 
     @classmethod
-    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+        """Dispatch the message to the registered event callbacks and return the created tasks."""
         if not isinstance(message, DimensionResponse):
             raise InvalidMessage("The message is not a DimensionResponse message.")
+
+        # the dispatcher only calls this with a matching EnergyManagement instance
+        if not isinstance(item, EnergyManagement):
+            raise InvalidMessage("The item is not an EnergyManagement instance.")
 
         # TODO: Refactor this
         dim = DimensionEnergy(message.dimension.string)

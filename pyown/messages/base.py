@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import builtins
 import copy
 import re
 from enum import StrEnum
@@ -19,6 +20,8 @@ __all__ = [
 
 
 class MessageType(StrEnum):
+    """Enumerates the types of messages that can be sent on the OpenWebNet bus."""
+
     ACK = "ACK"
     NACK = "NACK"
     NORMAL = "NORMAL"
@@ -30,8 +33,7 @@ class MessageType(StrEnum):
 
 
 class BaseMessage(abc.ABC):
-    """
-    Base class for all the messages from the OpenWebNet bus.
+    """Base class for all the messages from the OpenWebNet bus.
 
     It defines the structure of the messages and the methods to parse and create them.
 
@@ -75,30 +77,28 @@ class BaseMessage(abc.ABC):
 
     @classmethod
     def pattern(cls) -> Pattern[str]:
-        """
-        Returns the regex pattern used to match the message represented by the class.
+        """Returns the regex pattern used to match the message represented by the class.
+
         Returns:
             Pattern[str]: The regex pattern used to match the message
         """
         return cls._regex
 
     @property
-    def tags(self) -> tuple[str] | list[str]:
-        """
-        Returns a copy of the tags.
+    def tags(self) -> tuple[str, ...] | list[str]:
+        """Returns a copy of the tags.
 
         The tags are the elements that compose the message, like the WHO, WHAT, WHERE, etc.
 
         Returns:
-            tuple[str] | list[str]: The tags of the message
+            tuple[str, ...] | list[str]: The tags of the message
         """
         # Returns a new copy of the tags to avoid modifications
         return copy.deepcopy(self._tags)
 
     @property
     def type(self) -> MessageType:
-        """
-        Returns the type of the message.
+        """Returns the type of the message.
 
         Returns:
             MessageType: The type of the message
@@ -108,8 +108,7 @@ class BaseMessage(abc.ABC):
     @property
     @abc.abstractmethod
     def message(self) -> str:
-        """
-        Returns the message represented by the class.
+        """Returns the message represented by the class.
 
         This function is equivalent to the `__str__` method.
 
@@ -119,9 +118,8 @@ class BaseMessage(abc.ABC):
         raise NotImplementedError
 
     @property
-    def bytes(self) -> bytes:
-        """
-        Returns the message encoded in bytes.
+    def bytes(self) -> builtins.bytes:
+        """Returns the message encoded in bytes.
 
         Returns:
             bytes: The message encoded in bytes
@@ -129,31 +127,26 @@ class BaseMessage(abc.ABC):
         return self.message.encode("ascii")
 
     @classmethod
-    @abc.abstractmethod
     def parse(cls, tags: list[str]) -> BaseMessage:
-        """
-        Parses the tags of a message and returns an instance of the class.
+        """Parses the tags of a message and returns an instance of the class.
+
+        Subclasses override this; the base implementation only signals it is missing.
         """
         raise NotImplementedError
 
     @property
     def who(self) -> Who | None:
-        """
-        Returns the WHO tag of the message.
-        """
+        """Returns the WHO tag of the message."""
         return None
 
     @property
     def where(self) -> Where | None:
-        """
-        Returns the WHERE tag of the message.
-        """
+        """Returns the WHERE tag of the message."""
         return None
 
 
 class GenericMessage(BaseMessage):
-    """
-    Represents a generic message.
+    """Represents a generic message.
 
     This is used when the message has an unknown structure, or to send specific messages that
     don't need a specific class to represent them.
@@ -164,8 +157,7 @@ class GenericMessage(BaseMessage):
 
     @property
     def message(self) -> str:
-        """
-        Returns the string representation of the message.
+        """Returns the string representation of the message.
 
         Returns:
             str: The message
@@ -174,8 +166,8 @@ class GenericMessage(BaseMessage):
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
-        """
-        Parses the tags of a message from the OpenWebNet bus.
+        """Parses the tags of a message from the OpenWebNet bus.
+
         In this case, it only checks if the tags are correct.
 
         Args:
@@ -192,8 +184,7 @@ class GenericMessage(BaseMessage):
 
 
 def parse_message(message: str) -> BaseMessage:
-    """
-    Parses a message from the OpenWebNet bus.
+    """Parses a message from the OpenWebNet bus.
 
     Args:
         message (str): The message to parse

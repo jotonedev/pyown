@@ -3,7 +3,7 @@ import ipaddress
 import logging
 from asyncio import Task
 from enum import StrEnum
-from typing import Any, Self, Sequence
+from typing import Any, Sequence
 
 from ...client import BaseClient
 from ...exceptions import InvalidMessage
@@ -22,8 +22,7 @@ log = logging.getLogger("pyown.items.gateway")
 
 
 class GatewayModel(StrEnum):
-    """
-    This enum is used to define the various models of gateways that are supported by the library.
+    """This enum is used to define the various models of gateways that are supported by the library.
 
     This is not a complete list of all the gateways because there are many different models of gateways that are not
     listed in the official documentation.
@@ -51,8 +50,8 @@ class GatewayModel(StrEnum):
 
     @classmethod
     def _missing_(cls, value):
-        """
-        This method is called when a value is not found in the enum.
+        """This method is called when a value is not found in the enum.
+
         It returns the generic value if the value is not found.
         """
         log.warning("The gateway model %s was not found in the known models.", value)
@@ -61,8 +60,7 @@ class GatewayModel(StrEnum):
 
 
 class WhatGateway(What, StrEnum):
-    """
-    This enum is used to define the various types of data that can be retrieved from a gateway.
+    """This enum is used to define the various types of data that can be retrieved from a gateway.
 
     Attributes:
         TIME: get or set the time of the gateway and bus.
@@ -92,13 +90,15 @@ class WhatGateway(What, StrEnum):
 
 
 class Gateway(BaseItem):
+    """Gateway item used to query and configure the gateway device itself."""
+
     _who = Who.GATEWAY
 
     _event_callbacks: dict[WhatGateway, list[CoroutineCallback]] = {}
 
     def __init__(self, client: BaseClient, where: Where | str = ""):
-        """
-        Initializes the item.
+        """Initializes the item.
+
         Args:
             client: The client to use to communicate with the server.
         """
@@ -126,15 +126,14 @@ class Gateway(BaseItem):
         if tz is None:
             raise ValueError("The timezone must be set in the datetime object.")
 
-        sign = "0" if tz >= datetime.timedelta(0) else "1"  # type: ignore[union-attr]
-        hours = abs(tz.seconds) // 3600  # type: ignore[union-attr]
+        sign = "0" if tz >= datetime.timedelta(0) else "1"
+        hours = abs(tz.seconds) // 3600
 
         t = Value(f"{sign}{hours:03d}")
         return t
 
     async def get_time(self, *, message: EventMessage = None) -> datetime.time:
-        """
-        Requests the time of the gateway and bus.
+        """Requests the time of the gateway and bus.
 
         Args:
             message: The message to parse the time from. If not provided, it will send a request to the server.
@@ -161,8 +160,8 @@ class Gateway(BaseItem):
 
     # noinspection DuplicatedCode
     async def set_time(self, bus_time: datetime.time):
-        """
-        Sets the time of the gateway and bus.
+        """Sets the time of the gateway and bus.
+
         Args:
             bus_time: the time to set with the timezone.
 
@@ -177,8 +176,7 @@ class Gateway(BaseItem):
         await self.send_dimension_writing(WhatGateway.TIME, h, m, s, t)
 
     async def get_date(self, *, message: EventMessage = None) -> datetime.date:
-        """
-        Requests the date of the gateway and bus.
+        """Requests the date of the gateway and bus.
 
         Args:
             message: The message to parse the date from. If not provided, it will send a request to the server.
@@ -204,8 +202,7 @@ class Gateway(BaseItem):
         return bus_date
 
     async def set_date(self, bus_date: datetime.date):
-        """
-        Sets the date of the gateway and bus.
+        """Sets the date of the gateway and bus.
 
         Args:
             bus_date: the date to set.
@@ -222,8 +219,7 @@ class Gateway(BaseItem):
         await self.send_dimension_writing(WhatGateway.DATE, w, d, m, a)
 
     async def get_ip(self, *, message: EventMessage = None) -> ipaddress.IPv4Address:
-        """
-        Requests the IP address of the gateway.
+        """Requests the IP address of the gateway.
 
         Args:
             message: The message to parse the IP address from. If not provided, it will send a request to the server.
@@ -245,8 +241,7 @@ class Gateway(BaseItem):
         return ip
 
     async def get_netmask(self, *, message: EventMessage = None) -> str:
-        """
-        Requests the net mask of the gateway.
+        """Requests the net mask of the gateway.
 
         Args:
             message: The message to parse the net mask from. If not provided, it will send a request to the server.
@@ -265,8 +260,7 @@ class Gateway(BaseItem):
         return f"{int(oct1.string)}.{int(oct2.string)}.{int(oct3.string)}.{int(oct4.string)}"
 
     async def get_macaddress(self, *, message: EventMessage = None) -> str:
-        """
-        Requests the MAC address of the gateway.
+        """Requests the MAC address of the gateway.
 
         Args:
             message: The message to parse the MAC address from. If not provided, it will send a request to the server.
@@ -286,8 +280,8 @@ class Gateway(BaseItem):
         return mac
 
     async def get_netinfo(self) -> ipaddress.IPv4Network:
-        """
-        Combines the net mask and the IP address to get the network info.
+        """Combines the net mask and the IP address to get the network info.
+
         Returns:
             ipaddress.IPv4Network: The network info.
         """
@@ -297,8 +291,7 @@ class Gateway(BaseItem):
         return ipaddress.IPv4Network(f"{ip}/{netmask}", strict=False)
 
     async def get_model(self, *, message: EventMessage = None) -> GatewayModel:
-        """
-        Requests the device type of the gateway.
+        """Requests the device type of the gateway.
 
         Args:
             message: The message to parse the device type from. If not provided, it will send a request to the server.
@@ -315,8 +308,7 @@ class Gateway(BaseItem):
         return GatewayModel(resp.values[0].string)
 
     async def get_firmware(self, *, message: EventMessage = None) -> str:
-        """
-        Requests the firmware version of the gateway.
+        """Requests the firmware version of the gateway.
 
         Args:
             message: The message to parse the firmware version from. If not provided, it will send a request to the server.
@@ -337,8 +329,7 @@ class Gateway(BaseItem):
         return f"{v}.{r}.{b}"
 
     async def get_uptime(self, *, message: EventMessage = None) -> datetime.timedelta:
-        """
-        Requests the uptime of the gateway.
+        """Requests the uptime of the gateway.
 
         Args:
             message: The message to parse the uptime from. If not provided, it will send a request to the server.
@@ -361,8 +352,7 @@ class Gateway(BaseItem):
         return uptime
 
     async def get_datetime(self, *, message: EventMessage = None) -> datetime.datetime:
-        """
-        Requests the date and time of the gateway.
+        """Requests the date and time of the gateway.
 
         Args:
             message: The message to parse the date and time from. If not provided, it will send a request to the server.
@@ -393,8 +383,7 @@ class Gateway(BaseItem):
 
     # noinspection DuplicatedCode
     async def set_datetime(self, bus_time: datetime.datetime):
-        """
-        Sets the date and time of the gateway.
+        """Sets the date and time of the gateway.
 
         Args:
             bus_time: the date and time to set with the timezone.
@@ -414,8 +403,7 @@ class Gateway(BaseItem):
         await self.send_dimension_writing(WhatGateway.DATE_TIME, h, m, s, t, d, mo, y)
 
     async def get_kernel_version(self, *, message: EventMessage = None) -> str:
-        """
-        Requests the linux kernel version of the gateway.
+        """Requests the linux kernel version of the gateway.
 
         Args:
             message: The message to parse the kernel version from. If not provided, it will send a request to the server.
@@ -436,8 +424,7 @@ class Gateway(BaseItem):
         return f"{v}.{r}.{b}"
 
     async def get_distribution_version(self, *, message: EventMessage = None) -> str:
-        """
-        Requests the os distribution version of the gateway.
+        """Requests the os distribution version of the gateway.
 
         Args:
             message: The message to parse the distribution version from. If not provided, it will send a request to the server.
@@ -461,8 +448,7 @@ class Gateway(BaseItem):
     # and event messages for the gateway are very rarely sent
     @classmethod
     def register_callback(cls, what: WhatGateway, callback: CoroutineCallback):
-        """
-        Register a callback for a specific event.
+        """Register a callback for a specific event.
 
         Args:
             what: The event to register the callback for.
@@ -474,14 +460,18 @@ class Gateway(BaseItem):
         cls._event_callbacks[what].append(callback)
 
     @classmethod
-    async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
+    async def call_callbacks(cls, item: BaseItem, message: BaseMessage) -> list[Task]:
+        """Dispatches the message to the registered gateway callbacks."""
+        # the dispatcher only calls this with a matching Gateway instance
+        if not isinstance(item, Gateway):
+            raise InvalidMessage(str(message))
         tasks = []
 
         if isinstance(message, DimensionWriting):
             # convert the DimensionWriting message to a DimensionResponse message
             # noinspection PyTypeChecker
             message = DimensionResponse(
-                (message.who, message.where, message.dimension, *message.values)  # type: ignore[arg-type]
+                (message.who, message.where, message.dimension, *message.values)
             )
 
         if isinstance(message, DimensionResponse):

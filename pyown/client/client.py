@@ -19,6 +19,12 @@ log = logging.getLogger("pyown.client")
 
 
 class Client(BaseClient):
+    """Client connection to an OpenWebNet gateway.
+
+    Used to send commands and receive events from the gateway, and to instantiate
+    and cache the items exposed by it.
+    """
+
     _items: dict[tuple[Who, Where], BaseItem]
 
     def __init__(
@@ -30,8 +36,8 @@ class Client(BaseClient):
         *,
         loop: Optional[AbstractEventLoop] = None,
     ):
-        """
-        Represents a client connection that connects to an OpenWebNet gateway.
+        """Represents a client connection that connects to an OpenWebNet gateway.
+
         This class can be used to send commands and receive events from the gateway.
 
         Args:
@@ -47,8 +53,7 @@ class Client(BaseClient):
         self._items = {}
 
     def get_item(self, who: Who, where: Where, *, client: BaseClient) -> BaseItem:
-        """
-        Instantiates an item if it is not already cached in the client and returns it.
+        """Instantiates an item if it is not already cached in the client and returns it.
 
         Args:
             who: The type of the item.
@@ -72,8 +77,8 @@ class Client(BaseClient):
                 raise KeyError(f"Item factory not found: {who}, {where}")
 
     async def loop(self, *, client: BaseClient | None = None):
-        """
-        Runs the client loop.
+        """Runs the client loop.
+
         This is a loop that runs the entire event system for the client, it will read messages from the gateway and
         dispatch them to the correct callbacks.
 
@@ -138,8 +143,8 @@ class Client(BaseClient):
             await self._dispatch_callbacks(item, message)
 
     async def _dispatch_callbacks(self, item: BaseItem, message: BaseMessage):
-        """
-        Dispatches the message to the correct callbacks for the item.
+        """Dispatches the message to the correct callbacks for the item.
+
         Args:
             item: The item that triggered the event.
             message: The message that triggered the event.
@@ -168,6 +173,6 @@ class Client(BaseClient):
     @staticmethod
     async def _check_task_result(tasks: list[Task]):
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        for i, r in enumerate(results):
+        for r in results:
             if isinstance(r, Exception):
                 log.error(f"Error in callback {r}", exc_info=r, stack_info=True)

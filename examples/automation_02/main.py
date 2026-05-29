@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 
 async def on_shutter_state_change(light: Automation, state: WhatAutomation):
+    """Log the new state of a shutter when it changes."""
     if state == WhatAutomation.UP:
         log.info(f"Shutter at {light.where} is now up")
     elif state == WhatAutomation.DOWN:
@@ -18,6 +19,7 @@ async def on_shutter_state_change(light: Automation, state: WhatAutomation):
 
 # noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
+    """Connect with an event session and listen for shutter state changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     Automation.on_status_change(on_shutter_state_change)
@@ -27,6 +29,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

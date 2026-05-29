@@ -9,8 +9,7 @@ __all__ = [
 
 
 class Who(Tag, StrEnum):
-    """
-    Who tag class.
+    """Who tag class.
 
     This is an enum class because the value allowed in this tag is limited to the ones listed.
 
@@ -71,7 +70,7 @@ class Who(Tag, StrEnum):
 
     @property
     def name(self) -> str:
-        """Get a string description of the tag"""
+        """Get a string description of the tag."""
         return who_map[self]
 
 

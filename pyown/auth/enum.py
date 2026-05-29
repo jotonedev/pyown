@@ -8,8 +8,7 @@ __all__ = [
 
 
 class AuthAlgorithm(IntEnum):
-    """
-    Represents the all allowed hashing algorithms when using the HMAC authentication algorithm.
+    """Represents the all allowed hashing algorithms when using the HMAC authentication algorithm.
 
     Attributes:
         SHA1: The SHA1 hashing algorithm.
@@ -20,8 +19,7 @@ class AuthAlgorithm(IntEnum):
     SHA256 = 2
 
     def to_message(self) -> GenericMessage:
-        """
-        Converts the AuthAlgorithm to a message.
+        """Converts the AuthAlgorithm to a message.
 
         Returns:
             GenericMessage: The message.
@@ -30,8 +28,7 @@ class AuthAlgorithm(IntEnum):
 
     @classmethod
     def from_string(cls, value: str) -> "AuthAlgorithm":
-        """
-        Converts a string to an AuthAlgorithm.
+        """Converts a string to an AuthAlgorithm.
 
         Args:
             value: The string to convert.

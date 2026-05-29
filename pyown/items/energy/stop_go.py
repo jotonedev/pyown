@@ -14,13 +14,10 @@ __all__ = [
 
 
 class StopGo(EnergyManagement):
-    """
-    Used to manage the Stop&Go items.
-    """
+    """Used to manage the Stop&Go items."""
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
-        """
-        Initializes the item and check if the where tag is valid.
+        """Initializes the item and check if the where tag is valid.
 
         Args:
             client: The client to use to communicate with the server.
@@ -35,15 +32,11 @@ class StopGo(EnergyManagement):
             raise InvalidTag(f"Invalid tag for a Stop&Go item: {where}")
 
     async def enable_automatic_reset(self) -> None:
-        """
-        Enable the automatic reset of the Stop&Go device.
-        """
+        """Enable the automatic reset of the Stop&Go device."""
         await self.send_normal_message(WhatEnergy.AUTO_RESET_ON)
 
     async def disable_automatic_reset(self) -> None:
-        """
-        Disable the automatic reset of the Stop&Go device.
-        """
+        """Disable the automatic reset of the Stop&Go device."""
         await self.send_normal_message(WhatEnergy.AUTO_RESET_OFF)
 
     async def request_status(
@@ -52,8 +45,7 @@ class StopGo(EnergyManagement):
         messages: AsyncIterator[DimensionResponse] | None = None,
         dim_req: DimensionEnergy = DimensionEnergy.STATUS_STOP_GO_GENERAL,
     ) -> StopGoStatus:
-        """
-        Request the status of the Stop&Go device.
+        """Request the status of the Stop&Go device.
 
         Args:
             messages: The messages to parse the status from.

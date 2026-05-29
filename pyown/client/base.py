@@ -26,6 +26,13 @@ log = logging.getLogger("pyown.client")
 
 
 class BaseClient(ABC):
+    """Abstract base class for OpenWebNet gateway clients.
+
+    Defines the connection, authentication, and message exchange logic shared by
+    client implementations. It should not be instantiated directly; use the Client
+    class instead.
+    """
+
     def __init__(
         self,
         host: str,
@@ -35,9 +42,9 @@ class BaseClient(ABC):
         *,
         loop: Optional[AbstractEventLoop] = None,
     ):
-        """
-        BaseClient constructor
-        This class should not be instantiated directly, use the Client class instead
+        """BaseClient constructor.
+
+        This class should not be instantiated directly, use the Client class instead.
 
         Args:
             host (str): The host to connect to (ip address)
@@ -61,8 +68,7 @@ class BaseClient(ABC):
         self._on_connection_end: Future[Exception | None] = self._loop.create_future()
 
     def is_cmd_session(self) -> bool:
-        """
-        Checks if the session is a command session
+        """Checks if the session is a command session.
 
         Returns:
             bool: True if the session is a command session, False otherwise
@@ -73,8 +79,7 @@ class BaseClient(ABC):
         )
 
     async def start(self) -> None:
-        """
-        Creates a connection with the gateway and does the initial handshake
+        """Creates a connection with the gateway and does the initial handshake.
 
         Raises:
             TimeoutError: if the server does not respond
@@ -134,8 +139,7 @@ class BaseClient(ABC):
         log.info("Client ready")
 
     async def _authenticate_open(self, nonce: str) -> None:
-        """
-        Authenticates the client using the open authentication algorithm
+        """Authenticates the client using the open authentication algorithm.
 
         Args:
             nonce (str): The nonce sent by the server
@@ -149,8 +153,7 @@ class BaseClient(ABC):
             raise InvalidAuthentication("Invalid password")
 
     async def _authenticate_hmac(self, hash_algorithm: AuthAlgorithm | str) -> None:
-        """
-        Authenticates the client using the hmac authentication algorithm
+        """Authenticates the client using the hmac authentication algorithm.
 
         Args:
             hash_algorithm (AuthAlgorithm | str): The hash algorithm to use
@@ -203,8 +206,7 @@ class BaseClient(ABC):
             await self.send_message(ACK(), force=True)
 
     async def send_message(self, message: BaseMessage, *, force: bool = False) -> None:
-        """
-        Sends a message to the server
+        """Sends a message to the server.
 
         Args:
             message (BaseMessage): send to the server a subclass of BaseMessage
@@ -221,8 +223,7 @@ class BaseClient(ABC):
         await self._protocol.send_message(message)
 
     async def read_message(self, timeout: int | None = 5) -> BaseMessage:
-        """
-        Awaits a message from the server and returns it.
+        """Awaits a message from the server and returns it.
 
         Returns:
             BaseMessage: the message from the server, it will be a subclass of BaseMessage.
@@ -240,9 +241,7 @@ class BaseClient(ABC):
         return message
 
     async def close(self) -> None:
-        """
-        Close the client
-        """
+        """Close the client."""
         if self._transport is not None:
             self._transport.close()
 
@@ -251,8 +250,8 @@ class BaseClient(ABC):
 
     @abstractmethod
     async def loop(self):
-        """
-        Runs the client loop.
+        """Runs the client loop.
+
         This is a loop that runs the entire event system for the client, it will read messages from the gateway and
         dispatch them to the correct callbacks.
         """

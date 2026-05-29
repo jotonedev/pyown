@@ -15,8 +15,7 @@ VALID_TAG_CHARS: Final[str] = "0123456789#"
 
 
 def is_valid_tag(tag: str) -> bool:
-    """
-    Checks if the tag is valid.
+    """Checks if the tag is valid.
 
     A tag is valid if it contains only the characters defined in the VALID_TAG_CHARS constant.
 
@@ -30,8 +29,7 @@ def is_valid_tag(tag: str) -> bool:
 
 
 class Tag:
-    """
-    Tag class.
+    """Tag class.
 
     This a base class for all the other types of tags.
     This class does not support parameters. To use parameters, use the TagWithParameters class.
@@ -50,25 +48,25 @@ class Tag:
 
     @property
     def string(self) -> str:
-        """Returns the value of the tag"""
+        """Returns the value of the tag."""
         return self._string
 
     @property
-    def tag(self) -> str | None:
-        """Returns the value of the tag without its parameters or prefix"""
+    def tag(self) -> str:
+        """Returns the value of the tag without its parameters or prefix."""
         val = self.string.removeprefix("#")
         return val
 
     @property
     def parameters(self) -> list[str] | None:
-        """
-        Returns the parameters of the tag.
+        """Returns the parameters of the tag.
+
         For a tag without parameters, this function returns None.
         """
         return None
 
     def with_parameter(self, parameter: str | int) -> "TagWithParameters":
-        """Returns the tag with the specified parameter"""
+        """Returns the tag with the specified parameter."""
         return TagWithParameters(f"{self}#{parameter}")
 
     def __str__(self) -> str:
@@ -92,8 +90,7 @@ class Tag:
 
 
 class TagWithParameters(Tag):
-    """
-    Tag with parameters.
+    """Tag with parameters.
 
     A tag with parameters is a tag that contains a value and a list of parameters.
     So, it follows the following format value#parameter1#parameter2#...#parameterN
@@ -101,23 +98,21 @@ class TagWithParameters(Tag):
 
     @property
     def tag(self) -> str:
-        """Returns the value of the tag without its parameters or prefix"""
+        """Returns the value of the tag without its parameters or prefix."""
         val = self.string.split("#")[0]
         return val
 
     @property
     def parameters(self) -> list[str]:
-        """Returns the parameters of the tag"""
+        """Returns the parameters of the tag."""
         return self.string.split("#")[1:]
 
     def with_parameter(self, parameter: str | int) -> Self:
-        """Returns the tag with the specified parameter"""
+        """Returns the tag with the specified parameter."""
         return self.__class__(f"{self}#{parameter}")
 
 
 class Value(Tag):
-    """
-    Represents a value tag in a dimension response message.
-    """
+    """Represents a value tag in a dimension response message."""
 
     pass

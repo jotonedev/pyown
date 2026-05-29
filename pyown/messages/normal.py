@@ -10,8 +10,7 @@ __all__ = [
 
 
 class NormalMessage(BaseMessage):
-    """
-    Represents a Normal message
+    """Represents a Normal message.
 
     Syntax: `*who*what*where##`
     """
@@ -26,22 +25,25 @@ class NormalMessage(BaseMessage):
 
     @property
     def who(self) -> Who:
+        """The WHO tag of the message."""
         return self._tags[0]
 
     @property
     def what(self) -> What:
+        """The WHAT tag of the message."""
         return self._tags[1]
 
     @property
     def where(self) -> Where:
+        """The WHERE tag of the message."""
         return self._tags[2]
 
     @property
     def message(self) -> str:
+        """The string representation of the message as sent on the bus."""
         return f"*{self.who}*{self.what}*{self.where}##"
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
         """Parses the tags of a message from the OpenWebNet bus."""
-
         return cls(tags=(Who(tags[0]), What(tags[1]), Where(tags[2])))

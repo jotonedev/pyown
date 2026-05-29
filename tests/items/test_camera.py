@@ -1,3 +1,4 @@
+from pyown.client import BaseClient
 from pyown.items.camera import Camera, WhatCamera
 from pyown.messages import GenericMessage, NormalMessage
 from pyown.tags import Where, Who
@@ -24,8 +25,12 @@ def test_camera_free_resources_message_format():
 def test_camera_instantiation():
     """Test that Camera can be instantiated with correct WHO."""
 
-    class MockClient:
-        pass
+    class MockClient(BaseClient):
+        def __init__(self):
+            pass
+
+        async def loop(self):
+            pass
 
     camera = Camera(MockClient(), "4000")
     assert camera._who == Who.VIDEO_DOOR_ENTRY

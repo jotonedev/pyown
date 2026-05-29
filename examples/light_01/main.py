@@ -6,6 +6,7 @@ from pyown.items import Light
 
 
 async def run(host: str, port: int, password: str):
+    """Connect to the gateway, switch a light on and print its status."""
     client = Client(host=host, port=port, password=password)
 
     await client.start()
@@ -23,6 +24,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

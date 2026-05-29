@@ -6,11 +6,13 @@ from pyown.items import EnergyManagement
 
 
 async def on_power_change(item: EnergyManagement, value: float):
+    """Print the new instant power consumption when it changes."""
     print(f"Power consumption changed to {value} W for {item.where}")
 
 
 # noinspection DuplicatedCode
 async def run(host: str, port: int, password: str):
+    """Connect with an event session and listen for power consumption changes."""
     client = Client(host=host, port=port, password=password, session_type=SessionType.EventSession)
 
     # Register the callback for the power consumption change
@@ -21,6 +23,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",

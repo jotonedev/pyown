@@ -8,8 +8,7 @@ __all__ = ["StatusRequest"]
 
 
 class StatusRequest(BaseMessage):
-    """
-    Represents a status request message
+    """Represents a status request message.
 
     Syntax: `*#who*where##`
     """
@@ -24,18 +23,20 @@ class StatusRequest(BaseMessage):
 
     @property
     def who(self) -> Who:
+        """The WHO tag of the message."""
         return self._tags[0]
 
     @property
     def where(self) -> Where:
+        """The WHERE tag of the message."""
         return self._tags[1]
 
     @property
     def message(self) -> str:
+        """The string representation of the message as sent on the bus."""
         return f"*#{self.who}*{self.where}##"
 
     @classmethod
     def parse(cls, tags: list[str]) -> Self:
         """Parses the tags of a message from the OpenWebNet bus."""
-
         return cls(tags=(Who(tags[0].removeprefix("#")), Where(tags[1])))

@@ -6,6 +6,7 @@ from pyown.items.energy import EnergyManagement
 
 
 async def run(host: str, port: int, password: str):
+    """Connect to the gateway and read the active power of a meter."""
     client = Client(
         host=host,
         port=port,
@@ -26,6 +27,7 @@ async def run(host: str, port: int, password: str):
 
 
 def main(host: str, port: int, password: str):
+    """Configure logging and run the async example."""
     # Set the logging level to DEBUG
     logging.basicConfig(
         level=logging.DEBUG,

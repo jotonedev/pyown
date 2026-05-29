@@ -1,5 +1,5 @@
 import asyncio
-from abc import ABC, abstractmethod
+from abc import ABC
 from asyncio import Task
 from typing import Any, AsyncIterator, Callable, Coroutine, Self
 
@@ -28,16 +28,16 @@ EventMessage = DimensionResponse | DimensionWriting | None
 
 # TODO: Refactor this class
 class BaseItem(ABC):
-    """
-    The base class for all items.
+    """The base class for all items.
+
     This class provides the basic functionality to communicate with the server using the client.
     """
 
     _who = Who.LIGHTING
 
     def __init__(self, client: BaseClient, where: Where | str, *, who: Who | str | None = None):
-        """
-        Initializes the item.
+        """Initializes the item.
+
         Args:
             client: The client to use to communicate with the server.
             where: The location of the item.
@@ -65,7 +65,7 @@ class BaseItem(ABC):
         """Returns the where value of the item."""
         return self._where
 
-    @classmethod  # type: ignore[misc]
+    @classmethod
     @property
     def who(cls) -> Who:
         """Returns the who value of the item."""
@@ -85,11 +85,11 @@ class BaseItem(ABC):
         return [asyncio.create_task(func(*args)) for func in funcs]
 
     @classmethod
-    @abstractmethod
     async def call_callbacks(cls, item: Self, message: BaseMessage) -> list[Task]:
-        """
-        Calls the registered callbacks for the event.
+        """Calls the registered callbacks for the event.
+
         Used internally by the client to dispatch the events to the correct callbacks.
+        Subclasses override this; the base implementation only signals it is missing.
 
         Args:
             item (BaseItem): The item that triggered the event.
@@ -101,8 +101,8 @@ class BaseItem(ABC):
         raise NotImplementedError
 
     async def _send_message(self, message: BaseMessage) -> None:
-        """
-        Sends a message to the server
+        """Sends a message to the server.
+
         Args:
             message: The message to send.
 
@@ -112,8 +112,8 @@ class BaseItem(ABC):
         return await self._client.send_message(message)
 
     async def _read_message(self, timeout: int | None = 5) -> BaseMessage:
-        """
-        Reads a message from the server
+        """Reads a message from the server.
+
         Args:
             timeout: The time to wait for a message, None to wait indefinitely.
 
@@ -124,8 +124,8 @@ class BaseItem(ABC):
 
     @staticmethod
     def _check_ack(resp: BaseMessage) -> None:
-        """
-        Checks if the response is an ACK message.
+        """Checks if the response is an ACK message.
+
         Args:
             resp: The response to check.
 
@@ -137,8 +137,8 @@ class BaseItem(ABC):
 
     @staticmethod
     def _check_nack(resp: BaseMessage) -> None:
-        """
-        Checks if the response is a NACK message.
+        """Checks if the response is a NACK message.
+
         Args:
             resp: The response to check.
 
@@ -149,10 +149,11 @@ class BaseItem(ABC):
             raise ResponseError(f"Received {resp} instead of NACK")
 
     def create_normal_message(self, what: What | str) -> NormalMessage:
-        """
-        Creates a normal message for the item.
+        """Creates a normal message for the item.
+
         Args:
             what: The action to perform.
+
         Returns:
             A normal message.
         """
@@ -162,8 +163,7 @@ class BaseItem(ABC):
         return NormalMessage((self._who, what, self._where))
 
     def create_status_message(self) -> StatusRequest:
-        """
-        Creates a status message for the item.
+        """Creates a status message for the item.
 
         Returns:
             A status message.
@@ -173,14 +173,11 @@ class BaseItem(ABC):
     def create_dimension_writing_message(
         self, dimension: Dimension, *args: Value
     ) -> DimensionWriting:
-        """
-        Creates a dimension message for the item.
+        """Creates a dimension message for the item.
+
         Args:
             dimension: the dimension value to set.
             *args: the values to set.
-
-        Returns:
-
         """
         # noinspection PyTypeChecker
         return DimensionWriting(
@@ -188,24 +185,20 @@ class BaseItem(ABC):
                 self._who,
                 self._where,
                 dimension,
-                *args,  # type: ignore[arg-type]
+                *args,
             )
         )
 
     def create_dimension_request_message(self, dimension: Dimension) -> DimensionRequest:
-        """
-        Creates a dimension request message for the item.
+        """Creates a dimension request message for the item.
+
         Args:
             dimension: the dimension value to request.
-
-        Returns:
-
         """
         return DimensionRequest((self._who, self._where, dimension))
 
     async def send_normal_message(self, what: What | str) -> None:
-        """
-        Sends a normal message to the server and check the response.
+        """Sends a normal message to the server and check the response.
 
         Args:
             what: The action to perform.
@@ -220,8 +213,7 @@ class BaseItem(ABC):
         self._check_ack(resp)
 
     async def send_status_request(self) -> AsyncIterator[NormalMessage]:
-        """
-        Sends a status request and receive multiple responses from the server.
+        """Sends a status request and receive multiple responses from the server.
 
         Raises:
             ResponseError: If the server responds with an invalid message.
@@ -248,8 +240,7 @@ class BaseItem(ABC):
     async def send_dimension_request(
         self, dimension: Dimension | str
     ) -> AsyncIterator[DimensionResponse]:
-        """
-        Sends a dimension request and receive multiple responses from the server.
+        """Sends a dimension request and receive multiple responses from the server.
 
         Raises:
             ResponseError: If the server responds with an invalid message.
@@ -277,8 +268,7 @@ class BaseItem(ABC):
             yield resp
 
     async def send_dimension_writing(self, dimension: Dimension | str, *args: Value) -> None:
-        """
-        Sends a dimension writing message to the server and check the response.
+        """Sends a dimension writing message to the server and check the response.
 
         Args:
             dimension: the dimension value to set.

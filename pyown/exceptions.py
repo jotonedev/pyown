@@ -13,8 +13,7 @@ from typing import Any
 
 
 class OWNException(Exception):
-    """
-    Base exception for all exceptions in the pyown package.
+    """Base exception for all exceptions in the pyown package.
 
     This exception should not be raised directly.
     It is useful for catching all exceptions in the package.
@@ -24,8 +23,7 @@ class OWNException(Exception):
 
 
 class ParseError(OWNException):
-    """
-    Raised when an error occurs while parsing a message or a tag.
+    """Raised when an error occurs while parsing a message or a tag.
 
     It is a generic exception and should not be raised directly.
     """
@@ -34,8 +32,8 @@ class ParseError(OWNException):
 
 
 class InvalidData(ParseError):
-    """
-    Raised when an error occurs when not valid data or characters not allowed are received.
+    """Raised when an error occurs when not valid data or characters not allowed are received.
+
     This should not happen with official gateways.
 
     Args:
@@ -51,8 +49,7 @@ class InvalidData(ParseError):
 
 
 class InvalidMessage(ParseError):
-    """
-    Raised when a message does not follow the protocol standards.
+    """Raised when a message does not follow the protocol standards.
 
     Args:
         message: The message or tags that caused the error.
@@ -70,8 +67,7 @@ class InvalidMessage(ParseError):
 
 
 class InvalidTag(ParseError):
-    """
-    Raised when a tag is not valid or does not follow the protocol standards.
+    """Raised when a tag is not valid or does not follow the protocol standards.
 
     Args:
         tag: The tag that caused the error.
@@ -85,24 +81,18 @@ class InvalidTag(ParseError):
 
 
 class InvalidSession(OWNException):
-    """
-    Raised when a command is sent using an event session or when event methods are called using a command session.
-    """
+    """Raised when a command is sent using an event session or when event methods are called using a command session."""
 
     pass
 
 
 class InvalidAuthentication(OWNException):
-    """
-    Raised when the authentication fails or an unsupported authentication method is used.
-    """
+    """Raised when the authentication fails or an unsupported authentication method is used."""
 
     pass
 
 
 class ResponseError(OWNException):
-    """
-    Raised when an error the server responds with a NACK or responds with an unexpected message.
-    """
+    """Raised when an error the server responds with a NACK or responds with an unexpected message."""
 
     pass
