@@ -39,10 +39,6 @@ jobs:
       - name: Install the project
         run: uv sync --no-group docs --no-group dev
 
-      - name: Test code
-        id: test
-        run: uv run pytest
-
       - name: Package project
         id: build
         run: uv build -o dist/
@@ -58,7 +54,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
-          draft: true
           files: |
               dist/*
 

@@ -11,13 +11,42 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-slim
+    continue-on-error: false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+          version: "latest"
+
+      - name: Install the project
+        run: uv sync --all-extras --group dev --no-group docs
+
+      - name: Lint with ruff
+        id: lint
+        run: uv run ruff check -v
+
+      - name: Check formatting with ruff
+        id: check
+        run: uv run ruff format --check
+
+      - name: Check types
+        id: typing
+        run: uv run ty check pyown/
+
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.11", "3.12", "3.13", "3.14" ]
+        python-version: [ "3.11.4", "3.12", "3.13", "3.14" ]
 
     permissions:
       pull-requests: write
@@ -37,33 +66,6 @@ jobs:
       - name: Install the project
         run: uv sync --all-extras --group dev --no-group docs
 
-      - name: Lint with ruff
-        id: lint
-        if: matrix.python-version == '3.13'
-        run: uv run ruff check -v
-
-      - name: Check formatting with ruff
-        id: check
-        if: matrix.python-version == '3.13'
-        run: uv run ruff format --check
-
       - name: Test code
         id: test
         run: uv run pytest
-
-      - name: Test code with coverage
-        id: coverage
-        if: matrix.python-version == '3.13'
-        run: uv run coverage run -m pytest && uv run coverage report -m && uv run coverage xml
-        continue-on-error: true
-
-      - name: Upload coverage for pull requests
-        if: matrix.python-version == '3.13' && github.event_name == 'pull_request'
-        uses: orgoro/coverage@v3.3
-        with:
-          coverageFile: ./coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check types
-        id: typing
-        run: uv run mypy -p pyown
