@@ -50,8 +50,7 @@ theme:
     - toc.follow
 
 copyright: >
-  Copyright &copy; 2024-2025 John Toniutti
-
+  Copyright &copy; 2024-2026 John Toniutti when not otherwise noted.
 watch:
   - pyown
 
