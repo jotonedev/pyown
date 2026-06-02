@@ -60,6 +60,7 @@ plugins:
   privacy:
   search:
   awesome-nav:
+  mermaid2:
   mkdocstrings:
     default_handler: python
     handlers:
